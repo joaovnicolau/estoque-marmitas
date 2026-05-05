@@ -151,16 +151,14 @@
   </div>
 
   <div class="legend">
-    <div class="legend-item"><span class="legend-badge lb-350">350g</span> 350 gramas</div>
-    <div class="legend-item"><span class="legend-badge lb-500">500g</span> 500 gramas</div>
-    <div class="legend-item">🟠 Vence em até 2 dias</div>
+    <div class="legend-item">🟠 Vence em até 30 dias</div>
     <div class="legend-item">🔴 Vencida</div>
   </div>
 
   <div id="categories-container"></div>
 
   <div class="footer-bar">
-    <span>Verde = no prazo · Laranja = vence em até 2 dias · Vermelho = vencida · Validade calculada em D+60</span>
+    <span>Verde = no prazo · Laranja = vence em até 30 dias · Vermelho = vencida · Validade calculada em D+60</span>
     <span id="last-update"></span>
   </div>
 </div>
@@ -265,7 +263,7 @@ function validityInfo(d) {
   if (diff < 0)  return { cls: 'val-exp',  suffix: '(vencida)' };
   if (diff === 0) return { cls: 'val-soon', suffix: '(hoje)' };
   if (diff === 1) return { cls: 'val-soon', suffix: '(amanhã)' };
-  if (diff <= 2)  return { cls: 'val-soon', suffix: '(' + diff + 'd)' };
+  if (diff <= 30) return { cls: 'val-soon', suffix: '(' + diff + 'd)' };
   return { cls: 'val-ok', suffix: '(' + diff + 'd)' };
 }
 
@@ -326,7 +324,7 @@ function render() {
         total += datas.length;
         if (datas.length > 0) tipos++;
         var oldest = getOldest(datas);
-        if (oldest && (new Date(oldest) - new Date(today)) / 86400000 <= 2) venc++;
+        if (oldest && (new Date(oldest) - new Date(today)) / 86400000 <= 30) venc++;
         html += '<tr class="row-fit">' +
           '<td class="td-sabor">' + item + '</td>' +
           '<td class="center">' + renderQty(datas) + '</td>' +
@@ -348,7 +346,7 @@ function render() {
         if (d350.length > 0 || d500.length > 0) tipos++;
         [d350, d500].forEach(function(d) {
           var o = getOldest(d);
-          if (o && (new Date(o) - new Date(today)) / 86400000 <= 2) venc++;
+          if (o && (new Date(o) - new Date(today)) / 86400000 <= 30) venc++;
         });
 
         // Row 350
