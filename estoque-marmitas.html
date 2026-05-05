@@ -15,58 +15,89 @@
       --amber-bg: #faeeda; --amber-text: #854f0b;
       --red-bg: #fcebeb; --red-text: #a32d2d;
       --gray-bg: #f1efe8; --gray-text: #5f5e5a;
+      --blue-bg: #e8f0fb; --blue-text: #1a4fa0;
       --radius: 10px; --radius-sm: 6px;
     }
     body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 2rem 1rem; }
-    .container { max-width: 860px; margin: 0 auto; }
+    .container { max-width: 980px; margin: 0 auto; }
     .page-header { margin-bottom: 1.5rem; display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
     .page-header h1 { font-size: 22px; font-weight: 600; margin-bottom: 4px; }
     .page-header p { font-size: 13px; color: var(--text-muted); }
-    .status-dot { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); margin-top: 6px; }
-    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gray-text); }
+    .status-dot { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); margin-top: 6px; white-space: nowrap; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gray-text); flex-shrink: 0; }
     .dot.online { background: #3b6d11; }
     .dot.syncing { background: #854f0b; }
     .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 1.25rem; }
     .stat-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 14px 16px; }
     .stat-card .num { font-size: 26px; font-weight: 600; line-height: 1; margin-bottom: 4px; }
     .stat-card .label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
-    .card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+
+    /* Category blocks */
+    .category-block { margin-bottom: 1.25rem; background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+    .category-header { display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: var(--bg); border-bottom: 0.5px solid var(--border); }
+    .category-emoji { font-size: 16px; }
+    .category-name { font-size: 13px; font-weight: 600; color: var(--text); }
+    .category-count { font-size: 11px; color: var(--text-muted); margin-left: auto; }
+
     .table-wrap { overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    thead th { padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; background: var(--bg); border-bottom: 0.5px solid var(--border); }
+    thead th { padding: 8px 12px; text-align: left; font-size: 10px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; background: #fafaf8; border-bottom: 0.5px solid var(--border); }
     thead th.center { text-align: center; }
     tbody tr { border-bottom: 0.5px solid var(--border); transition: background 0.1s; }
     tbody tr:last-child { border-bottom: none; }
     tbody tr:hover { background: #fafaf8; }
-    tbody td { padding: 9px 14px; vertical-align: middle; }
-    .sabor-name { font-weight: 500; font-size: 13px; }
-    .qty-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 22px; border-radius: 11px; font-size: 12px; font-weight: 600; padding: 0 8px; }
+    tbody td { padding: 0; vertical-align: middle; }
+
+    /* Inner row layout */
+    .item-wrap { display: flex; align-items: stretch; min-height: 44px; }
+    .item-name { flex: 1; padding: 10px 12px; font-weight: 500; font-size: 12px; color: var(--text); display: flex; align-items: center; border-right: 0.5px solid var(--border); min-width: 180px; }
+    .size-group { display: flex; flex-direction: column; border-right: 0.5px solid var(--border); }
+    .size-group:last-child { border-right: none; }
+    .size-row { display: flex; align-items: center; gap: 0; flex: 1; }
+    .size-row + .size-row { border-top: 0.5px dashed rgba(0,0,0,0.07); }
+    .size-label { font-size: 10px; font-weight: 600; padding: 0 8px; min-width: 46px; text-align: center; }
+    .label-350 { color: var(--blue-text); background: var(--blue-bg); height: 100%; display: flex; align-items: center; justify-content: center; border-right: 0.5px solid var(--border); }
+    .label-500 { color: var(--green-text); background: var(--green-bg); height: 100%; display: flex; align-items: center; justify-content: center; border-right: 0.5px solid var(--border); }
+    .size-label-fitness { color: var(--gray-text); background: var(--gray-bg); height: 100%; display: flex; align-items: center; justify-content: center; border-right: 0.5px solid var(--border); font-size: 10px; font-weight: 600; padding: 0 8px; min-width: 46px; text-align: center; }
+    .cell-qty { width: 48px; text-align: center; padding: 8px 4px; border-right: 0.5px solid var(--border); }
+    .cell-btn { width: 38px; text-align: center; padding: 6px 4px; border-right: 0.5px solid var(--border); }
+    .cell-btn:last-of-type { border-right: 0.5px solid var(--border); }
+    .cell-val { padding: 8px 10px; min-width: 130px; }
+
+    .qty-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 20px; border-radius: 10px; font-size: 11px; font-weight: 600; padding: 0 6px; }
     .qty-0 { background: var(--gray-bg); color: var(--gray-text); }
     .qty-low { background: var(--amber-bg); color: var(--amber-text); }
     .qty-ok { background: var(--green-bg); color: var(--green-text); }
-    .val-ok { color: var(--green-text); font-size: 12px; }
-    .val-soon { color: var(--amber-text); font-size: 12px; font-weight: 600; }
-    .val-exp { color: var(--red-text); font-size: 12px; font-weight: 600; }
-    .val-empty { color: var(--text-light); font-size: 12px; }
-    .val-suffix { font-size: 11px; opacity: 0.75; }
-    .btn { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: var(--radius-sm); border: 0.5px solid var(--border-strong); background: var(--surface); cursor: pointer; font-size: 18px; line-height: 1; transition: background 0.1s, transform 0.1s; }
+    .val-ok { color: var(--green-text); font-size: 11px; }
+    .val-soon { color: var(--amber-text); font-size: 11px; font-weight: 600; }
+    .val-exp { color: var(--red-text); font-size: 11px; font-weight: 600; }
+    .val-empty { color: var(--text-light); font-size: 11px; }
+    .val-suffix { font-size: 10px; opacity: 0.75; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: var(--radius-sm); border: 0.5px solid var(--border-strong); background: var(--surface); cursor: pointer; font-size: 16px; line-height: 1; transition: background 0.1s, transform 0.1s; }
     .btn:hover { background: var(--bg); }
     .btn:active { transform: scale(0.93); }
-    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn:disabled { opacity: 0.35; cursor: not-allowed; }
     .btn-minus { color: #a32d2d; }
     .btn-plus { color: #3b6d11; }
-    td.center { text-align: center; }
-    .footer { padding: 10px 14px; border-top: 0.5px solid var(--border); font-size: 11px; color: var(--text-light); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px; }
-    .toast { position: fixed; bottom: 20px; right: 20px; background: var(--text); color: #fff; border-radius: var(--radius-sm); padding: 9px 16px; font-size: 13px; opacity: 0; transform: translateY(8px); transition: opacity 0.25s, transform 0.25s; pointer-events: none; z-index: 999; }
+
+    .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 1.25rem; }
+    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); }
+    .legend-badge { width: 28px; height: 16px; border-radius: 8px; font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+    .lb-350 { background: var(--blue-bg); color: var(--blue-text); }
+    .lb-500 { background: var(--green-bg); color: var(--green-text); }
+
+    .footer-bar { margin-top: 1rem; font-size: 11px; color: var(--text-light); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px; padding: 0 2px; }
+    .toast { position: fixed; bottom: 20px; right: 20px; background: var(--text); color: #fff; border-radius: var(--radius-sm); padding: 9px 16px; font-size: 13px; opacity: 0; transform: translateY(8px); transition: opacity 0.25s, transform 0.25s; pointer-events: none; z-index: 999; max-width: 280px; }
     .toast.show { opacity: 1; transform: translateY(0); }
-    .loading-overlay { position: fixed; inset: 0; background: rgba(245,244,240,0.85); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; z-index: 100; font-size: 14px; color: var(--text-muted); }
+    .loading-overlay { position: fixed; inset: 0; background: rgba(245,244,240,0.88); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; z-index: 100; font-size: 14px; color: var(--text-muted); }
     .spinner { width: 28px; height: 28px; border: 2px solid var(--border); border-top-color: var(--text-muted); border-radius: 50%; animation: spin 0.7s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
-    @media (max-width: 540px) {
+
+    @media (max-width: 600px) {
+      .item-name { min-width: 120px; font-size: 11px; }
+      .cell-val { min-width: 100px; }
       .stats-row { gap: 8px; }
       .stat-card .num { font-size: 20px; }
-      .sabor-name { font-size: 12px; }
-      thead th, tbody td { padding: 8px 10px; }
     }
   </style>
 </head>
@@ -81,7 +112,7 @@
   <div class="page-header">
     <div>
       <h1>Estoque de Marmitas</h1>
-      <p>Clique em + para registrar uma marmita com a data de hoje. Clique em − para remover a mais antiga.</p>
+      <p>Clique em + para registrar com a data de hoje · Clique em − para remover a mais antiga</p>
     </div>
     <div class="status-dot">
       <div class="dot" id="status-dot"></div>
@@ -95,216 +126,296 @@
     <div class="stat-card"><div class="num" id="stat-venc">—</div><div class="label">Vencidas / próximas</div></div>
   </div>
 
-  <div class="card">
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th style="width:38%">Sabor</th>
-            <th class="center" style="width:10%">Qtd</th>
-            <th class="center" style="width:13%">Remover</th>
-            <th class="center" style="width:13%">Adicionar</th>
-            <th style="width:26%">Validade mais antiga</th>
-          </tr>
-        </thead>
-        <tbody id="tbody"></tbody>
-      </table>
-    </div>
-    <div class="footer">
-      <span>Verde = no prazo &middot; Laranja = vence em até 2 dias &middot; Vermelho = vencida</span>
-      <span id="last-update"></span>
-    </div>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-badge lb-350">350</div> 350g</div>
+    <div class="legend-item"><div class="legend-badge lb-500">500</div> 500g</div>
+    <div class="legend-item">🟠 Vence em até 2 dias</div>
+    <div class="legend-item">🔴 Vencida</div>
+  </div>
+
+  <div id="categories-container"></div>
+
+  <div class="footer-bar">
+    <span>Verde = no prazo · Laranja = vence em até 2 dias · Vermelho = vencida</span>
+    <span id="last-update"></span>
   </div>
 </div>
 
 <div id="toast" class="toast"></div>
 
-<!-- Firebase CDN compatível com GitHub Pages -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-
 <script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyAOhA-3CYhTdNAdBiKOpf9f8OtW3CMO674",
-    authDomain: "estoque-marmitas.firebaseapp.com",
-    databaseURL: "https://estoque-marmitas-default-rtdb.firebaseio.com",
-    projectId: "estoque-marmitas",
-    storageBucket: "estoque-marmitas.firebasestorage.app",
-    messagingSenderId: "667056517335",
-    appId: "1:667056517335:web:dd15208ede9b61ddc44092"
-  };
+const firebaseConfig = {
+  apiKey: "AIzaSyAOhA-3CYhTdNAdBiKOpf9f8OtW3CMO674",
+  authDomain: "estoque-marmitas.firebaseapp.com",
+  databaseURL: "https://estoque-marmitas-default-rtdb.firebaseio.com",
+  projectId: "estoque-marmitas",
+  storageBucket: "estoque-marmitas.firebasestorage.app",
+  messagingSenderId: "667056517335",
+  appId: "1:667056517335:web:dd15208ede9b61ddc44092"
+};
 
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
-  const estoqueRef = db.ref('estoque');
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const estoqueRef = db.ref('estoque_v2');
 
-  const SABORES = [
-    "Frango grelhado c/ arroz e feijão",
-    "Carne assada c/ purê de batata",
-    "Tilápia grelhada c/ legumes",
-    "Feijoada completa",
-    "Strogonoff de frango",
-    "Parmegiana de frango",
-    "Carne moída c/ batata",
-    "Macarrão ao molho bolonhesa",
-    "Frango à passarinho c/ farofa",
-    "Picadinho de carne c/ polenta",
-    "Costelinha de porco c/ mandioca",
-    "Estrogonofe de carne",
-    "Omelete c/ salada",
-    "Frango ensopado c/ arroz integral",
-    "Bife acebolado c/ macarrão",
-    "Lombo suíno c/ arroz e feijão",
-    "Peito de frango c/ risoto",
-    "Carne de sol c/ macaxeira",
-    "Panqueca de carne c/ molho",
-    "Frango xadrez c/ arroz",
-    "Nhoque ao molho de tomate",
-    "Peixe assado c/ legumes",
-    "Linguiça c/ batata e pimentão",
-    "Frango caipira c/ polenta",
-    "Dobradinha c/ arroz",
-    "Moqueca de frango",
-    "Arroz carreteiro",
-    "Carne de panela c/ mandioquinha",
-    "Frango recheado c/ farofa",
-    "Bife de fígado c/ arroz e feijão"
-  ];
+const CATEGORIAS = [
+  { emoji: '🍗', nome: 'Frango', itens: [
+    'Frango grelhado com arroz, feijão, batata doce e legumes',
+    'Frango grelhado com arroz, lentilha, batata doce e legumes',
+    'Frango ao molho com arroz, feijão, polenta e legumes',
+    'Frango ao molho com espaguete ao molho de tomate e legumes',
+    'Frango à milanesa com espaguete ao molho de tomate, purê de batatas e legumes',
+    'Frango à parmegiana com arroz e batata chips',
+    'Frango assado com espaguete à bolonhesa e batatas assadas',
+    'Frango assado com espaguete ao molho pesto e batata rústica',
+    'Frango grelhado com creme de milho, arroz, legumes e batata chips',
+    'Strogonoff de frango com arroz e batata palha',
+    'Frango oriental com arroz chop suey e brócolis',
+    'Frango à milanesa com talharim ao molho rosê e batatas assadas'
+  ]},
+  { emoji: '🥩', nome: 'Carne bovina', itens: [
+    'Carne moída com arroz, feijão preto, purê de batatas e legumes',
+    'Carne moída com macarrão ao molho de tomate e legumes',
+    'Carne de panela com mandioca, arroz, feijão preto, legumes e farofa',
+    'Carne de panela desfiada com arroz, batatas assadas e farofa',
+    'Carne desfiada com arroz, farofa e batata assada (sem legumes)',
+    'Carne desfiada com macarrão penne, molho de tomate e batatas assadas',
+    'Strogonoff de carne com arroz e batata palha',
+    'Almôndega com espaguete, molho de tomate e legumes',
+    'Almôndega com arroz, feijão carioca, purê e legumes',
+    'Escondidinho de carne moída coberto com queijo mussarela'
+  ]},
+  { emoji: '🐟', nome: 'Peixe', itens: [
+    'Tilápia frita com arroz, feijão carioca, purê de batatas e legumes',
+    'Tilápia à milanesa com arroz, feijão, purê de batatas e legumes'
+  ]},
+  { emoji: '🍖', nome: 'Suíno', itens: [
+    'Pernil suíno assado e desfiado com arroz, feijão, couve e farofa',
+    'Linguiça suína com ovo frito, arroz, feijão preto, couve e vinagrete',
+    'Bisteca grelhada com arroz, feijão, couve e legumes'
+  ]},
+  { emoji: '🍝', nome: 'Massas', itens: [
+    'Lasanha à bolonhesa com arroz à jardineira e batata chips',
+    'Panqueca de carne com molho de tomate e queijo, arroz e batata chips',
+    'Panqueca recheada com legumes coberta com molho de tomate e queijo, arroz e batata chips'
+  ]},
+  { emoji: '🌱', nome: 'Vegetarianos', itens: [
+    'Kibe assado veg com mix de legumes',
+    'Berinjela à milanesa com espaguete',
+    'Berinjela à milanesa com arroz, feijão e batata chips',
+    'Proteína de soja com arroz, feijão, purê de batatas e legumes',
+    'Espaguete com proteína de soja coberta com molho de tomate caseiro',
+    'Espaguete com molho de tomate, batatas assadas e legumes',
+    'Grão de bico refogado com arroz e batatas assadas'
+  ]},
+  { emoji: '💪', nome: 'Fitness', itens: [
+    'Frango grelhado (200g de filé de peito, 150g de arroz, 50g de legumes)',
+    'Carne moída (200g de carne de primeira, 150g de arroz, 50g de legumes)'
+  ], fitness: true}
+];
 
-  let state = {};
-  let syncing = false;
+// Build flat key index: "catIdx_itemIdx_tamanho"
+// tamanho: '350' | '500' | 'fit'
+let state = {};
+let syncing = false;
 
-  function today() {
-    return new Date().toISOString().slice(0, 10);
-  }
+function stateKey(catIdx, itemIdx, tamanho) {
+  return 'c' + catIdx + '_i' + itemIdx + '_' + tamanho;
+}
 
-  function formatDate(d) {
-    const [y, m, day] = d.split('-');
-    return `${day}/${m}/${y}`;
-  }
+function today() { return new Date().toISOString().slice(0, 10); }
 
-  function validityInfo(d) {
-    const diff = Math.round((new Date(d) - new Date(today())) / 86400000);
-    if (diff < 0) return { cls: 'val-exp', suffix: '(vencida)' };
-    if (diff === 0) return { cls: 'val-soon', suffix: '(hoje)' };
-    if (diff === 1) return { cls: 'val-soon', suffix: '(amanhã)' };
-    if (diff <= 2) return { cls: 'val-soon', suffix: `(${diff}d)` };
-    return { cls: 'val-ok', suffix: `(${diff}d)` };
-  }
+function formatDate(d) {
+  var p = d.split('-'); return p[2] + '/' + p[1] + '/' + p[0];
+}
 
-  function showToast(msg) {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.classList.add('show');
-    clearTimeout(t._timer);
-    t._timer = setTimeout(() => t.classList.remove('show'), 2200);
-  }
+function validityInfo(d) {
+  var diff = Math.round((new Date(d) - new Date(today())) / 86400000);
+  if (diff < 0) return { cls: 'val-exp', suffix: '(vencida)' };
+  if (diff === 0) return { cls: 'val-soon', suffix: '(hoje)' };
+  if (diff === 1) return { cls: 'val-soon', suffix: '(amanhã)' };
+  if (diff <= 2) return { cls: 'val-soon', suffix: '(' + diff + 'd)' };
+  return { cls: 'val-ok', suffix: '(' + diff + 'd)' };
+}
 
-  function setStatus(status) {
-    const dot = document.getElementById('status-dot');
-    const label = document.getElementById('status-label');
-    if (status === 'online') { dot.className = 'dot online'; label.textContent = 'Sincronizado'; }
-    else if (status === 'syncing') { dot.className = 'dot syncing'; label.textContent = 'Salvando...'; }
-    else { dot.className = 'dot'; label.textContent = 'Sem conexão'; }
-  }
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(function() { t.classList.remove('show'); }, 2200);
+}
 
-  function render() {
-    const tbody = document.getElementById('tbody');
-    let total = 0, tipos = 0, venc = 0;
-    let html = '';
+function setStatus(status) {
+  var dot = document.getElementById('status-dot');
+  var label = document.getElementById('status-label');
+  if (status === 'online') { dot.className = 'dot online'; label.textContent = 'Sincronizado'; }
+  else if (status === 'syncing') { dot.className = 'dot syncing'; label.textContent = 'Salvando...'; }
+  else { dot.className = 'dot'; label.textContent = 'Sem conexão'; }
+}
 
-    SABORES.forEach(function(s, i) {
-      const datas = state[i] || [];
-      const qty = datas.length;
-      total += qty;
-      if (qty > 0) tipos++;
+function getOldest(datas) {
+  if (!datas || datas.length === 0) return null;
+  return datas.reduce(function(a, b) { return a < b ? a : b; });
+}
 
-      const oldest = qty > 0 ? datas.reduce(function(a, b) { return a < b ? a : b; }) : null;
-      if (oldest) {
-        const diff = (new Date(oldest) - new Date(today())) / 86400000;
-        if (diff <= 2) venc++;
-      }
+function renderValidade(datas) {
+  var oldest = getOldest(datas);
+  if (!oldest) return '<span class="val-empty">—</span>';
+  var info = validityInfo(oldest);
+  return '<span class="' + info.cls + '">' + formatDate(oldest) + ' <span class="val-suffix">' + info.suffix + '</span></span>';
+}
 
-      const qtyClass = qty === 0 ? 'qty-0' : qty <= 3 ? 'qty-low' : 'qty-ok';
-      let valdHTML = '<span class="val-empty">—</span>';
-      if (oldest) {
-        const info = validityInfo(oldest);
-        valdHTML = '<span class="' + info.cls + '">' + formatDate(oldest) + ' <span class="val-suffix">' + info.suffix + '</span></span>';
-      }
+function renderQty(datas) {
+  var qty = datas ? datas.length : 0;
+  var cls = qty === 0 ? 'qty-0' : qty <= 3 ? 'qty-low' : 'qty-ok';
+  return '<span class="qty-badge ' + cls + '">' + qty + '</span>';
+}
 
-      html += '<tr>' +
-        '<td class="sabor-name">' + s + '</td>' +
-        '<td class="center"><span class="qty-badge ' + qtyClass + '">' + qty + '</span></td>' +
-        '<td class="center"><button class="btn btn-minus" onclick="_remover(' + i + ')" ' + (syncing ? 'disabled' : '') + '>−</button></td>' +
-        '<td class="center"><button class="btn btn-plus" onclick="_adicionar(' + i + ')" ' + (syncing ? 'disabled' : '') + '>+</button></td>' +
-        '<td>' + valdHTML + '</td>' +
-        '</tr>';
-    });
+function render() {
+  var container = document.getElementById('categories-container');
+  var total = 0, tipos = 0, venc = 0;
+  var html = '';
 
-    tbody.innerHTML = html;
-    document.getElementById('stat-total').textContent = total;
-    document.getElementById('stat-tipos').textContent = tipos;
-    document.getElementById('stat-venc').textContent = venc;
+  CATEGORIAS.forEach(function(cat, catIdx) {
+    html += '<div class="category-block">';
+    html += '<div class="category-header">';
+    html += '<span class="category-emoji">' + cat.emoji + '</span>';
+    html += '<span class="category-name">' + cat.nome + '</span>';
+    html += '<span class="category-count">' + cat.itens.length + ' itens</span>';
+    html += '</div>';
+    html += '<div class="table-wrap"><table>';
 
-    const now = new Date();
-    document.getElementById('last-update').textContent =
-      'Atualizado ' + now.toLocaleDateString('pt-BR') + ' às ' +
-      String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
-  }
-
-  function saveState(callback) {
-    syncing = true;
-    setStatus('syncing');
-    render();
-    estoqueRef.set(state, function(error) {
-      if (error) {
-        showToast('Erro ao salvar. Verifique a conexão.');
-        setStatus('offline');
-      } else {
-        setStatus('online');
-        if (callback) callback();
-      }
-      syncing = false;
-      render();
-    });
-  }
-
-  function _adicionar(i) {
-    if (syncing) return;
-    if (!state[i]) state[i] = [];
-    state[i].push(today());
-    const nome = SABORES[i].split(' ').slice(0, 2).join(' ');
-    saveState(function() {
-      showToast('+1 ' + nome + '... adicionada');
-    });
-  }
-
-  function _remover(i) {
-    if (syncing) return;
-    if (!state[i] || state[i].length === 0) { showToast('Estoque vazio para este sabor'); return; }
-    const oldest = state[i].reduce(function(a, b) { return a < b ? a : b; });
-    state[i].splice(state[i].indexOf(oldest), 1);
-    saveState(function() {
-      showToast('Removida marmita de ' + formatDate(oldest));
-    });
-  }
-
-  // Escuta mudanças em tempo real
-  estoqueRef.on('value', function(snapshot) {
-    const data = snapshot.val();
-    if (data) {
-      state = data;
+    // Header
+    if (cat.fitness) {
+      html += '<thead><tr>' +
+        '<th style="width:40%">Sabor</th>' +
+        '<th class="center" style="width:8%">Qtd</th>' +
+        '<th class="center" style="width:9%">−</th>' +
+        '<th class="center" style="width:9%">+</th>' +
+        '<th style="width:34%">Validade mais antiga</th>' +
+        '</tr></thead>';
     } else {
-      SABORES.forEach(function(_, i) { state[i] = []; });
+      html += '<thead><tr>' +
+        '<th style="width:36%">Sabor</th>' +
+        '<th class="center" style="width:5%">g</th>' +
+        '<th class="center" style="width:8%">Qtd</th>' +
+        '<th class="center" style="width:8%">−</th>' +
+        '<th class="center" style="width:8%">+</th>' +
+        '<th style="width:35%">Validade mais antiga</th>' +
+        '</tr></thead>';
     }
-    document.getElementById('loading-overlay').style.display = 'none';
-    setStatus('online');
-    render();
-  }, function(error) {
-    document.getElementById('loading-overlay').style.display = 'none';
-    setStatus('offline');
-    showToast('Erro de conexão com o banco de dados.');
+
+    html += '<tbody>';
+
+    cat.itens.forEach(function(item, itemIdx) {
+      if (cat.fitness) {
+        var key = stateKey(catIdx, itemIdx, 'fit');
+        var datas = state[key] || [];
+        total += datas.length;
+        if (datas.length > 0) tipos++;
+        var oldest = getOldest(datas);
+        if (oldest) { var diff2 = (new Date(oldest) - new Date(today())) / 86400000; if (diff2 <= 2) venc++; }
+        html += '<tr><td>' +
+          '<div class="item-wrap">' +
+          '<div class="item-name">' + item + '</div>' +
+          '<div class="cell-qty">' + renderQty(datas) + '</div>' +
+          '<div class="cell-btn"><button class="btn btn-minus" onclick="_remover(\'' + key + '\')" ' + (syncing?'disabled':'') + '>−</button></div>' +
+          '<div class="cell-btn"><button class="btn btn-plus" onclick="_adicionar(\'' + key + '\')" ' + (syncing?'disabled':'') + '>+</button></div>' +
+          '<div class="cell-val">' + renderValidade(datas) + '</div>' +
+          '</div></td></tr>';
+      } else {
+        var key350 = stateKey(catIdx, itemIdx, '350');
+        var key500 = stateKey(catIdx, itemIdx, '500');
+        var d350 = state[key350] || [];
+        var d500 = state[key500] || [];
+        total += d350.length + d500.length;
+        if (d350.length > 0 || d500.length > 0) tipos++;
+        [d350, d500].forEach(function(d) {
+          var o = getOldest(d);
+          if (o) { var df = (new Date(o) - new Date(today())) / 86400000; if (df <= 2) venc++; }
+        });
+
+        html += '<tr><td>' +
+          '<div class="item-wrap">' +
+          '<div class="item-name">' + item + '</div>' +
+          // 350g row
+          '<div style="display:flex;flex-direction:column;border-left:0.5px solid var(--border)">' +
+          // 350
+          '<div class="size-row" style="border-bottom:0.5px dashed rgba(0,0,0,0.07)">' +
+          '<div class="size-label label-350">350g</div>' +
+          '<div class="cell-qty">' + renderQty(d350) + '</div>' +
+          '<div class="cell-btn"><button class="btn btn-minus" onclick="_remover(\'' + key350 + '\')" ' + (syncing?'disabled':'') + '>−</button></div>' +
+          '<div class="cell-btn"><button class="btn btn-plus" onclick="_adicionar(\'' + key350 + '\')" ' + (syncing?'disabled':'') + '>+</button></div>' +
+          '<div class="cell-val">' + renderValidade(d350) + '</div>' +
+          '</div>' +
+          // 500
+          '<div class="size-row">' +
+          '<div class="size-label label-500">500g</div>' +
+          '<div class="cell-qty">' + renderQty(d500) + '</div>' +
+          '<div class="cell-btn"><button class="btn btn-minus" onclick="_remover(\'' + key500 + '\')" ' + (syncing?'disabled':'') + '>−</button></div>' +
+          '<div class="cell-btn"><button class="btn btn-plus" onclick="_adicionar(\'' + key500 + '\')" ' + (syncing?'disabled':'') + '>+</button></div>' +
+          '<div class="cell-val">' + renderValidade(d500) + '</div>' +
+          '</div>' +
+          '</div>' +
+          '</div></td></tr>';
+      }
+    });
+
+    html += '</tbody></table></div></div>';
   });
+
+  container.innerHTML = html;
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-tipos').textContent = tipos;
+  document.getElementById('stat-venc').textContent = venc;
+  var now = new Date();
+  document.getElementById('last-update').textContent = 'Atualizado ' + now.toLocaleDateString('pt-BR') + ' às ' + String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+}
+
+function saveState(cb) {
+  syncing = true;
+  setStatus('syncing');
+  render();
+  estoqueRef.set(state, function(err) {
+    if (err) { showToast('Erro ao salvar. Verifique a conexão.'); setStatus('offline'); }
+    else { setStatus('online'); if (cb) cb(); }
+    syncing = false;
+    render();
+  });
+}
+
+function _adicionar(key) {
+  if (syncing) return;
+  if (!state[key]) state[key] = [];
+  state[key].push(today());
+  var label = key.indexOf('350') > -1 ? '350g' : key.indexOf('500') > -1 ? '500g' : '';
+  saveState(function() { showToast('+1 adicionada' + (label ? ' (' + label + ')' : '')); });
+}
+
+function _remover(key) {
+  if (syncing) return;
+  if (!state[key] || state[key].length === 0) { showToast('Estoque vazio!'); return; }
+  var oldest = state[key].reduce(function(a,b){ return a<b?a:b; });
+  state[key].splice(state[key].indexOf(oldest), 1);
+  var label = key.indexOf('350') > -1 ? '350g' : key.indexOf('500') > -1 ? '500g' : '';
+  saveState(function() { showToast('Removida' + (label ? ' (' + label + ')' : '') + ' de ' + formatDate(oldest)); });
+}
+
+estoqueRef.on('value', function(snapshot) {
+  var data = snapshot.val();
+  state = data || {};
+  document.getElementById('loading-overlay').style.display = 'none';
+  setStatus('online');
+  render();
+}, function() {
+  document.getElementById('loading-overlay').style.display = 'none';
+  setStatus('offline');
+  showToast('Erro de conexão com o banco de dados.');
+  render();
+});
 </script>
 </body>
 </html>
