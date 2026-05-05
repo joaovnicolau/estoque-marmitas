@@ -90,18 +90,9 @@
   </div>
 
   <div class="stats-row">
-    <div class="stat-card">
-      <div class="num" id="stat-total">—</div>
-      <div class="label">Total em estoque</div>
-    </div>
-    <div class="stat-card">
-      <div class="num" id="stat-tipos">—</div>
-      <div class="label">Sabores c/ estoque</div>
-    </div>
-    <div class="stat-card">
-      <div class="num" id="stat-venc">—</div>
-      <div class="label">Vencidas / próximas</div>
-    </div>
+    <div class="stat-card"><div class="num" id="stat-total">—</div><div class="label">Total em estoque</div></div>
+    <div class="stat-card"><div class="num" id="stat-tipos">—</div><div class="label">Sabores c/ estoque</div></div>
+    <div class="stat-card"><div class="num" id="stat-venc">—</div><div class="label">Vencidas / próximas</div></div>
   </div>
 
   <div class="card">
@@ -128,10 +119,11 @@
 
 <div id="toast" class="toast"></div>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+<!-- Firebase CDN compatível com GitHub Pages -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
+<script>
   const firebaseConfig = {
     apiKey: "AIzaSyAOhA-3CYhTdNAdBiKOpf9f8OtW3CMO674",
     authDomain: "estoque-marmitas.firebaseapp.com",
@@ -141,6 +133,10 @@
     messagingSenderId: "667056517335",
     appId: "1:667056517335:web:dd15208ede9b61ddc44092"
   };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+  const estoqueRef = db.ref('estoque');
 
   const SABORES = [
     "Frango grelhado c/ arroz e feijão",
@@ -174,10 +170,6 @@
     "Frango recheado c/ farofa",
     "Bife de fígado c/ arroz e feijão"
   ];
-
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-  const estoqueRef = ref(db, 'estoque');
 
   let state = {};
   let syncing = false;
@@ -221,13 +213,13 @@
     let total = 0, tipos = 0, venc = 0;
     let html = '';
 
-    SABORES.forEach((s, i) => {
+    SABORES.forEach(function(s, i) {
       const datas = state[i] || [];
       const qty = datas.length;
       total += qty;
       if (qty > 0) tipos++;
 
-      const oldest = qty > 0 ? datas.reduce((a, b) => a < b ? a : b) : null;
+      const oldest = qty > 0 ? datas.reduce(function(a, b) { return a < b ? a : b; }) : null;
       if (oldest) {
         const diff = (new Date(oldest) - new Date(today())) / 86400000;
         if (diff <= 2) venc++;
@@ -236,17 +228,17 @@
       const qtyClass = qty === 0 ? 'qty-0' : qty <= 3 ? 'qty-low' : 'qty-ok';
       let valdHTML = '<span class="val-empty">—</span>';
       if (oldest) {
-        const { cls, suffix } = validityInfo(oldest);
-        valdHTML = `<span class="${cls}">${formatDate(oldest)} <span class="val-suffix">${suffix}</span></span>`;
+        const info = validityInfo(oldest);
+        valdHTML = '<span class="' + info.cls + '">' + formatDate(oldest) + ' <span class="val-suffix">' + info.suffix + '</span></span>';
       }
 
-      html += `<tr>
-        <td class="sabor-name">${s}</td>
-        <td class="center"><span class="qty-badge ${qtyClass}">${qty}</span></td>
-        <td class="center"><button class="btn btn-minus" onclick="window._remover(${i})" ${syncing ? 'disabled' : ''}>−</button></td>
-        <td class="center"><button class="btn btn-plus" onclick="window._adicionar(${i})" ${syncing ? 'disabled' : ''}>+</button></td>
-        <td>${valdHTML}</td>
-      </tr>`;
+      html += '<tr>' +
+        '<td class="sabor-name">' + s + '</td>' +
+        '<td class="center"><span class="qty-badge ' + qtyClass + '">' + qty + '</span></td>' +
+        '<td class="center"><button class="btn btn-minus" onclick="_remover(' + i + ')" ' + (syncing ? 'disabled' : '') + '>−</button></td>' +
+        '<td class="center"><button class="btn btn-plus" onclick="_adicionar(' + i + ')" ' + (syncing ? 'disabled' : '') + '>+</button></td>' +
+        '<td>' + valdHTML + '</td>' +
+        '</tr>';
     });
 
     tbody.innerHTML = html;
@@ -256,53 +248,59 @@
 
     const now = new Date();
     document.getElementById('last-update').textContent =
-      `Atualizado ${now.toLocaleDateString('pt-BR')} às ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+      'Atualizado ' + now.toLocaleDateString('pt-BR') + ' às ' +
+      String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
   }
 
-  async function saveState() {
+  function saveState(callback) {
     syncing = true;
     setStatus('syncing');
     render();
-    try {
-      await set(estoqueRef, state);
-      setStatus('online');
-    } catch(e) {
-      showToast('Erro ao salvar. Verifique a conexão.');
-      setStatus('offline');
-    }
-    syncing = false;
-    render();
+    estoqueRef.set(state, function(error) {
+      if (error) {
+        showToast('Erro ao salvar. Verifique a conexão.');
+        setStatus('offline');
+      } else {
+        setStatus('online');
+        if (callback) callback();
+      }
+      syncing = false;
+      render();
+    });
   }
 
-  window._adicionar = async function(i) {
+  function _adicionar(i) {
     if (syncing) return;
     if (!state[i]) state[i] = [];
     state[i].push(today());
-    await saveState();
     const nome = SABORES[i].split(' ').slice(0, 2).join(' ');
-    showToast(`+1 ${nome}... adicionada`);
-  };
+    saveState(function() {
+      showToast('+1 ' + nome + '... adicionada');
+    });
+  }
 
-  window._remover = async function(i) {
+  function _remover(i) {
     if (syncing) return;
     if (!state[i] || state[i].length === 0) { showToast('Estoque vazio para este sabor'); return; }
-    const oldest = state[i].reduce((a, b) => a < b ? a : b);
+    const oldest = state[i].reduce(function(a, b) { return a < b ? a : b; });
     state[i].splice(state[i].indexOf(oldest), 1);
-    await saveState();
-    showToast(`Removida marmita de ${formatDate(oldest)}`);
-  };
+    saveState(function() {
+      showToast('Removida marmita de ' + formatDate(oldest));
+    });
+  }
 
-  onValue(estoqueRef, (snapshot) => {
+  // Escuta mudanças em tempo real
+  estoqueRef.on('value', function(snapshot) {
     const data = snapshot.val();
     if (data) {
       state = data;
     } else {
-      SABORES.forEach((_, i) => { state[i] = []; });
+      SABORES.forEach(function(_, i) { state[i] = []; });
     }
     document.getElementById('loading-overlay').style.display = 'none';
     setStatus('online');
     render();
-  }, (error) => {
+  }, function(error) {
     document.getElementById('loading-overlay').style.display = 'none';
     setStatus('offline');
     showToast('Erro de conexão com o banco de dados.');
