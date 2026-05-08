@@ -22,8 +22,7 @@
     .container { max-width: 980px; margin: 0 auto; }
     .page-header { margin-bottom: 1.5rem; display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
     .page-header h1 { font-size: 22px; font-weight: 600; margin-bottom: 4px; }
-    .page-header p { font-size: 13px; color: var(--text-muted); }
-    .status-dot { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); margin-top: 6px; white-space: nowrap; }
+    .status-dot { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); white-space: nowrap; }
     .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gray-text); flex-shrink: 0; }
     .dot.online { background: #3b6d11; }
     .dot.syncing { background: #854f0b; }
@@ -33,34 +32,19 @@
     .stat-card .label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
     .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 1.25rem; align-items: center; }
     .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); }
-
     .category-block { margin-bottom: 1.25rem; background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); overflow: hidden; }
     .category-header { display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: var(--bg); border-bottom: 0.5px solid var(--border); }
     .category-emoji { font-size: 16px; }
     .category-name { font-size: 13px; font-weight: 600; }
     .category-count { font-size: 11px; color: var(--text-muted); margin-left: auto; }
-
     .table-wrap { overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; }
-
-    col.c-sabor  { width: 30%; }
-    col.c-g      { width: 7%; }
-    col.c-qty    { width: 7%; }
-    col.c-minus  { width: 6%; }
-    col.c-plus   { width: 6%; }
-    col.c-cal    { width: 6%; }
-    col.c-val    { width: 38%; }
-
-    col.c-sabor-fit { width: 36%; }
-    col.c-qty-fit   { width: 8%; }
-    col.c-minus-fit { width: 7%; }
-    col.c-plus-fit  { width: 7%; }
-    col.c-cal-fit   { width: 7%; }
-    col.c-val-fit   { width: 35%; }
-
+    col.c-sabor  { width: 30%; } col.c-g { width: 7%; } col.c-qty { width: 7%; }
+    col.c-minus  { width: 6%; } col.c-plus { width: 6%; } col.c-cal { width: 6%; } col.c-val { width: 38%; }
+    col.c-sabor-fit { width: 36%; } col.c-qty-fit { width: 8%; }
+    col.c-minus-fit { width: 7%; } col.c-plus-fit { width: 7%; } col.c-cal-fit { width: 7%; } col.c-val-fit { width: 35%; }
     thead th { padding: 8px 10px; font-size: 10px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; background: #fafaf8; border-bottom: 0.5px solid var(--border); text-align: left; }
     thead th.center { text-align: center; }
-
     tbody tr.row-350 td { border-bottom: 0.5px dashed rgba(0,0,0,0.08); }
     tbody tr.row-500 td { border-bottom: 0.5px solid var(--border); }
     tbody tr.row-fit td { border-bottom: 0.5px solid var(--border); }
@@ -68,24 +52,19 @@
     tbody tr:hover td { background: #fafaf8; }
     tbody td { padding: 7px 10px; vertical-align: middle; }
     td.center { text-align: center; }
-
     td.td-sabor { font-weight: 500; font-size: 12px; color: var(--text); vertical-align: middle; border-right: 0.5px solid var(--border); }
-
     .size-badge { display: inline-flex; align-items: center; justify-content: center; padding: 2px 7px; border-radius: 8px; font-size: 10px; font-weight: 700; }
     .badge-350 { background: var(--blue-bg); color: var(--blue-text); }
     .badge-500 { background: var(--green-bg); color: var(--green-text); }
-
     .qty-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 20px; border-radius: 10px; font-size: 11px; font-weight: 600; padding: 0 6px; }
     .qty-0   { background: var(--gray-bg);  color: var(--gray-text); }
     .qty-low { background: var(--amber-bg); color: var(--amber-text); }
     .qty-ok  { background: var(--green-bg); color: var(--green-text); }
-
     .val-ok   { color: var(--green-text); font-size: 11px; }
     .val-soon { color: var(--amber-text); font-size: 11px; font-weight: 600; }
     .val-exp  { color: var(--red-text);   font-size: 11px; font-weight: 600; }
     .val-empty{ color: var(--text-light); font-size: 11px; }
     .val-suffix { font-size: 10px; opacity: 0.75; }
-
     .btn { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: var(--radius-sm); border: 0.5px solid var(--border-strong); background: var(--surface); cursor: pointer; font-size: 16px; line-height: 1; transition: background 0.1s, transform 0.1s; }
     .btn:hover { background: var(--bg); }
     .btn:active { transform: scale(0.93); }
@@ -93,8 +72,6 @@
     .btn-minus { color: #a32d2d; }
     .btn-plus  { color: #3b6d11; }
     .btn-cal   { color: var(--blue-text); font-size: 13px; }
-
-    /* Modal */
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
     .modal-overlay.open { opacity: 1; pointer-events: all; }
     .modal { background: var(--surface); border-radius: var(--radius); padding: 24px; width: 340px; max-width: 92vw; box-shadow: 0 8px 40px rgba(0,0,0,0.18); }
@@ -109,28 +86,21 @@
     .modal-btn:hover { background: #e8e6e0; }
     .modal-btn.primary { background: var(--text); color: #fff; border-color: var(--text); }
     .modal-btn.primary:hover { background: #333; }
-
     .footer-bar { margin-top: 1rem; font-size: 11px; color: var(--text-light); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px; padding: 0 2px; }
     .toast { position: fixed; bottom: 20px; right: 20px; background: var(--text); color: #fff; border-radius: var(--radius-sm); padding: 9px 16px; font-size: 13px; opacity: 0; transform: translateY(8px); transition: opacity 0.25s, transform 0.25s; pointer-events: none; z-index: 999; max-width: 300px; }
     .toast.show { opacity: 1; transform: translateY(0); }
     .loading-overlay { position: fixed; inset: 0; background: rgba(245,244,240,0.88); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; z-index: 100; font-size: 14px; color: var(--text-muted); }
     .spinner { width: 28px; height: 28px; border: 2px solid var(--border); border-top-color: var(--text-muted); border-radius: 50%; animation: spin 0.7s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
-
-    @media (max-width: 600px) {
-      col.c-sabor { width: 24%; }
-      col.c-val   { width: 30%; }
-      .stat-card .num { font-size: 20px; }
-    }
+    @media (max-width: 600px) { col.c-sabor { width: 24%; } col.c-val { width: 30%; } .stat-card .num { font-size: 20px; } }
   </style>
 </head>
 <body>
 
-<!-- Modal de data manual -->
 <div class="modal-overlay" id="modal-overlay">
   <div class="modal">
     <h3>Adicionar com data manual</h3>
-    <p class="modal-sub" id="modal-sub">—</p>
+    <p class="modal-sub" id="modal-sub">--</p>
     <div class="modal-field">
       <label>Data de validade</label>
       <input type="date" id="modal-date" />
@@ -146,21 +116,34 @@
   </div>
 </div>
 
-<!-- Modal resumo -->
 <div class="modal-overlay" id="resumo-overlay">
   <div class="modal" style="width:480px;max-height:80vh;display:flex;flex-direction:column;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-      <h3 style="margin:0;">🗒️ Resumo do Estoque</h3>
-      <button onclick="fecharResumo()" style="background:none;border:none;cursor:pointer;font-size:18px;color:#6b6b67;padding:2px 6px;">✕</button>
+      <h3 style="margin:0;">Resumo do Estoque</h3>
+      <button onclick="fecharResumo()" style="background:none;border:none;cursor:pointer;font-size:18px;color:#6b6b67;padding:2px 6px;">&#x2715;</button>
     </div>
     <p style="font-size:13px;color:#6b6b67;margin-bottom:16px;">Segue abaixo os sabores que tenho no estoque:</p>
     <div id="resumo-conteudo" style="overflow-y:auto;flex:1;"></div>
     <div style="margin-top:16px;display:flex;gap:8px;justify-content:space-between;align-items:center;flex-wrap:wrap;">
       <div style="display:flex;gap:8px;">
-        <button class="modal-btn" id="btn-copiar-350" onclick="copiarEstoque('350')" style="font-size:12px;padding:7px 12px;">📋 Copiar 350g</button>
-        <button class="modal-btn" id="btn-copiar-500" onclick="copiarEstoque('500')" style="font-size:12px;padding:7px 12px;">📋 Copiar 500g</button>
+        <button class="modal-btn" id="btn-copiar-350" onclick="copiarEstoque('350')" style="font-size:12px;padding:7px 12px;">Copiar 350g</button>
+        <button class="modal-btn" id="btn-copiar-500" onclick="copiarEstoque('500')" style="font-size:12px;padding:7px 12px;">Copiar 500g</button>
       </div>
       <button class="modal-btn" onclick="fecharResumo()">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="ranking-overlay">
+  <div class="modal" style="width:520px;max-height:82vh;display:flex;flex-direction:column;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <h3 style="margin:0;">&#x1F4CA; Ranking do Estoque</h3>
+      <button onclick="fecharRanking()" style="background:none;border:none;cursor:pointer;font-size:18px;color:#6b6b67;padding:2px 6px;">&#x2715;</button>
+    </div>
+    <p style="font-size:12px;color:#6b6b67;margin-bottom:16px;">Marmitas ordenadas por quantidade total (350g + 500g), da maior para a menor.</p>
+    <div id="ranking-conteudo" style="overflow-y:auto;flex:1;"></div>
+    <div style="margin-top:16px;text-align:right;">
+      <button class="modal-btn" onclick="fecharRanking()">Fechar</button>
     </div>
   </div>
 </div>
@@ -181,31 +164,33 @@
           <div class="dot" id="status-dot"></div>
           <span id="status-label">Conectando...</span>
         </div>
-        <button id="btn-resumo" onclick="abrirResumo()" title="Resumo do estoque (tecla E)" style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;border:0.5px solid rgba(0,0,0,0.18);background:#fff;cursor:pointer;font-size:15px;transition:background 0.1s;" onmouseover="this.style.background='#f1efe8'" onmouseout="this.style.background='#fff'">🗒️</button>
+        <button id="btn-resumo" onclick="abrirResumo()" title="Resumo do estoque (tecla E)" style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;border:0.5px solid rgba(0,0,0,0.18);background:#fff;cursor:pointer;font-size:15px;transition:background 0.1s;" onmouseover="this.style.background='#f1efe8'" onmouseout="this.style.background='#fff'">&#x1F5D2;&#xFE0F;</button>
+        <button id="btn-ranking" onclick="abrirRanking()" title="Ranking do estoque" style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;border:0.5px solid rgba(0,0,0,0.18);background:#fff;cursor:pointer;font-size:15px;transition:background 0.1s;" onmouseover="this.style.background='#f1efe8'" onmouseout="this.style.background='#fff'">&#x1F4CA;</button>
       </div>
       <span id="last-update-header" style="font-size:10px;color:#9b9b97;"></span>
     </div>
   </div>
 
   <div class="stats-row">
-    <div class="stat-card"><div class="num" id="stat-total">—</div><div class="label">Total em estoque</div></div>
-    <div class="stat-card"><div class="num" id="stat-tipos">—</div><div class="label">Sabores c/ estoque</div></div>
-    <div class="stat-card"><div class="num" id="stat-venc">—</div><div class="label">Vencidas / próximas</div></div>
+    <div class="stat-card"><div class="num" id="stat-total">--</div><div class="label">Total em estoque</div></div>
+    <div class="stat-card"><div class="num" id="stat-tipos">--</div><div class="label">Sabores c/ estoque</div></div>
+    <div class="stat-card"><div class="num" id="stat-venc">--</div><div class="label">Vencidas / proximas</div></div>
   </div>
 
   <div class="legend">
-    <div class="legend-item">🟠 Vence em até 30 dias</div>
-    <div class="legend-item">🔴 Vencida</div>
-    <div class="legend-item">📅 Adicionar com data manual</div>
-    <div class="legend-item" style="margin-left:auto;">
-      <input id="busca-input" type="text" placeholder="🔍 Buscar marmita..." oninput="filtrarMarmitas(this.value)" style="padding:6px 12px;border:0.5px solid rgba(0,0,0,0.18);border-radius:8px;font-size:13px;font-family:inherit;background:#fff;color:#1a1a18;width:220px;outline:none;" onfocus="this.style.outline='2px solid #1a4fa0'" onblur="this.style.outline='none'" />
+    <div class="legend-item">&#x1F7E0; Vence em ate 30 dias</div>
+    <div class="legend-item">&#x1F534; Vencida</div>
+    <div class="legend-item">&#x1F4C5; Adicionar com data manual</div>
+    <div class="legend-item" style="margin-left:auto;position:relative;">
+      <input id="busca-input" type="text" placeholder="Buscar marmita..." oninput="filtrarMarmitas(this.value)" style="padding:6px 32px 6px 12px;border:0.5px solid rgba(0,0,0,0.18);border-radius:8px;font-size:13px;font-family:inherit;background:#fff;color:#1a1a18;width:240px;outline:none;" onfocus="this.style.outline='2px solid #1a4fa0'" onblur="this.style.outline='none'" />
+      <button id="busca-clear" onclick="limparBusca()" title="Limpar busca" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:14px;color:#9b9b97;display:none;line-height:1;padding:0;">&#x2715;</button>
     </div>
   </div>
 
   <div id="categories-container"></div>
 
   <div class="footer-bar">
-    <span>Verde = no prazo · Laranja = vence em até 30 dias · Vermelho = vencida</span>
+    <span>Verde = no prazo &middot; Laranja = vence em ate 30 dias &middot; Vermelho = vencida</span>
     <span id="last-update"></span>
   </div>
 </div>
@@ -215,7 +200,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script>
-const firebaseConfig = {
+var firebaseConfig = {
   apiKey: "AIzaSyAOhA-3CYhTdNAdBiKOpf9f8OtW3CMO674",
   authDomain: "estoque-marmitas.firebaseapp.com",
   databaseURL: "https://estoque-marmitas-default-rtdb.firebaseio.com",
@@ -226,10 +211,10 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-const estoqueRef = db.ref('estoque_v2');
+var db = firebase.database();
+var estoqueRef = db.ref('estoque_v2');
 
-const CATEGORIAS = [
+var CATEGORIAS = [
   { emoji: '\uD83C\uDF57', nome: 'Frango', itens: [
     'Frango grelhado com arroz, feij\u00E3o, batata doce e legumes',
     'Frango grelhado com arroz, lentilha, batata doce e legumes',
@@ -237,7 +222,7 @@ const CATEGORIAS = [
     'Frango ao molho com espaguete ao molho de tomate e legumes',
     'Frango \u00E0 milanesa com espaguete ao molho de tomate, pur\u00EA de batatas e legumes',
     'Frango \u00E0 parmegiana com arroz e batata chips',
-    'Frango assado com espaguete \u00E0 bolonhesa e batatas assadas',
+    'Frango assado com espaguete \u00E0 bolonh\u00EAsa e batatas assadas',
     'Frango assado com espaguete ao molho pesto e batata r\u00FAstica',
     'Frango grelhado com creme de milho, arroz, legumes e batata chips',
     'Strogonoff de frango com arroz e batata palha',
@@ -246,11 +231,11 @@ const CATEGORIAS = [
   ]},
   { emoji: '\uD83E\uDD69', nome: 'Carne bovina', itens: [
     'Carne mo\u00EDda com arroz, feij\u00E3o preto, pur\u00EA de batatas e legumes',
-    'Carne mo\u00EDda com macarr\u00E3o ao molho de tomate e legumes',
+    'Carne mo\u00EDda com macarro\u00E3o ao molho de tomate e legumes',
     'Carne de panela com mandioca, arroz, feij\u00E3o preto, legumes e farofa',
     'Carne de panela desfiada com arroz, batatas assadas e farofa',
     'Carne desfiada com arroz, farofa e batata assada (sem legumes)',
-    'Carne desfiada com macarr\u00E3o penne, molho de tomate e batatas assadas',
+    'Carne desfiada com macarro\u00E3o penne, molho de tomate e batatas assadas',
     'Strogonoff de carne com arroz e batata palha',
     'Alm\u00F4ndega com espaguete, molho de tomate e legumes',
     'Alm\u00F4ndega com arroz, feij\u00E3o carioca, pur\u00EA e legumes',
@@ -262,11 +247,11 @@ const CATEGORIAS = [
   ]},
   { emoji: '\uD83C\uDF56', nome: 'Su\u00EDno', itens: [
     'Pernil su\u00EDno assado e desfiado com arroz, feij\u00E3o, couve e farofa',
-    'Lingui\u00E7a su\u00EDna com ovo frito, arroz, feij\u00E3o preto, couve e vinagrete',
+    'Lingu\u00ED\u00E7a su\u00EDna com ovo frito, arroz, feij\u00E3o preto, couve e vinagrete',
     'Bisteca grelhada com arroz, feij\u00E3o, couve e legumes'
   ]},
   { emoji: '\uD83C\uDF5D', nome: 'Massas', itens: [
-    'Lasanha \u00E0 bolonhesa com arroz \u00E0 jardineira e batata chips',
+    'Lasanha \u00E0 bolonh\u00EAsa com arroz \u00E0 jardineira e batata chips',
     'Panqueca de carne com molho de tomate e queijo, arroz e batata chips',
     'Panqueca recheada com legumes coberta com molho de tomate e queijo, arroz e batata chips'
   ]},
@@ -285,9 +270,10 @@ const CATEGORIAS = [
   ]}
 ];
 
-let state = {};
-let syncing = false;
-let modalKey = null;
+var state = {};
+var syncing = false;
+var modalKey = null;
+var termoAtual = '';
 
 function stateKey(catIdx, itemIdx, tamanho) {
   return 'c' + catIdx + '_i' + itemIdx + '_' + tamanho;
@@ -312,7 +298,7 @@ function validityInfo(d) {
   var diff = Math.round((new Date(d) - new Date(todayStr())) / 86400000);
   if (diff < 0)   return { cls: 'val-exp',  suffix: '(vencida)' };
   if (diff === 0) return { cls: 'val-soon', suffix: '(hoje)' };
-  if (diff === 1) return { cls: 'val-soon', suffix: '(amanh\u00E3)' };
+  if (diff === 1) return { cls: 'val-soon', suffix: '(amanha)' };
   if (diff <= 30) return { cls: 'val-soon', suffix: '(' + diff + 'd)' };
   return { cls: 'val-ok', suffix: '(' + diff + 'd)' };
 }
@@ -348,10 +334,9 @@ function setStatus(status) {
   var label = document.getElementById('status-label');
   if (status === 'online')       { dot.className = 'dot online';  label.textContent = 'Sincronizado'; }
   else if (status === 'syncing') { dot.className = 'dot syncing'; label.textContent = 'Salvando...'; }
-  else                           { dot.className = 'dot';         label.textContent = 'Sem conex\u00E3o'; }
+  else                           { dot.className = 'dot';         label.textContent = 'Sem conexao'; }
 }
 
-// Modal
 function openModal(key, descricao) {
   modalKey = key;
   document.getElementById('modal-sub').textContent = descricao;
@@ -373,14 +358,12 @@ function confirmarManual() {
   if (!modalKey) return;
   if (!state[modalKey]) state[modalKey] = [];
   for (var i = 0; i < qty; i++) state[modalKey].push(dateVal);
-  var key = modalKey;
   closeModal();
   saveState(function() {
-    showToast('+' + qty + ' adicionada(s) \u00B7 vence em ' + formatDate(dateVal));
+    showToast('+' + qty + ' adicionada(s) - vence em ' + formatDate(dateVal));
   });
 }
 
-// Fechar modal clicando fora
 document.getElementById('modal-overlay').addEventListener('click', function(e) {
   if (e.target === this) closeModal();
 });
@@ -462,12 +445,14 @@ function render() {
   document.getElementById('last-update').textContent = 'Atualizado ' + updateStr;
   var headerUpdate = document.getElementById('last-update-header');
   if (headerUpdate) headerUpdate.textContent = 'Atualizado ' + updateStr;
+
+  if (termoAtual) aplicarFiltro(termoAtual.toLowerCase().trim());
 }
 
 function saveState(cb) {
   syncing = true; setStatus('syncing'); render();
   estoqueRef.set(state, function(err) {
-    if (err) { showToast('Erro ao salvar. Verifique a conex\u00E3o.'); setStatus('offline'); }
+    if (err) { showToast('Erro ao salvar. Verifique a conexao.'); setStatus('offline'); }
     else { setStatus('online'); if (cb) cb(); }
     syncing = false; render();
   });
@@ -478,7 +463,7 @@ function _adicionar(key) {
   if (!state[key]) state[key] = [];
   state[key].push(todayPlus60());
   var label = key.indexOf('350') > -1 ? ' (350g)' : key.indexOf('500') > -1 ? ' (500g)' : '';
-  saveState(function() { showToast('+1 adicionada' + label + ' \u00B7 vence em ' + formatDate(todayPlus60())); });
+  saveState(function() { showToast('+1 adicionada' + label + ' - vence em ' + formatDate(todayPlus60())); });
 }
 
 function _remover(key) {
@@ -487,25 +472,29 @@ function _remover(key) {
   var oldest = state[key].reduce(function(a,b){ return a<b?a:b; });
   state[key].splice(state[key].indexOf(oldest), 1);
   var label = key.indexOf('350') > -1 ? ' (350g)' : key.indexOf('500') > -1 ? ' (500g)' : '';
-  saveState(function() { showToast('Removida' + label + ' \u00B7 validade era ' + formatDate(oldest)); });
+  saveState(function() { showToast('Removida' + label + ' - validade era ' + formatDate(oldest)); });
 }
 
 function _abrirModal(key) {
   if (syncing) return;
-  // Monta descri\u00E7\u00E3o leg\u00EDvel
   var parts = key.split('_');
   var catIdx = parseInt(parts[0].replace('c',''));
   var itemIdx = parseInt(parts[1].replace('i',''));
   var tam = parts[2];
   var cat = CATEGORIAS[catIdx];
   var nome = cat ? cat.itens[itemIdx] : key;
-  var tamLabel = tam === '350' ? ' \u00B7 350g' : tam === '500' ? ' \u00B7 500g' : '';
+  var tamLabel = tam === '350' ? ' - 350g' : tam === '500' ? ' - 500g' : '';
   openModal(key, nome + tamLabel);
 }
 
-// Busca
 function filtrarMarmitas(termo) {
-  var t = termo.toLowerCase().trim();
+  termoAtual = termo;
+  var clearBtn = document.getElementById('busca-clear');
+  if (clearBtn) clearBtn.style.display = termo ? 'block' : 'none';
+  aplicarFiltro(termo.toLowerCase().trim());
+}
+
+function aplicarFiltro(t) {
   var blocos = document.querySelectorAll('.category-block');
   blocos.forEach(function(bloco) {
     var rows = bloco.querySelectorAll('tbody tr');
@@ -532,39 +521,15 @@ function filtrarMarmitas(termo) {
   });
 }
 
-// Copiar estoque
-function copiarEstoque(tamanho) {
-  var linhas = [];
-  CATEGORIAS.forEach(function(cat, catIdx) {
-    cat.itens.forEach(function(item, itemIdx) {
-      var qty = 0;
-      if (cat.fitness) {
-        if (tamanho === 'fit') qty = (state[stateKey(catIdx, itemIdx, 'fit')] || []).length;
-      } else {
-        qty = (state[stateKey(catIdx, itemIdx, tamanho)] || []).length;
-      }
-      if (qty > 0) {
-        var unidade = qty === 1 ? 'unidade' : 'unidades';
-        linhas.push(item + ' - ' + qty + ' ' + unidade);
-      }
-    });
-  });
-  if (linhas.length === 0) {
-    showToast('Nenhuma marmita ' + tamanho + 'g no estoque.');
-    return;
-  }
-  var texto = 'Segue abaixo os sabores que tenho no estoque:\n\n' + linhas.join('\n');
-  navigator.clipboard.writeText(texto).then(function() {
-    var btn = document.getElementById('btn-copiar-' + tamanho);
-    var original = btn.textContent;
-    btn.textContent = '\u2705 Copiado!';
-    setTimeout(function() { btn.textContent = original; }, 2000);
-  }).catch(function() {
-    showToast('Erro ao copiar. Tente manualmente.');
-  });
+function limparBusca() {
+  termoAtual = '';
+  var input = document.getElementById('busca-input');
+  if (input) input.value = '';
+  var clearBtn = document.getElementById('busca-clear');
+  if (clearBtn) clearBtn.style.display = 'none';
+  aplicarFiltro('');
 }
 
-// Resumo
 function abrirResumo() {
   var html = '';
   var temAlgo = false;
@@ -615,7 +580,37 @@ document.getElementById('resumo-overlay').addEventListener('click', function(e) 
   if (e.target === this) fecharResumo();
 });
 
-// Atalho tecla E
+function copiarEstoque(tamanho) {
+  var linhas = [];
+  CATEGORIAS.forEach(function(cat, catIdx) {
+    cat.itens.forEach(function(item, itemIdx) {
+      var qty = 0;
+      if (cat.fitness) {
+        if (tamanho === 'fit') qty = (state[stateKey(catIdx, itemIdx, 'fit')] || []).length;
+      } else {
+        qty = (state[stateKey(catIdx, itemIdx, tamanho)] || []).length;
+      }
+      if (qty > 0) {
+        var unidade = qty === 1 ? 'unidade' : 'unidades';
+        linhas.push(item + ' - ' + qty + ' ' + unidade);
+      }
+    });
+  });
+  if (linhas.length === 0) {
+    showToast('Nenhuma marmita ' + tamanho + 'g no estoque.');
+    return;
+  }
+  var texto = 'Segue abaixo os sabores que tenho no estoque:\n\n' + linhas.join('\n');
+  navigator.clipboard.writeText(texto).then(function() {
+    var btn = document.getElementById('btn-copiar-' + tamanho);
+    var original = btn.textContent;
+    btn.textContent = 'Copiado!';
+    setTimeout(function() { btn.textContent = original; }, 2000);
+  }).catch(function() {
+    showToast('Erro ao copiar. Tente manualmente.');
+  });
+}
+
 document.addEventListener('keydown', function(e) {
   if (e.key === 'e' || e.key === 'E') {
     var active = document.activeElement;
@@ -625,10 +620,63 @@ document.addEventListener('keydown', function(e) {
     if (resumo.classList.contains('open')) fecharResumo();
     else abrirResumo();
   }
-  if (e.key === 'Escape') {
-    fecharResumo();
-    closeModal();
+  if (e.key === 'Escape') { fecharResumo(); fecharRanking(); closeModal(); }
+});
+
+function abrirRanking() {
+  var itens = [];
+  CATEGORIAS.forEach(function(cat, catIdx) {
+    if (cat.fitness) return;
+    cat.itens.forEach(function(item, itemIdx) {
+      var q350 = (state[stateKey(catIdx, itemIdx, '350')] || []).length;
+      var q500 = (state[stateKey(catIdx, itemIdx, '500')] || []).length;
+      var total = q350 + q500;
+      if (total > 0) {
+        itens.push({ nome: item, q350: q350, q500: q500, total: total });
+      }
+    });
+  });
+
+  itens.sort(function(a, b) { return b.total - a.total; });
+
+  var html = '';
+  if (itens.length === 0) {
+    html = '<p style="font-size:13px;color:#9b9b97;text-align:center;padding:24px 0;">Nenhuma marmita em estoque no momento.</p>';
+  } else {
+    itens.forEach(function(item, idx) {
+      var pct350 = item.total > 0 ? Math.round((item.q350 / item.total) * 100) : 0;
+      var pct500 = 100 - pct350;
+      html += '<div style="padding:10px 0;border-bottom:0.5px solid rgba(0,0,0,0.07);">';
+      // Row 1: rank + nome + total
+      html += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">';
+      html += '<span style="font-size:11px;font-weight:700;color:#9b9b97;min-width:20px;text-align:right;">' + (idx+1) + '</span>';
+      html += '<span style="font-size:13px;font-weight:500;color:#1a1a18;flex:1;">' + item.nome + '</span>';
+      html += '<span style="font-size:13px;font-weight:700;color:#1a1a18;">' + item.total + ' un</span>';
+      html += '</div>';
+      // Row 2: badges + bar
+      html += '<div style="display:flex;align-items:center;gap:8px;padding-left:30px;">';
+      if (item.q350 > 0) html += '<span style="font-size:11px;font-weight:600;background:#e8f0fb;color:#1a4fa0;padding:2px 8px;border-radius:8px;white-space:nowrap;">350g: ' + item.q350 + '</span>';
+      if (item.q500 > 0) html += '<span style="font-size:11px;font-weight:600;background:#eaf3de;color:#3b6d11;padding:2px 8px;border-radius:8px;white-space:nowrap;">500g: ' + item.q500 + '</span>';
+      // Progress bar
+      html += '<div style="flex:1;height:6px;background:#f1efe8;border-radius:3px;overflow:hidden;display:flex;">';
+      if (item.q350 > 0) html += '<div style="width:' + pct350 + '%;background:#1a4fa0;opacity:0.5;"></div>';
+      if (item.q500 > 0) html += '<div style="width:' + pct500 + '%;background:#3b6d11;opacity:0.5;"></div>';
+      html += '</div>';
+      html += '</div>';
+      html += '</div>';
+    });
   }
+
+  document.getElementById('ranking-conteudo').innerHTML = html;
+  document.getElementById('ranking-overlay').classList.add('open');
+}
+
+function fecharRanking() {
+  document.getElementById('ranking-overlay').classList.remove('open');
+}
+
+document.getElementById('ranking-overlay').addEventListener('click', function(e) {
+  if (e.target === this) fecharRanking();
 });
 
 estoqueRef.on('value', function(snapshot) {
@@ -639,7 +687,7 @@ estoqueRef.on('value', function(snapshot) {
 }, function() {
   document.getElementById('loading-overlay').style.display = 'none';
   setStatus('offline');
-  showToast('Erro de conex\u00E3o com o banco de dados.');
+  showToast('Erro de conexao com o banco de dados.');
   render();
 });
 </script>
