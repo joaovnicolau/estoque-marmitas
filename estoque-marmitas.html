@@ -146,6 +146,25 @@
   </div>
 </div>
 
+<!-- Modal resumo -->
+<div class="modal-overlay" id="resumo-overlay">
+  <div class="modal" style="width:480px;max-height:80vh;display:flex;flex-direction:column;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <h3 style="margin:0;">🗒️ Resumo do Estoque</h3>
+      <button onclick="fecharResumo()" style="background:none;border:none;cursor:pointer;font-size:18px;color:#6b6b67;padding:2px 6px;">✕</button>
+    </div>
+    <p style="font-size:13px;color:#6b6b67;margin-bottom:16px;">Segue abaixo os sabores que tenho no estoque:</p>
+    <div id="resumo-conteudo" style="overflow-y:auto;flex:1;"></div>
+    <div style="margin-top:16px;display:flex;gap:8px;justify-content:space-between;align-items:center;flex-wrap:wrap;">
+      <div style="display:flex;gap:8px;">
+        <button class="modal-btn" id="btn-copiar-350" onclick="copiarEstoque('350')" style="font-size:12px;padding:7px 12px;">📋 Copiar 350g</button>
+        <button class="modal-btn" id="btn-copiar-500" onclick="copiarEstoque('500')" style="font-size:12px;padding:7px 12px;">📋 Copiar 500g</button>
+      </div>
+      <button class="modal-btn" onclick="fecharResumo()">Fechar</button>
+    </div>
+  </div>
+</div>
+
 <div id="loading-overlay" class="loading-overlay">
   <div class="spinner"></div>
   <span>Conectando ao estoque...</span>
@@ -155,11 +174,16 @@
   <div class="page-header">
     <div>
       <h1>Estoque de Marmitas</h1>
-      <p>+ registra com validade D+60 · 📅 permite escolher a data manualmente · − remove a mais antiga</p>
     </div>
-    <div class="status-dot">
-      <div class="dot" id="status-dot"></div>
-      <span id="status-label">Conectando...</span>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;margin-top:6px;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div class="status-dot">
+          <div class="dot" id="status-dot"></div>
+          <span id="status-label">Conectando...</span>
+        </div>
+        <button id="btn-resumo" onclick="abrirResumo()" title="Resumo do estoque (tecla E)" style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;border:0.5px solid rgba(0,0,0,0.18);background:#fff;cursor:pointer;font-size:15px;transition:background 0.1s;" onmouseover="this.style.background='#f1efe8'" onmouseout="this.style.background='#fff'">🗒️</button>
+      </div>
+      <span id="last-update-header" style="font-size:10px;color:#9b9b97;"></span>
     </div>
   </div>
 
@@ -173,6 +197,9 @@
     <div class="legend-item">🟠 Vence em até 30 dias</div>
     <div class="legend-item">🔴 Vencida</div>
     <div class="legend-item">📅 Adicionar com data manual</div>
+    <div class="legend-item" style="margin-left:auto;">
+      <input id="busca-input" type="text" placeholder="🔍 Buscar marmita..." oninput="filtrarMarmitas(this.value)" style="padding:6px 12px;border:0.5px solid rgba(0,0,0,0.18);border-radius:8px;font-size:13px;font-family:inherit;background:#fff;color:#1a1a18;width:220px;outline:none;" onfocus="this.style.outline='2px solid #1a4fa0'" onblur="this.style.outline='none'" />
+    </div>
   </div>
 
   <div id="categories-container"></div>
@@ -203,58 +230,58 @@ const db = firebase.database();
 const estoqueRef = db.ref('estoque_v2');
 
 const CATEGORIAS = [
-  { emoji: '🍗', nome: 'Frango', itens: [
-    'Frango grelhado com arroz, feijão, batata doce e legumes',
+  { emoji: '\uD83C\uDF57', nome: 'Frango', itens: [
+    'Frango grelhado com arroz, feij\u00E3o, batata doce e legumes',
     'Frango grelhado com arroz, lentilha, batata doce e legumes',
-    'Frango ao molho com arroz, feijão, polenta e legumes',
+    'Frango ao molho com arroz, feij\u00E3o, polenta e legumes',
     'Frango ao molho com espaguete ao molho de tomate e legumes',
-    'Frango à milanesa com espaguete ao molho de tomate, purê de batatas e legumes',
-    'Frango à parmegiana com arroz e batata chips',
-    'Frango assado com espaguete à bolonhesa e batatas assadas',
-    'Frango assado com espaguete ao molho pesto e batata rústica',
+    'Frango \u00E0 milanesa com espaguete ao molho de tomate, pur\u00EA de batatas e legumes',
+    'Frango \u00E0 parmegiana com arroz e batata chips',
+    'Frango assado com espaguete \u00E0 bolonhesa e batatas assadas',
+    'Frango assado com espaguete ao molho pesto e batata r\u00FAstica',
     'Frango grelhado com creme de milho, arroz, legumes e batata chips',
     'Strogonoff de frango com arroz e batata palha',
-    'Frango oriental com arroz chop suey e brócolis',
-    'Frango à milanesa com talharim ao molho rosê e batatas assadas'
+    'Frango oriental com arroz chop suey e br\u00F3colis',
+    'Frango \u00E0 milanesa com talharim ao molho ros\u00EA e batatas assadas'
   ]},
-  { emoji: '🥩', nome: 'Carne bovina', itens: [
-    'Carne moída com arroz, feijão preto, purê de batatas e legumes',
-    'Carne moída com macarrão ao molho de tomate e legumes',
-    'Carne de panela com mandioca, arroz, feijão preto, legumes e farofa',
+  { emoji: '\uD83E\uDD69', nome: 'Carne bovina', itens: [
+    'Carne mo\u00EDda com arroz, feij\u00E3o preto, pur\u00EA de batatas e legumes',
+    'Carne mo\u00EDda com macarr\u00E3o ao molho de tomate e legumes',
+    'Carne de panela com mandioca, arroz, feij\u00E3o preto, legumes e farofa',
     'Carne de panela desfiada com arroz, batatas assadas e farofa',
     'Carne desfiada com arroz, farofa e batata assada (sem legumes)',
-    'Carne desfiada com macarrão penne, molho de tomate e batatas assadas',
+    'Carne desfiada com macarr\u00E3o penne, molho de tomate e batatas assadas',
     'Strogonoff de carne com arroz e batata palha',
-    'Almôndega com espaguete, molho de tomate e legumes',
-    'Almôndega com arroz, feijão carioca, purê e legumes',
-    'Escondidinho de carne moída coberto com queijo mussarela'
+    'Alm\u00F4ndega com espaguete, molho de tomate e legumes',
+    'Alm\u00F4ndega com arroz, feij\u00E3o carioca, pur\u00EA e legumes',
+    'Escondidinho de carne mo\u00EDda coberto com queijo mussarela'
   ]},
-  { emoji: '🐟', nome: 'Peixe', itens: [
-    'Tilápia frita com arroz, feijão carioca, purê de batatas e legumes',
-    'Tilápia à milanesa com arroz, feijão, purê de batatas e legumes'
+  { emoji: '\uD83D\uDC1F', nome: 'Peixe', itens: [
+    'Til\u00E1pia frita com arroz, feij\u00E3o carioca, pur\u00EA de batatas e legumes',
+    'Til\u00E1pia \u00E0 milanesa com arroz, feij\u00E3o, pur\u00EA de batatas e legumes'
   ]},
-  { emoji: '🍖', nome: 'Suíno', itens: [
-    'Pernil suíno assado e desfiado com arroz, feijão, couve e farofa',
-    'Linguiça suína com ovo frito, arroz, feijão preto, couve e vinagrete',
-    'Bisteca grelhada com arroz, feijão, couve e legumes'
+  { emoji: '\uD83C\uDF56', nome: 'Su\u00EDno', itens: [
+    'Pernil su\u00EDno assado e desfiado com arroz, feij\u00E3o, couve e farofa',
+    'Lingui\u00E7a su\u00EDna com ovo frito, arroz, feij\u00E3o preto, couve e vinagrete',
+    'Bisteca grelhada com arroz, feij\u00E3o, couve e legumes'
   ]},
-  { emoji: '🍝', nome: 'Massas', itens: [
-    'Lasanha à bolonhesa com arroz à jardineira e batata chips',
+  { emoji: '\uD83C\uDF5D', nome: 'Massas', itens: [
+    'Lasanha \u00E0 bolonhesa com arroz \u00E0 jardineira e batata chips',
     'Panqueca de carne com molho de tomate e queijo, arroz e batata chips',
     'Panqueca recheada com legumes coberta com molho de tomate e queijo, arroz e batata chips'
   ]},
-  { emoji: '🌱', nome: 'Vegetarianos', itens: [
+  { emoji: '\uD83C\uDF31', nome: 'Vegetarianos', itens: [
     'Kibe assado veg com mix de legumes',
-    'Berinjela à milanesa com espaguete',
-    'Berinjela à milanesa com arroz, feijão e batata chips',
-    'Proteína de soja com arroz, feijão, purê de batatas e legumes',
-    'Espaguete com proteína de soja coberta com molho de tomate caseiro',
+    'Berinjela \u00E0 milanesa com espaguete',
+    'Berinjela \u00E0 milanesa com arroz, feij\u00E3o e batata chips',
+    'Prote\u00EDna de soja com arroz, feij\u00E3o, pur\u00EA de batatas e legumes',
+    'Espaguete com prote\u00EDna de soja coberta com molho de tomate caseiro',
     'Espaguete com molho de tomate, batatas assadas e legumes',
-    'Grão de bico refogado com arroz e batatas assadas'
+    'Gr\u00E3o de bico refogado com arroz e batatas assadas'
   ]},
-  { emoji: '💪', nome: 'Fitness', fitness: true, itens: [
-    'Frango grelhado (200g de filé de peito, 150g de arroz, 50g de legumes)',
-    'Carne moída (200g de carne de primeira, 150g de arroz, 50g de legumes)'
+  { emoji: '\uD83D\uDCAA', nome: 'Fitness', fitness: true, itens: [
+    'Frango grelhado (200g de fil\u00E9 de peito, 150g de arroz, 50g de legumes)',
+    'Carne mo\u00EDda (200g de carne de primeira, 150g de arroz, 50g de legumes)'
   ]}
 ];
 
@@ -285,7 +312,7 @@ function validityInfo(d) {
   var diff = Math.round((new Date(d) - new Date(todayStr())) / 86400000);
   if (diff < 0)   return { cls: 'val-exp',  suffix: '(vencida)' };
   if (diff === 0) return { cls: 'val-soon', suffix: '(hoje)' };
-  if (diff === 1) return { cls: 'val-soon', suffix: '(amanhã)' };
+  if (diff === 1) return { cls: 'val-soon', suffix: '(amanh\u00E3)' };
   if (diff <= 30) return { cls: 'val-soon', suffix: '(' + diff + 'd)' };
   return { cls: 'val-ok', suffix: '(' + diff + 'd)' };
 }
@@ -297,7 +324,7 @@ function getOldest(datas) {
 
 function renderValidade(datas) {
   var oldest = getOldest(datas);
-  if (!oldest) return '<span class="val-empty">—</span>';
+  if (!oldest) return '<span class="val-empty">--</span>';
   var info = validityInfo(oldest);
   return '<span class="' + info.cls + '">' + formatDate(oldest) + ' <span class="val-suffix">' + info.suffix + '</span></span>';
 }
@@ -321,7 +348,7 @@ function setStatus(status) {
   var label = document.getElementById('status-label');
   if (status === 'online')       { dot.className = 'dot online';  label.textContent = 'Sincronizado'; }
   else if (status === 'syncing') { dot.className = 'dot syncing'; label.textContent = 'Salvando...'; }
-  else                           { dot.className = 'dot';         label.textContent = 'Sem conexão'; }
+  else                           { dot.className = 'dot';         label.textContent = 'Sem conex\u00E3o'; }
 }
 
 // Modal
@@ -349,7 +376,7 @@ function confirmarManual() {
   var key = modalKey;
   closeModal();
   saveState(function() {
-    showToast('+' + qty + ' adicionada(s) · vence em ' + formatDate(dateVal));
+    showToast('+' + qty + ' adicionada(s) \u00B7 vence em ' + formatDate(dateVal));
   });
 }
 
@@ -360,9 +387,9 @@ document.getElementById('modal-overlay').addEventListener('click', function(e) {
 
 function buildBtns(key, dis) {
   var d = dis ? ' disabled' : '';
-  return '<td class="center"><button class="btn btn-minus" onclick="_remover(\'' + key + '\')"' + d + '>−</button></td>' +
+  return '<td class="center"><button class="btn btn-minus" onclick="_remover(\'' + key + '\')"' + d + '>-</button></td>' +
          '<td class="center"><button class="btn btn-plus"  onclick="_adicionar(\'' + key + '\')"' + d + '>+</button></td>' +
-         '<td class="center"><button class="btn btn-cal"   onclick="_abrirModal(\'' + key + '\')"' + d + ' title="Data manual">📅</button></td>';
+         '<td class="center"><button class="btn btn-cal"   onclick="_abrirModal(\'' + key + '\')"' + d + ' title="Data manual">\uD83D\uDCC5</button></td>';
 }
 
 function render() {
@@ -380,7 +407,7 @@ function render() {
 
     if (cat.fitness) {
       html += '<table><colgroup><col class="c-sabor-fit"><col class="c-qty-fit"><col class="c-minus-fit"><col class="c-plus-fit"><col class="c-cal-fit"><col class="c-val-fit"></colgroup>';
-      html += '<thead><tr><th>Sabor</th><th class="center">Qtd</th><th class="center">−</th><th class="center">+</th><th class="center">📅</th><th>Validade mais antiga</th></tr></thead><tbody>';
+      html += '<thead><tr><th>Sabor</th><th class="center">Qtd</th><th class="center">-</th><th class="center">+</th><th class="center">\uD83D\uDCC5</th><th>Validade mais antiga</th></tr></thead><tbody>';
       cat.itens.forEach(function(item, itemIdx) {
         var key = stateKey(catIdx, itemIdx, 'fit');
         var datas = state[key] || [];
@@ -396,7 +423,7 @@ function render() {
       html += '</tbody></table>';
     } else {
       html += '<table><colgroup><col class="c-sabor"><col class="c-g"><col class="c-qty"><col class="c-minus"><col class="c-plus"><col class="c-cal"><col class="c-val"></colgroup>';
-      html += '<thead><tr><th>Sabor</th><th class="center">Tam.</th><th class="center">Qtd</th><th class="center">−</th><th class="center">+</th><th class="center">📅</th><th>Validade mais antiga</th></tr></thead><tbody>';
+      html += '<thead><tr><th>Sabor</th><th class="center">Tam.</th><th class="center">Qtd</th><th class="center">-</th><th class="center">+</th><th class="center">\uD83D\uDCC5</th><th>Validade mais antiga</th></tr></thead><tbody>';
       cat.itens.forEach(function(item, itemIdx) {
         var k350 = stateKey(catIdx, itemIdx, '350');
         var k500 = stateKey(catIdx, itemIdx, '500');
@@ -430,15 +457,17 @@ function render() {
   document.getElementById('stat-tipos').textContent = tipos;
   document.getElementById('stat-venc').textContent = venc;
   var now = new Date();
-  document.getElementById('last-update').textContent =
-    'Atualizado ' + now.toLocaleDateString('pt-BR') + ' às ' +
+  var updateStr = now.toLocaleDateString('pt-BR') + ' \u00E0s ' +
     String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+  document.getElementById('last-update').textContent = 'Atualizado ' + updateStr;
+  var headerUpdate = document.getElementById('last-update-header');
+  if (headerUpdate) headerUpdate.textContent = 'Atualizado ' + updateStr;
 }
 
 function saveState(cb) {
   syncing = true; setStatus('syncing'); render();
   estoqueRef.set(state, function(err) {
-    if (err) { showToast('Erro ao salvar. Verifique a conexão.'); setStatus('offline'); }
+    if (err) { showToast('Erro ao salvar. Verifique a conex\u00E3o.'); setStatus('offline'); }
     else { setStatus('online'); if (cb) cb(); }
     syncing = false; render();
   });
@@ -449,7 +478,7 @@ function _adicionar(key) {
   if (!state[key]) state[key] = [];
   state[key].push(todayPlus60());
   var label = key.indexOf('350') > -1 ? ' (350g)' : key.indexOf('500') > -1 ? ' (500g)' : '';
-  saveState(function() { showToast('+1 adicionada' + label + ' · vence em ' + formatDate(todayPlus60())); });
+  saveState(function() { showToast('+1 adicionada' + label + ' \u00B7 vence em ' + formatDate(todayPlus60())); });
 }
 
 function _remover(key) {
@@ -458,21 +487,149 @@ function _remover(key) {
   var oldest = state[key].reduce(function(a,b){ return a<b?a:b; });
   state[key].splice(state[key].indexOf(oldest), 1);
   var label = key.indexOf('350') > -1 ? ' (350g)' : key.indexOf('500') > -1 ? ' (500g)' : '';
-  saveState(function() { showToast('Removida' + label + ' · validade era ' + formatDate(oldest)); });
+  saveState(function() { showToast('Removida' + label + ' \u00B7 validade era ' + formatDate(oldest)); });
 }
 
 function _abrirModal(key) {
   if (syncing) return;
-  // Monta descrição legível
+  // Monta descri\u00E7\u00E3o leg\u00EDvel
   var parts = key.split('_');
   var catIdx = parseInt(parts[0].replace('c',''));
   var itemIdx = parseInt(parts[1].replace('i',''));
   var tam = parts[2];
   var cat = CATEGORIAS[catIdx];
   var nome = cat ? cat.itens[itemIdx] : key;
-  var tamLabel = tam === '350' ? ' · 350g' : tam === '500' ? ' · 500g' : '';
+  var tamLabel = tam === '350' ? ' \u00B7 350g' : tam === '500' ? ' \u00B7 500g' : '';
   openModal(key, nome + tamLabel);
 }
+
+// Busca
+function filtrarMarmitas(termo) {
+  var t = termo.toLowerCase().trim();
+  var blocos = document.querySelectorAll('.category-block');
+  blocos.forEach(function(bloco) {
+    var rows = bloco.querySelectorAll('tbody tr');
+    var algumVisivel = false;
+    var i = 0;
+    while (i < rows.length) {
+      var row = rows[i];
+      if (row.classList.contains('row-350') || row.classList.contains('row-fit')) {
+        var saborCell = row.querySelector('.td-sabor');
+        var texto = saborCell ? saborCell.textContent.toLowerCase() : '';
+        var visivel = t === '' || texto.includes(t);
+        if (row.classList.contains('row-350') && rows[i+1]) {
+          row.style.display = visivel ? '' : 'none';
+          rows[i+1].style.display = visivel ? '' : 'none';
+          i += 2;
+        } else {
+          row.style.display = visivel ? '' : 'none';
+          i++;
+        }
+        if (visivel) algumVisivel = true;
+      } else { i++; }
+    }
+    bloco.style.display = (t === '' || algumVisivel) ? '' : 'none';
+  });
+}
+
+// Copiar estoque
+function copiarEstoque(tamanho) {
+  var linhas = [];
+  CATEGORIAS.forEach(function(cat, catIdx) {
+    cat.itens.forEach(function(item, itemIdx) {
+      var qty = 0;
+      if (cat.fitness) {
+        if (tamanho === 'fit') qty = (state[stateKey(catIdx, itemIdx, 'fit')] || []).length;
+      } else {
+        qty = (state[stateKey(catIdx, itemIdx, tamanho)] || []).length;
+      }
+      if (qty > 0) {
+        var unidade = qty === 1 ? 'unidade' : 'unidades';
+        linhas.push(item + ' - ' + qty + ' ' + unidade);
+      }
+    });
+  });
+  if (linhas.length === 0) {
+    showToast('Nenhuma marmita ' + tamanho + 'g no estoque.');
+    return;
+  }
+  var texto = 'Segue abaixo os sabores que tenho no estoque:\n\n' + linhas.join('\n');
+  navigator.clipboard.writeText(texto).then(function() {
+    var btn = document.getElementById('btn-copiar-' + tamanho);
+    var original = btn.textContent;
+    btn.textContent = '\u2705 Copiado!';
+    setTimeout(function() { btn.textContent = original; }, 2000);
+  }).catch(function() {
+    showToast('Erro ao copiar. Tente manualmente.');
+  });
+}
+
+// Resumo
+function abrirResumo() {
+  var html = '';
+  var temAlgo = false;
+  CATEGORIAS.forEach(function(cat, catIdx) {
+    var linhasCat = '';
+    cat.itens.forEach(function(item, itemIdx) {
+      if (cat.fitness) {
+        var key = stateKey(catIdx, itemIdx, 'fit');
+        var qty = (state[key] || []).length;
+        if (qty > 0) {
+          linhasCat += '<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:0.5px solid rgba(0,0,0,0.06);">' +
+            '<span style="font-size:12px;color:#1a1a18;">' + item + '</span>' +
+            '<span style="font-size:12px;font-weight:600;background:#f1efe8;color:#5f5e5a;padding:2px 8px;border-radius:10px;white-space:nowrap;margin-left:12px;">' + qty + ' un</span></div>';
+          temAlgo = true;
+        }
+      } else {
+        var k350 = stateKey(catIdx, itemIdx, '350');
+        var k500 = stateKey(catIdx, itemIdx, '500');
+        var q350 = (state[k350] || []).length;
+        var q500 = (state[k500] || []).length;
+        if (q350 > 0 || q500 > 0) {
+          var badges = '';
+          if (q350 > 0) badges += '<span style="font-size:11px;font-weight:600;background:#e8f0fb;color:#1a4fa0;padding:2px 7px;border-radius:8px;margin-left:6px;">350g: ' + q350 + '</span>';
+          if (q500 > 0) badges += '<span style="font-size:11px;font-weight:600;background:#eaf3de;color:#3b6d11;padding:2px 7px;border-radius:8px;margin-left:6px;">500g: ' + q500 + '</span>';
+          linhasCat += '<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:0.5px solid rgba(0,0,0,0.06);">' +
+            '<span style="font-size:12px;color:#1a1a18;">' + item + '</span>' +
+            '<div style="white-space:nowrap;margin-left:12px;">' + badges + '</div></div>';
+          temAlgo = true;
+        }
+      }
+    });
+    if (linhasCat) {
+      html += '<div style="margin-bottom:14px;">';
+      html += '<div style="font-size:11px;font-weight:600;color:#6b6b67;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;">' + cat.emoji + ' ' + cat.nome + '</div>';
+      html += linhasCat + '</div>';
+    }
+  });
+  if (!temAlgo) html = '<p style="font-size:13px;color:#9b9b97;text-align:center;padding:24px 0;">Nenhuma marmita em estoque no momento.</p>';
+  document.getElementById('resumo-conteudo').innerHTML = html;
+  document.getElementById('resumo-overlay').classList.add('open');
+}
+
+function fecharResumo() {
+  document.getElementById('resumo-overlay').classList.remove('open');
+}
+
+document.getElementById('resumo-overlay').addEventListener('click', function(e) {
+  if (e.target === this) fecharResumo();
+});
+
+// Atalho tecla E
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'e' || e.key === 'E') {
+    var active = document.activeElement;
+    var tag = active ? active.tagName : '';
+    if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+    var resumo = document.getElementById('resumo-overlay');
+    if (resumo.classList.contains('open')) fecharResumo();
+    else abrirResumo();
+  }
+  if (e.key === 'Escape') {
+    fecharResumo();
+    closeModal();
+  }
+});
 
 estoqueRef.on('value', function(snapshot) {
   state = snapshot.val() || {};
@@ -482,7 +639,7 @@ estoqueRef.on('value', function(snapshot) {
 }, function() {
   document.getElementById('loading-overlay').style.display = 'none';
   setStatus('offline');
-  showToast('Erro de conexão com o banco de dados.');
+  showToast('Erro de conex\u00E3o com o banco de dados.');
   render();
 });
 </script>
