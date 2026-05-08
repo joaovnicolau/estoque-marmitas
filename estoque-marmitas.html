@@ -15,17 +15,18 @@
       --amber-bg: #faeeda; --amber-text: #854f0b;
       --red-bg: #fcebeb; --red-text: #a32d2d;
       --gray-bg: #f1efe8; --gray-text: #5f5e5a;
-      --blue-bg: #e8f0fb; --blue-text: #1a4fa0;
+      --red-vivid: #4285F4; --green-vivid: #34A853;
       --radius: 10px; --radius-sm: 6px;
     }
-    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 2rem 1rem; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    /* ── ESTOQUE ── */
     .container { max-width: 980px; margin: 0 auto; }
     .page-header { margin-bottom: 1.5rem; display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
     .page-header h1 { font-size: 22px; font-weight: 600; margin-bottom: 4px; }
     .status-dot { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); white-space: nowrap; }
     .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gray-text); flex-shrink: 0; }
-    .dot.online { background: #3b6d11; }
-    .dot.syncing { background: #854f0b; }
+    .dot.online { background: #3b6d11; } .dot.syncing { background: #854f0b; }
     .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 1.25rem; }
     .stat-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 14px 16px; }
     .stat-card .num { font-size: 26px; font-weight: 600; line-height: 1; margin-bottom: 4px; }
@@ -34,164 +35,164 @@
     .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); }
     .category-block { margin-bottom: 1.25rem; background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); overflow: hidden; }
     .category-header { display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: var(--bg); border-bottom: 0.5px solid var(--border); }
-    .category-emoji { font-size: 16px; }
-    .category-name { font-size: 13px; font-weight: 600; }
+    .category-emoji { font-size: 16px; } .category-name { font-size: 13px; font-weight: 600; }
     .category-count { font-size: 11px; color: var(--text-muted); margin-left: auto; }
     .table-wrap { overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; }
-    col.c-sabor  { width: 30%; } col.c-g { width: 7%; } col.c-qty { width: 7%; }
-    col.c-minus  { width: 6%; } col.c-plus { width: 6%; } col.c-cal { width: 6%; } col.c-val { width: 38%; }
-    col.c-sabor-fit { width: 36%; } col.c-qty-fit { width: 8%; }
-    col.c-minus-fit { width: 7%; } col.c-plus-fit { width: 7%; } col.c-cal-fit { width: 7%; } col.c-val-fit { width: 35%; }
+    col.c-sabor{width:30%} col.c-g{width:7%} col.c-qty{width:7%} col.c-minus{width:6%} col.c-plus{width:6%} col.c-cal{width:6%} col.c-val{width:38%}
+    col.c-sabor-fit{width:36%} col.c-qty-fit{width:8%} col.c-minus-fit{width:7%} col.c-plus-fit{width:7%} col.c-cal-fit{width:7%} col.c-val-fit{width:35%}
     thead th { padding: 8px 10px; font-size: 10px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; background: #fafaf8; border-bottom: 0.5px solid var(--border); text-align: left; }
     thead th.center { text-align: center; }
     tbody tr.row-350 td { border-bottom: 0.5px dashed rgba(0,0,0,0.08); }
-    tbody tr.row-500 td { border-bottom: 0.5px solid var(--border); }
-    tbody tr.row-fit td { border-bottom: 0.5px solid var(--border); }
+    tbody tr.row-500 td, tbody tr.row-fit td { border-bottom: 0.5px solid var(--border); }
     tbody tr:last-child td { border-bottom: none; }
     tbody tr:hover td { background: #fafaf8; }
     tbody td { padding: 7px 10px; vertical-align: middle; }
     td.center { text-align: center; }
     td.td-sabor { font-weight: 500; font-size: 12px; color: var(--text); vertical-align: middle; border-right: 0.5px solid var(--border); }
     .size-badge { display: inline-flex; align-items: center; justify-content: center; padding: 2px 7px; border-radius: 8px; font-size: 10px; font-weight: 700; }
-    .badge-350 { background: var(--blue-bg); color: var(--blue-text); }
-    .badge-500 { background: var(--green-bg); color: var(--green-text); }
+    .badge-350 { background: #4285F4; color: #ffffff; }
+    .badge-500 { background: #34A853; color: #ffffff; }
     .qty-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 20px; border-radius: 10px; font-size: 11px; font-weight: 600; padding: 0 6px; }
-    .qty-0   { background: var(--gray-bg);  color: var(--gray-text); }
-    .qty-low { background: var(--amber-bg); color: var(--amber-text); }
-    .qty-ok  { background: var(--green-bg); color: var(--green-text); }
-    .val-ok   { color: var(--green-text); font-size: 11px; }
-    .val-soon { color: var(--amber-text); font-size: 11px; font-weight: 600; }
-    .val-exp  { color: var(--red-text);   font-size: 11px; font-weight: 600; }
-    .val-empty{ color: var(--text-light); font-size: 11px; }
-    .val-suffix { font-size: 10px; opacity: 0.75; }
-    .btn { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: var(--radius-sm); border: 0.5px solid var(--border-strong); background: var(--surface); cursor: pointer; font-size: 16px; line-height: 1; transition: background 0.1s, transform 0.1s; }
-    .btn:hover { background: var(--bg); }
-    .btn:active { transform: scale(0.93); }
-    .btn:disabled { opacity: 0.35; cursor: not-allowed; }
-    .btn-minus { color: #a32d2d; }
-    .btn-plus  { color: #3b6d11; }
-    .btn-cal   { color: var(--blue-text); font-size: 13px; }
-    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
-    .modal-overlay.open { opacity: 1; pointer-events: all; }
-    .modal { background: var(--surface); border-radius: var(--radius); padding: 24px; width: 340px; max-width: 92vw; box-shadow: 0 8px 40px rgba(0,0,0,0.18); }
-    .modal h3 { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
-    .modal .modal-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.5; }
-    .modal-field { margin-bottom: 14px; }
-    .modal-field label { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; display: block; margin-bottom: 6px; }
-    .modal-field input { width: 100%; padding: 9px 10px; border: 0.5px solid var(--border-strong); border-radius: var(--radius-sm); font-size: 14px; font-family: inherit; background: var(--bg); color: var(--text); }
-    .modal-field input:focus { outline: 2px solid var(--blue-text); outline-offset: 1px; }
-    .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; }
-    .modal-btn { padding: 8px 18px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; cursor: pointer; border: 0.5px solid var(--border-strong); background: var(--bg); color: var(--text); font-family: inherit; transition: background 0.1s; }
-    .modal-btn:hover { background: #e8e6e0; }
-    .modal-btn.primary { background: var(--text); color: #fff; border-color: var(--text); }
-    .modal-btn.primary:hover { background: #333; }
+    .qty-0{background:var(--gray-bg);color:var(--gray-text)} .qty-low{background:var(--amber-bg);color:var(--amber-text)} .qty-ok{background:var(--green-bg);color:var(--green-text)}
+    .val-ok{color:var(--green-text);font-size:11px} .val-soon{color:var(--amber-text);font-size:11px;font-weight:600} .val-exp{color:var(--red-text);font-size:11px;font-weight:600} .val-empty{color:var(--text-light);font-size:11px}
+    .val-suffix{font-size:10px;opacity:0.75}
+    .btn { display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:var(--radius-sm);border:0.5px solid var(--border-strong);background:var(--surface);cursor:pointer;font-size:16px;line-height:1;transition:background 0.1s,transform 0.1s; }
+    .btn:hover{background:var(--bg)} .btn:active{transform:scale(0.93)} .btn:disabled{opacity:0.35;cursor:not-allowed}
+    .btn-minus{color:#a32d2d} .btn-plus{color:#3b6d11} .btn-cal{color:var(--red-vivid);font-size:13px}
     .footer-bar { margin-top: 1rem; font-size: 11px; color: var(--text-light); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px; padding: 0 2px; }
-    .toast { position: fixed; bottom: 20px; right: 20px; background: var(--text); color: #fff; border-radius: var(--radius-sm); padding: 9px 16px; font-size: 13px; opacity: 0; transform: translateY(8px); transition: opacity 0.25s, transform 0.25s; pointer-events: none; z-index: 999; max-width: 300px; }
-    .toast.show { opacity: 1; transform: translateY(0); }
-    .loading-overlay { position: fixed; inset: 0; background: rgba(245,244,240,0.88); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; z-index: 100; font-size: 14px; color: var(--text-muted); }
-    .spinner { width: 28px; height: 28px; border: 2px solid var(--border); border-top-color: var(--text-muted); border-radius: 50%; animation: spin 0.7s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    @media (max-width: 600px) { col.c-sabor { width: 24%; } col.c-val { width: 30%; } .stat-card .num { font-size: 20px; } }
+
+    /* ── MODALS ── */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;z-index:200;opacity:0;pointer-events:none;transition:opacity 0.2s}
+    .modal-overlay.open{opacity:1;pointer-events:all}
+    .modal{background:var(--surface);border-radius:var(--radius);padding:24px;width:340px;max-width:92vw;box-shadow:0 8px 40px rgba(0,0,0,0.18)}
+    .modal h3{font-size:15px;font-weight:600;margin-bottom:4px}
+    .modal .modal-sub{font-size:12px;color:var(--text-muted);margin-bottom:20px;line-height:1.5}
+    .modal-field{margin-bottom:14px}
+    .modal-field label{font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.04em;display:block;margin-bottom:6px}
+    .modal-field input{width:100%;padding:9px 10px;border:0.5px solid var(--border-strong);border-radius:var(--radius-sm);font-size:14px;font-family:inherit;background:var(--bg);color:var(--text)}
+    .modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:20px}
+    .modal-btn{padding:8px 18px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;cursor:pointer;border:0.5px solid var(--border-strong);background:var(--bg);color:var(--text);font-family:inherit;transition:background 0.1s}
+    .modal-btn:hover{background:#e8e6e0}
+    .modal-btn.primary{background:var(--text);color:#fff;border-color:var(--text)}
+    .modal-btn.primary:hover{background:#333}
+
+    /* ── TOAST & LOADER ── */
+    .toast{position:fixed;bottom:20px;right:20px;background:var(--text);color:#fff;border-radius:var(--radius-sm);padding:9px 16px;font-size:13px;opacity:0;transform:translateY(8px);transition:opacity 0.25s,transform 0.25s;pointer-events:none;z-index:999;max-width:300px}
+    .toast.show{opacity:1;transform:translateY(0)}
+    .loading-overlay{position:fixed;inset:0;background:rgba(245,244,240,0.88);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;z-index:100;font-size:14px;color:var(--text-muted)}
+    .spinner{width:28px;height:28px;border:2px solid var(--border);border-top-color:var(--text-muted);border-radius:50%;animation:spin 0.7s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    @media(max-width:600px){.stats-row{gap:8px}.stat-card .num{font-size:20px}.day-tabs{gap:4px}.day-tab{padding:5px 10px;font-size:11px}}
   </style>
 </head>
 <body>
 
-<div class="modal-overlay" id="modal-overlay">
-  <div class="modal">
-    <h3>Adicionar com data manual</h3>
-    <p class="modal-sub" id="modal-sub">--</p>
-    <div class="modal-field">
-      <label>Data de validade</label>
-      <input type="date" id="modal-date" />
-    </div>
-    <div class="modal-field">
-      <label>Quantidade</label>
-      <input type="number" id="modal-qty" value="1" min="1" max="99" />
-    </div>
-    <div class="modal-actions">
-      <button class="modal-btn" onclick="closeModal()">Cancelar</button>
-      <button class="modal-btn primary" onclick="confirmarManual()">Adicionar</button>
-    </div>
-  </div>
+<!-- TAB BAR -->
+<div class="tab-bar">
+  <span class="tab-bar-title">Marmitas</span>
+  <button class="tab active" onclick="trocarAba('estoque', this)">Estoque</button>
 </div>
 
-<div class="modal-overlay" id="resumo-overlay">
-  <div class="modal" style="width:480px;max-height:80vh;display:flex;flex-direction:column;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-      <h3 style="margin:0;">Resumo do Estoque</h3>
-      <button onclick="fecharResumo()" style="background:none;border:none;cursor:pointer;font-size:18px;color:#6b6b67;padding:2px 6px;">&#x2715;</button>
-    </div>
-    <p style="font-size:13px;color:#6b6b67;margin-bottom:16px;">Segue abaixo os sabores que tenho no estoque:</p>
-    <div id="resumo-conteudo" style="overflow-y:auto;flex:1;"></div>
-    <div style="margin-top:16px;display:flex;gap:8px;justify-content:space-between;align-items:center;flex-wrap:wrap;">
-      <div style="display:flex;gap:8px;">
-        <button class="modal-btn" id="btn-copiar-350" onclick="copiarEstoque('350')" style="font-size:12px;padding:7px 12px;">Copiar 350g</button>
-        <button class="modal-btn" id="btn-copiar-500" onclick="copiarEstoque('500')" style="font-size:12px;padding:7px 12px;">Copiar 500g</button>
+<!-- ══════════ ABA ESTOQUE ══════════ -->
+<div id="aba-estoque" class="tab-content active">
+
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal">
+      <h3>Adicionar com data manual</h3>
+      <p class="modal-sub" id="modal-sub">--</p>
+      <div class="modal-field"><label>Data de validade</label><input type="date" id="modal-date" /></div>
+      <div class="modal-field"><label>Quantidade</label><input type="number" id="modal-qty" value="1" min="1" max="99" /></div>
+      <div class="modal-actions">
+        <button class="modal-btn" onclick="closeModal()">Cancelar</button>
+        <button class="modal-btn primary" onclick="confirmarManual()">Adicionar</button>
       </div>
-      <button class="modal-btn" onclick="fecharResumo()">Fechar</button>
     </div>
   </div>
-</div>
 
-<div class="modal-overlay" id="ranking-overlay">
-  <div class="modal" style="width:520px;max-height:82vh;display:flex;flex-direction:column;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-      <h3 style="margin:0;">&#x1F4CA; Ranking do Estoque</h3>
-      <button onclick="fecharRanking()" style="background:none;border:none;cursor:pointer;font-size:18px;color:#6b6b67;padding:2px 6px;">&#x2715;</button>
-    </div>
-    <p style="font-size:12px;color:#6b6b67;margin-bottom:16px;">Marmitas ordenadas por quantidade total (350g + 500g), da maior para a menor.</p>
-    <div id="ranking-conteudo" style="overflow-y:auto;flex:1;"></div>
-    <div style="margin-top:16px;text-align:right;">
-      <button class="modal-btn" onclick="fecharRanking()">Fechar</button>
-    </div>
-  </div>
-</div>
-
-<div id="loading-overlay" class="loading-overlay">
-  <div class="spinner"></div>
-  <span>Conectando ao estoque...</span>
-</div>
-
-<div class="container">
-  <div class="page-header">
-    <div>
-      <h1>Estoque de Marmitas</h1>
-    </div>
-    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;margin-top:6px;">
-      <div style="display:flex;align-items:center;gap:8px;">
-        <div class="status-dot">
-          <div class="dot" id="status-dot"></div>
-          <span id="status-label">Conectando...</span>
+  <div class="modal-overlay" id="resumo-overlay">
+    <div class="modal" style="width:480px;max-height:80vh;display:flex;flex-direction:column;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <h3 style="margin:0;">Resumo do Estoque</h3>
+        <button onclick="fecharResumo()" style="background:none;border:none;cursor:pointer;font-size:18px;color:#6b6b67;padding:2px 6px;">&#x2715;</button>
+      </div>
+      <p style="font-size:13px;color:#6b6b67;margin-bottom:16px;">Segue abaixo os sabores que tenho no estoque:</p>
+      <div id="resumo-conteudo" style="overflow-y:auto;flex:1;"></div>
+      <div style="margin-top:16px;display:flex;gap:8px;justify-content:space-between;align-items:center;flex-wrap:wrap;">
+        <div style="display:flex;gap:8px;">
+          <button class="modal-btn" id="btn-copiar-350" onclick="copiarEstoque('350')" style="font-size:12px;padding:7px 12px;">Copiar 350g</button>
+          <button class="modal-btn" id="btn-copiar-500" onclick="copiarEstoque('500')" style="font-size:12px;padding:7px 12px;">Copiar 500g</button>
         </div>
-        <button id="btn-resumo" onclick="abrirResumo()" title="Resumo do estoque (tecla E)" style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;border:0.5px solid rgba(0,0,0,0.18);background:#fff;cursor:pointer;font-size:15px;transition:background 0.1s;" onmouseover="this.style.background='#f1efe8'" onmouseout="this.style.background='#fff'">&#x1F5D2;&#xFE0F;</button>
-        <button id="btn-ranking" onclick="abrirRanking()" title="Ranking do estoque" style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;border:0.5px solid rgba(0,0,0,0.18);background:#fff;cursor:pointer;font-size:15px;transition:background 0.1s;" onmouseover="this.style.background='#f1efe8'" onmouseout="this.style.background='#fff'">&#x1F4CA;</button>
+        <button class="modal-btn" onclick="fecharResumo()">Fechar</button>
       </div>
-      <span id="last-update-header" style="font-size:10px;color:#9b9b97;"></span>
     </div>
   </div>
 
-  <div class="stats-row">
-    <div class="stat-card"><div class="num" id="stat-total">--</div><div class="label">Total em estoque</div></div>
-    <div class="stat-card"><div class="num" id="stat-tipos">--</div><div class="label">Sabores c/ estoque</div></div>
-    <div class="stat-card"><div class="num" id="stat-venc">--</div><div class="label">Vencidas / proximas</div></div>
-  </div>
-
-  <div class="legend">
-    <div class="legend-item">&#x1F7E0; Vence em ate 30 dias</div>
-    <div class="legend-item">&#x1F534; Vencida</div>
-    <div class="legend-item">&#x1F4C5; Adicionar com data manual</div>
-    <div class="legend-item" style="margin-left:auto;position:relative;">
-      <input id="busca-input" type="text" placeholder="Buscar marmita..." oninput="filtrarMarmitas(this.value)" style="padding:6px 32px 6px 12px;border:0.5px solid rgba(0,0,0,0.18);border-radius:8px;font-size:13px;font-family:inherit;background:#fff;color:#1a1a18;width:240px;outline:none;" onfocus="this.style.outline='2px solid #1a4fa0'" onblur="this.style.outline='none'" />
-      <button id="busca-clear" onclick="limparBusca()" title="Limpar busca" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:14px;color:#9b9b97;display:none;line-height:1;padding:0;">&#x2715;</button>
+  <div class="modal-overlay" id="ranking-overlay">
+    <div class="modal" style="width:520px;max-height:82vh;display:flex;flex-direction:column;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <h3 style="margin:0;">&#x1F4CA; Ranking do Estoque</h3>
+        <button onclick="fecharRanking()" style="background:none;border:none;cursor:pointer;font-size:18px;color:#6b6b67;padding:2px 6px;">&#x2715;</button>
+      </div>
+      <p style="font-size:12px;color:#6b6b67;margin-bottom:16px;">Marmitas ordenadas por quantidade total (350g + 500g), da maior para a menor.</p>
+      <div id="ranking-conteudo" style="overflow-y:auto;flex:1;"></div>
+      <div style="margin-top:16px;text-align:right;"><button class="modal-btn" onclick="fecharRanking()">Fechar</button></div>
     </div>
   </div>
 
-  <div id="categories-container"></div>
+  <div class="modal-overlay" id="historico-overlay">
+    <div class="modal" style="width:540px;max-height:84vh;display:flex;flex-direction:column;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <h3 style="margin:0;">&#x1F4CB; Hist&#xF3;rico</h3>
+        <button onclick="fecharHistorico()" style="background:none;border:none;cursor:pointer;font-size:18px;color:#6b6b67;padding:2px 6px;">&#x2715;</button>
+      </div>
+      <p style="font-size:12px;color:#6b6b67;margin-bottom:16px;">&#xDA;ltimas 50 altera&#xE7;&#xF5;es. As mais recentes aparecem primeiro.</p>
+      <div id="historico-conteudo" style="overflow-y:auto;flex:1;"></div>
+      <div style="margin-top:16px;display:flex;gap:8px;justify-content:space-between;align-items:center;">
+        <button class="modal-btn" onclick="desfazerUltima()" style="font-size:12px;padding:7px 14px;">&#x21A9; Desfazer &#xFA;ltima a&#xE7;&#xE3;o</button>
+        <button class="modal-btn" onclick="fecharHistorico()">Fechar</button>
+      </div>
+    </div>
+  </div>
 
-  <div class="footer-bar">
-    <span>Verde = no prazo &middot; Laranja = vence em ate 30 dias &middot; Vermelho = vencida</span>
-    <span id="last-update"></span>
+  <div id="loading-overlay" class="loading-overlay">
+    <div class="spinner"></div>
+    <span>Conectando ao estoque...</span>
+  </div>
+
+  <div class="container">
+    <div class="page-header">
+      <div><h1>Estoque de Marmitas</h1></div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;margin-top:6px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="status-dot"><div class="dot" id="status-dot"></div><span id="status-label">Conectando...</span></div>
+          <button onclick="abrirResumo()" title="Resumo (tecla E)" style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;border:0.5px solid rgba(0,0,0,0.18);background:#fff;cursor:pointer;font-size:15px;" onmouseover="this.style.background='#f1efe8'" onmouseout="this.style.background='#fff'">&#x1F5D2;&#xFE0F;</button>
+          <button onclick="abrirRanking()" title="Ranking" style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;border:0.5px solid rgba(0,0,0,0.18);background:#fff;cursor:pointer;font-size:15px;" onmouseover="this.style.background='#f1efe8'" onmouseout="this.style.background='#fff'">&#x1F4CA;</button>
+          <button onclick="exportarBackup()" title="Backup" style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;border:0.5px solid rgba(0,0,0,0.18);background:#fff;cursor:pointer;font-size:15px;" onmouseover="this.style.background='#f1efe8'" onmouseout="this.style.background='#fff'">&#x1F4BE;</button>
+          <button onclick="abrirHistorico()" title="Hist&#xF3;rico" style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;border:0.5px solid rgba(0,0,0,0.18);background:#fff;cursor:pointer;font-size:15px;" onmouseover="this.style.background='#f1efe8'" onmouseout="this.style.background='#fff'">&#x1F4CB;</button>
+        </div>
+        <span id="last-update-header" style="font-size:10px;color:#9b9b97;"></span>
+      </div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="num" id="stat-total">--</div><div class="label">Total em estoque</div></div>
+      <div class="stat-card"><div class="num" id="stat-tipos">--</div><div class="label">Sabores c/ estoque</div></div>
+      <div class="stat-card"><div class="num" id="stat-venc">--</div><div class="label">Vencidas / proximas</div></div>
+    </div>
+    <div class="legend">
+      <div class="legend-item">&#x1F7E0; Vence em ate 30 dias</div>
+      <div class="legend-item">&#x1F534; Vencida</div>
+      <div class="legend-item">&#x1F4C5; Data manual</div>
+      <div class="legend-item" style="margin-left:auto;position:relative;">
+        <input id="busca-input" type="text" placeholder="Buscar marmita..." oninput="filtrarMarmitas(this.value)" style="padding:6px 32px 6px 12px;border:0.5px solid rgba(0,0,0,0.18);border-radius:8px;font-size:13px;font-family:inherit;background:#fff;color:#1a1a18;width:240px;outline:none;" onfocus="this.style.outline='2px solid #1a4fa0'" onblur="this.style.outline='none'" />
+        <button id="busca-clear" onclick="limparBusca()" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:14px;color:#9b9b97;display:none;line-height:1;padding:0;">&#x2715;</button>
+      </div>
+    </div>
+    <div id="categories-container"></div>
+    <div class="footer-bar">
+      <span>Verde = no prazo &middot; Laranja = vence em ate 30 dias &middot; Vermelho = vencida</span>
+      <span id="last-update"></span>
+    </div>
   </div>
 </div>
 
@@ -200,6 +201,9 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script>
+// ══════════════════════════════════════
+// ESTOQUE (Firebase)
+// ══════════════════════════════════════
 var firebaseConfig = {
   apiKey: "AIzaSyAOhA-3CYhTdNAdBiKOpf9f8OtW3CMO674",
   authDomain: "estoque-marmitas.firebaseapp.com",
@@ -209,7 +213,6 @@ var firebaseConfig = {
   messagingSenderId: "667056517335",
   appId: "1:667056517335:web:dd15208ede9b61ddc44092"
 };
-
 firebase.initializeApp(firebaseConfig);
 var db = firebase.database();
 var estoqueRef = db.ref('estoque_v2');
@@ -227,8 +230,7 @@ var CATEGORIAS = [
     'Frango grelhado com creme de milho, arroz, legumes e batata chips',
     'Strogonoff de frango com arroz e batata palha',
     'Frango oriental com arroz chop suey e br\u00F3colis',
-    'Frango \u00E0 milanesa com talharim ao molho ros\u00EA e batatas assadas',
-    'Frango assado com macarrão ao molho branco'
+    'Frango \u00E0 milanesa com talharim ao molho ros\u00EA e batatas assadas'
   ]},
   { emoji: '\uD83E\uDD69', nome: 'Carne bovina', itens: [
     'Carne mo\u00EDda com arroz, feij\u00E3o preto, pur\u00EA de batatas e legumes',
@@ -276,25 +278,10 @@ var syncing = false;
 var modalKey = null;
 var termoAtual = '';
 
-function stateKey(catIdx, itemIdx, tamanho) {
-  return 'c' + catIdx + '_i' + itemIdx + '_' + tamanho;
-}
-
-function todayPlus60() {
-  var d = new Date();
-  d.setDate(d.getDate() + 60);
-  return d.toISOString().slice(0, 10);
-}
-
-function todayStr() {
-  return new Date().toISOString().slice(0, 10);
-}
-
-function formatDate(d) {
-  var p = d.split('-');
-  return p[2] + '/' + p[1] + '/' + p[0];
-}
-
+function stateKey(catIdx, itemIdx, tamanho) { return 'c' + catIdx + '_i' + itemIdx + '_' + tamanho; }
+function todayPlus60() { var d = new Date(); d.setDate(d.getDate() + 60); return d.toISOString().slice(0,10); }
+function todayStr() { return new Date().toISOString().slice(0,10); }
+function formatDate(d) { var p = d.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
 function validityInfo(d) {
   var diff = Math.round((new Date(d) - new Date(todayStr())) / 86400000);
   if (diff < 0)   return { cls: 'val-exp',  suffix: '(vencida)' };
@@ -303,55 +290,38 @@ function validityInfo(d) {
   if (diff <= 30) return { cls: 'val-soon', suffix: '(' + diff + 'd)' };
   return { cls: 'val-ok', suffix: '(' + diff + 'd)' };
 }
-
-function getOldest(datas) {
-  if (!datas || datas.length === 0) return null;
-  return datas.reduce(function(a, b) { return a < b ? a : b; });
-}
-
+function getOldest(datas) { if (!datas || !datas.length) return null; return datas.reduce(function(a,b){return a<b?a:b;}); }
 function renderValidade(datas) {
   var oldest = getOldest(datas);
   if (!oldest) return '<span class="val-empty">--</span>';
   var info = validityInfo(oldest);
-  return '<span class="' + info.cls + '">' + formatDate(oldest) + ' <span class="val-suffix">' + info.suffix + '</span></span>';
+  var count = datas.filter(function(d){ return d === oldest; }).length;
+  return '<span class="' + info.cls + '">' + formatDate(oldest) + ' <span class="val-suffix">' + info.suffix + '</span> <span class="val-suffix">(' + count + 'un)</span></span>';
 }
-
 function renderQty(datas) {
   var qty = datas ? datas.length : 0;
   var cls = qty === 0 ? 'qty-0' : qty <= 3 ? 'qty-low' : 'qty-ok';
   return '<span class="qty-badge ' + cls + '">' + qty + '</span>';
 }
-
 function showToast(msg) {
-  var t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(t._timer);
-  t._timer = setTimeout(function() { t.classList.remove('show'); }, 2600);
+  var t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._timer); t._timer = setTimeout(function(){ t.classList.remove('show'); }, 2600);
 }
-
 function setStatus(status) {
-  var dot = document.getElementById('status-dot');
-  var label = document.getElementById('status-label');
-  if (status === 'online')       { dot.className = 'dot online';  label.textContent = 'Sincronizado'; }
+  var dot = document.getElementById('status-dot'); var label = document.getElementById('status-label');
+  if (status === 'online') { dot.className = 'dot online'; label.textContent = 'Sincronizado'; }
   else if (status === 'syncing') { dot.className = 'dot syncing'; label.textContent = 'Salvando...'; }
-  else                           { dot.className = 'dot';         label.textContent = 'Sem conexao'; }
+  else { dot.className = 'dot'; label.textContent = 'Sem conexao'; }
 }
-
-function openModal(key, descricao) {
+function openModal(key, desc) {
   modalKey = key;
-  document.getElementById('modal-sub').textContent = descricao;
+  document.getElementById('modal-sub').textContent = desc;
   document.getElementById('modal-date').value = todayPlus60();
   document.getElementById('modal-qty').value = 1;
   document.getElementById('modal-overlay').classList.add('open');
-  setTimeout(function() { document.getElementById('modal-date').focus(); }, 100);
+  setTimeout(function(){ document.getElementById('modal-date').focus(); }, 100);
 }
-
-function closeModal() {
-  document.getElementById('modal-overlay').classList.remove('open');
-  modalKey = null;
-}
-
+function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); modalKey = null; }
 function confirmarManual() {
   var dateVal = document.getElementById('modal-date').value;
   var qty = parseInt(document.getElementById('modal-qty').value) || 1;
@@ -359,338 +329,296 @@ function confirmarManual() {
   if (!modalKey) return;
   if (!state[modalKey]) state[modalKey] = [];
   for (var i = 0; i < qty; i++) state[modalKey].push(dateVal);
+  var snapM = (state[modalKey] || []).slice();
+  var descM = '+' + qty + ' manual - ' + nomeDoKey(modalKey) + ' - vence ' + formatDate(dateVal);
+  registrarAcao('manual', descM, modalKey, snapM);
   closeModal();
-  saveState(function() {
-    showToast('+' + qty + ' adicionada(s) - vence em ' + formatDate(dateVal));
-  });
+  saveState(function(){ showToast('+' + qty + ' adicionada(s) - vence em ' + formatDate(dateVal)); });
 }
-
-document.getElementById('modal-overlay').addEventListener('click', function(e) {
-  if (e.target === this) closeModal();
-});
-
+document.getElementById('modal-overlay').addEventListener('click', function(e){ if (e.target === this) closeModal(); });
 function buildBtns(key, dis) {
   var d = dis ? ' disabled' : '';
   return '<td class="center"><button class="btn btn-minus" onclick="_remover(\'' + key + '\')"' + d + '>-</button></td>' +
-         '<td class="center"><button class="btn btn-plus"  onclick="_adicionar(\'' + key + '\')"' + d + '>+</button></td>' +
-         '<td class="center"><button class="btn btn-cal"   onclick="_abrirModal(\'' + key + '\')"' + d + ' title="Data manual">\uD83D\uDCC5</button></td>';
+         '<td class="center"><button class="btn btn-plus" onclick="_adicionar(\'' + key + '\')"' + d + '>+</button></td>' +
+         '<td class="center"><button class="btn btn-cal" onclick="_abrirModal(\'' + key + '\')"' + d + ' title="Data manual">\uD83D\uDCC5</button></td>';
 }
-
 function render() {
   var container = document.getElementById('categories-container');
-  var total = 0, tipos = 0, venc = 0;
-  var today = todayStr();
-  var html = '';
-
+  var total = 0, tipos = 0, venc = 0, today = todayStr(), html = '';
   CATEGORIAS.forEach(function(cat, catIdx) {
-    html += '<div class="category-block">';
-    html += '<div class="category-header"><span class="category-emoji">' + cat.emoji + '</span>' +
-            '<span class="category-name">' + cat.nome + '</span>' +
-            '<span class="category-count">' + cat.itens.length + ' itens</span></div>';
-    html += '<div class="table-wrap">';
-
+    html += '<div class="category-block"><div class="category-header"><span class="category-emoji">' + cat.emoji + '</span><span class="category-name">' + cat.nome + '</span><span class="category-count">' + cat.itens.length + ' itens</span></div><div class="table-wrap">';
     if (cat.fitness) {
       html += '<table><colgroup><col class="c-sabor-fit"><col class="c-qty-fit"><col class="c-minus-fit"><col class="c-plus-fit"><col class="c-cal-fit"><col class="c-val-fit"></colgroup>';
       html += '<thead><tr><th>Sabor</th><th class="center">Qtd</th><th class="center">-</th><th class="center">+</th><th class="center">\uD83D\uDCC5</th><th>Validade mais antiga</th></tr></thead><tbody>';
       cat.itens.forEach(function(item, itemIdx) {
-        var key = stateKey(catIdx, itemIdx, 'fit');
-        var datas = state[key] || [];
-        total += datas.length;
-        if (datas.length > 0) tipos++;
+        var key = stateKey(catIdx, itemIdx, 'fit'); var datas = state[key] || [];
+        total += datas.length; if (datas.length > 0) tipos++;
         var oldest = getOldest(datas);
         if (oldest && (new Date(oldest) - new Date(today)) / 86400000 <= 30) venc++;
-        html += '<tr class="row-fit"><td class="td-sabor">' + item + '</td>' +
-                '<td class="center">' + renderQty(datas) + '</td>' +
-                buildBtns(key, syncing) +
-                '<td>' + renderValidade(datas) + '</td></tr>';
+        html += '<tr class="row-fit"><td class="td-sabor">' + item + '</td><td class="center">' + renderQty(datas) + '</td>' + buildBtns(key, syncing) + '<td>' + renderValidade(datas) + '</td></tr>';
       });
-      html += '</tbody></table>';
     } else {
       html += '<table><colgroup><col class="c-sabor"><col class="c-g"><col class="c-qty"><col class="c-minus"><col class="c-plus"><col class="c-cal"><col class="c-val"></colgroup>';
       html += '<thead><tr><th>Sabor</th><th class="center">Tam.</th><th class="center">Qtd</th><th class="center">-</th><th class="center">+</th><th class="center">\uD83D\uDCC5</th><th>Validade mais antiga</th></tr></thead><tbody>';
       cat.itens.forEach(function(item, itemIdx) {
-        var k350 = stateKey(catIdx, itemIdx, '350');
-        var k500 = stateKey(catIdx, itemIdx, '500');
-        var d350 = state[k350] || [];
-        var d500 = state[k500] || [];
+        var k350 = stateKey(catIdx, itemIdx, '350'), k500 = stateKey(catIdx, itemIdx, '500');
+        var d350 = state[k350] || [], d500 = state[k500] || [];
         total += d350.length + d500.length;
         if (d350.length > 0 || d500.length > 0) tipos++;
-        [d350, d500].forEach(function(d) {
-          var o = getOldest(d);
-          if (o && (new Date(o) - new Date(today)) / 86400000 <= 30) venc++;
-        });
-        html += '<tr class="row-350">' +
-                '<td class="td-sabor" rowspan="2">' + item + '</td>' +
-                '<td class="center"><span class="size-badge badge-350">350g</span></td>' +
-                '<td class="center">' + renderQty(d350) + '</td>' +
-                buildBtns(k350, syncing) +
-                '<td>' + renderValidade(d350) + '</td></tr>';
-        html += '<tr class="row-500">' +
-                '<td class="center"><span class="size-badge badge-500">500g</span></td>' +
-                '<td class="center">' + renderQty(d500) + '</td>' +
-                buildBtns(k500, syncing) +
-                '<td>' + renderValidade(d500) + '</td></tr>';
+        [d350, d500].forEach(function(d){ var o = getOldest(d); if (o && (new Date(o)-new Date(today))/86400000 <= 30) venc++; });
+        html += '<tr class="row-350"><td class="td-sabor" rowspan="2">' + item + '</td><td class="center"><span class="size-badge badge-350">350g</span></td><td class="center">' + renderQty(d350) + '</td>' + buildBtns(k350, syncing) + '<td>' + renderValidade(d350) + '</td></tr>';
+        html += '<tr class="row-500"><td class="center"><span class="size-badge badge-500">500g</span></td><td class="center">' + renderQty(d500) + '</td>' + buildBtns(k500, syncing) + '<td>' + renderValidade(d500) + '</td></tr>';
       });
-      html += '</tbody></table>';
     }
-    html += '</div></div>';
+    html += '</tbody></table></div></div>';
   });
-
-  container.innerHTML = html;
+  document.getElementById('categories-container').innerHTML = html;
   document.getElementById('stat-total').textContent = total;
   document.getElementById('stat-tipos').textContent = tipos;
   document.getElementById('stat-venc').textContent = venc;
   var now = new Date();
-  var updateStr = now.toLocaleDateString('pt-BR') + ' \u00E0s ' +
-    String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
-  document.getElementById('last-update').textContent = 'Atualizado ' + updateStr;
-  var headerUpdate = document.getElementById('last-update-header');
-  if (headerUpdate) headerUpdate.textContent = 'Atualizado ' + updateStr;
-
+  var upd = now.toLocaleDateString('pt-BR') + ' \u00E0s ' + String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+  document.getElementById('last-update').textContent = 'Atualizado ' + upd;
+  var h = document.getElementById('last-update-header'); if (h) h.textContent = 'Atualizado ' + upd;
   if (termoAtual) aplicarFiltro(termoAtual.toLowerCase().trim());
 }
-
 function saveState(cb) {
   syncing = true; setStatus('syncing'); render();
-  estoqueRef.set(state, function(err) {
-    if (err) { showToast('Erro ao salvar. Verifique a conexao.'); setStatus('offline'); }
+  estoqueRef.set(state, function(err){
+    if (err) { showToast('Erro ao salvar.'); setStatus('offline'); }
     else { setStatus('online'); if (cb) cb(); }
     syncing = false; render();
   });
 }
-
 function _adicionar(key) {
   if (syncing) return;
   if (!state[key]) state[key] = [];
   state[key].push(todayPlus60());
   var label = key.indexOf('350') > -1 ? ' (350g)' : key.indexOf('500') > -1 ? ' (500g)' : '';
-  saveState(function() { showToast('+1 adicionada' + label + ' - vence em ' + formatDate(todayPlus60())); });
+  saveState(function(){ showToast('+1 adicionada' + label + ' - vence em ' + formatDate(todayPlus60())); });
 }
-
 function _remover(key) {
   if (syncing) return;
-  if (!state[key] || state[key].length === 0) { showToast('Estoque vazio!'); return; }
-  var oldest = state[key].reduce(function(a,b){ return a<b?a:b; });
+  if (!state[key] || !state[key].length) { showToast('Estoque vazio!'); return; }
+  var snap = state[key].slice();
+  var oldest = state[key].reduce(function(a,b){return a<b?a:b;});
   state[key].splice(state[key].indexOf(oldest), 1);
   var label = key.indexOf('350') > -1 ? ' (350g)' : key.indexOf('500') > -1 ? ' (500g)' : '';
-  saveState(function() { showToast('Removida' + label + ' - validade era ' + formatDate(oldest)); });
+  var desc = '-1 removida' + label + ' - ' + nomeDoKey(key) + ' - validade era ' + formatDate(oldest);
+  registrarAcao('remove', desc, key, snap);
+  saveState(function(){ showToast('Removida' + label + ' - validade era ' + formatDate(oldest)); });
 }
-
 function _abrirModal(key) {
   if (syncing) return;
-  var parts = key.split('_');
-  var catIdx = parseInt(parts[0].replace('c',''));
-  var itemIdx = parseInt(parts[1].replace('i',''));
-  var tam = parts[2];
-  var cat = CATEGORIAS[catIdx];
-  var nome = cat ? cat.itens[itemIdx] : key;
+  var parts = key.split('_'), catIdx = parseInt(parts[0].replace('c','')), itemIdx = parseInt(parts[1].replace('i','')), tam = parts[2];
+  var cat = CATEGORIAS[catIdx], nome = cat ? cat.itens[itemIdx] : key;
   var tamLabel = tam === '350' ? ' - 350g' : tam === '500' ? ' - 500g' : '';
   openModal(key, nome + tamLabel);
 }
-
 function filtrarMarmitas(termo) {
   termoAtual = termo;
-  var clearBtn = document.getElementById('busca-clear');
-  if (clearBtn) clearBtn.style.display = termo ? 'block' : 'none';
+  var cb = document.getElementById('busca-clear'); if (cb) cb.style.display = termo ? 'block' : 'none';
   aplicarFiltro(termo.toLowerCase().trim());
 }
-
 function aplicarFiltro(t) {
-  var blocos = document.querySelectorAll('.category-block');
-  blocos.forEach(function(bloco) {
-    var rows = bloco.querySelectorAll('tbody tr');
-    var algumVisivel = false;
-    var i = 0;
+  document.querySelectorAll('.category-block').forEach(function(bloco){
+    var rows = bloco.querySelectorAll('tbody tr'), algum = false, i = 0;
     while (i < rows.length) {
       var row = rows[i];
       if (row.classList.contains('row-350') || row.classList.contains('row-fit')) {
-        var saborCell = row.querySelector('.td-sabor');
-        var texto = saborCell ? saborCell.textContent.toLowerCase() : '';
-        var visivel = t === '' || texto.includes(t);
-        if (row.classList.contains('row-350') && rows[i+1]) {
-          row.style.display = visivel ? '' : 'none';
-          rows[i+1].style.display = visivel ? '' : 'none';
-          i += 2;
-        } else {
-          row.style.display = visivel ? '' : 'none';
-          i++;
-        }
-        if (visivel) algumVisivel = true;
+        var cell = row.querySelector('.td-sabor'), txt = cell ? cell.textContent.toLowerCase() : '';
+        var vis = t === '' || txt.includes(t);
+        if (row.classList.contains('row-350') && rows[i+1]) { row.style.display = vis?'':'none'; rows[i+1].style.display = vis?'':'none'; i += 2; }
+        else { row.style.display = vis?'':'none'; i++; }
+        if (vis) algum = true;
       } else { i++; }
     }
-    bloco.style.display = (t === '' || algumVisivel) ? '' : 'none';
+    bloco.style.display = (t === '' || algum) ? '' : 'none';
   });
 }
-
 function limparBusca() {
   termoAtual = '';
-  var input = document.getElementById('busca-input');
-  if (input) input.value = '';
-  var clearBtn = document.getElementById('busca-clear');
-  if (clearBtn) clearBtn.style.display = 'none';
+  var inp = document.getElementById('busca-input'); if (inp) inp.value = '';
+  var cb = document.getElementById('busca-clear'); if (cb) cb.style.display = 'none';
   aplicarFiltro('');
 }
-
 function abrirResumo() {
-  var html = '';
-  var temAlgo = false;
-  CATEGORIAS.forEach(function(cat, catIdx) {
-    var linhasCat = '';
-    cat.itens.forEach(function(item, itemIdx) {
+  var html = '', temAlgo = false;
+  CATEGORIAS.forEach(function(cat, catIdx){
+    var bloco = '';
+    cat.itens.forEach(function(item, itemIdx){
       if (cat.fitness) {
-        var key = stateKey(catIdx, itemIdx, 'fit');
-        var qty = (state[key] || []).length;
-        if (qty > 0) {
-          linhasCat += '<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:0.5px solid rgba(0,0,0,0.06);">' +
-            '<span style="font-size:12px;color:#1a1a18;">' + item + '</span>' +
-            '<span style="font-size:12px;font-weight:600;background:#f1efe8;color:#5f5e5a;padding:2px 8px;border-radius:10px;white-space:nowrap;margin-left:12px;">' + qty + ' un</span></div>';
-          temAlgo = true;
-        }
+        var qty = (state[stateKey(catIdx,itemIdx,'fit')]||[]).length;
+        if (qty > 0) { temAlgo = true; bloco += '<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:0.5px solid rgba(0,0,0,0.06);"><span style="font-size:12px;">' + item + '</span><span style="font-size:12px;font-weight:600;background:#f1efe8;color:#5f5e5a;padding:2px 8px;border-radius:10px;margin-left:12px;">' + qty + ' un</span></div>'; }
       } else {
-        var k350 = stateKey(catIdx, itemIdx, '350');
-        var k500 = stateKey(catIdx, itemIdx, '500');
-        var q350 = (state[k350] || []).length;
-        var q500 = (state[k500] || []).length;
+        var q350 = (state[stateKey(catIdx,itemIdx,'350')]||[]).length, q500 = (state[stateKey(catIdx,itemIdx,'500')]||[]).length;
         if (q350 > 0 || q500 > 0) {
-          var badges = '';
-          if (q350 > 0) badges += '<span style="font-size:11px;font-weight:600;background:#e8f0fb;color:#1a4fa0;padding:2px 7px;border-radius:8px;margin-left:6px;">350g: ' + q350 + '</span>';
-          if (q500 > 0) badges += '<span style="font-size:11px;font-weight:600;background:#eaf3de;color:#3b6d11;padding:2px 7px;border-radius:8px;margin-left:6px;">500g: ' + q500 + '</span>';
-          linhasCat += '<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:0.5px solid rgba(0,0,0,0.06);">' +
-            '<span style="font-size:12px;color:#1a1a18;">' + item + '</span>' +
-            '<div style="white-space:nowrap;margin-left:12px;">' + badges + '</div></div>';
           temAlgo = true;
+          var badges = '';
+          if (q350 > 0) badges += '<span style="font-size:11px;font-weight:600;background:#4285F4;color:#fff;padding:2px 7px;border-radius:8px;margin-left:6px;">350g: ' + q350 + '</span>';
+          if (q500 > 0) badges += '<span style="font-size:11px;font-weight:600;background:#34A853;color:#fff;padding:2px 7px;border-radius:8px;margin-left:6px;">500g: ' + q500 + '</span>';
+          bloco += '<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:0.5px solid rgba(0,0,0,0.06);"><span style="font-size:12px;">' + item + '</span><div style="white-space:nowrap;margin-left:12px;">' + badges + '</div></div>';
         }
       }
     });
-    if (linhasCat) {
-      html += '<div style="margin-bottom:14px;">';
-      html += '<div style="font-size:11px;font-weight:600;color:#6b6b67;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;">' + cat.emoji + ' ' + cat.nome + '</div>';
-      html += linhasCat + '</div>';
-    }
+    if (bloco) { html += '<div style="margin-bottom:14px;"><div style="font-size:11px;font-weight:600;color:#6b6b67;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;">' + cat.emoji + ' ' + cat.nome + '</div>' + bloco + '</div>'; }
   });
-  if (!temAlgo) html = '<p style="font-size:13px;color:#9b9b97;text-align:center;padding:24px 0;">Nenhuma marmita em estoque no momento.</p>';
+  if (!temAlgo) html = '<p style="font-size:13px;color:#9b9b97;text-align:center;padding:24px 0;">Nenhuma marmita em estoque.</p>';
   document.getElementById('resumo-conteudo').innerHTML = html;
   document.getElementById('resumo-overlay').classList.add('open');
 }
-
-function fecharResumo() {
-  document.getElementById('resumo-overlay').classList.remove('open');
-}
-
-document.getElementById('resumo-overlay').addEventListener('click', function(e) {
-  if (e.target === this) fecharResumo();
-});
-
+function fecharResumo() { document.getElementById('resumo-overlay').classList.remove('open'); }
+document.getElementById('resumo-overlay').addEventListener('click', function(e){ if (e.target===this) fecharResumo(); });
 function copiarEstoque(tamanho) {
   var linhas = [];
-  CATEGORIAS.forEach(function(cat, catIdx) {
-    cat.itens.forEach(function(item, itemIdx) {
+  CATEGORIAS.forEach(function(cat, catIdx){
+    cat.itens.forEach(function(item, itemIdx){
       var qty = 0;
-      if (cat.fitness) {
-        if (tamanho === 'fit') qty = (state[stateKey(catIdx, itemIdx, 'fit')] || []).length;
-      } else {
-        qty = (state[stateKey(catIdx, itemIdx, tamanho)] || []).length;
-      }
-      if (qty > 0) {
-        var unidade = qty === 1 ? 'unidade' : 'unidades';
-        linhas.push(item + ' - ' + qty + ' ' + unidade);
-      }
+      if (cat.fitness) { if (tamanho==='fit') qty=(state[stateKey(catIdx,itemIdx,'fit')]||[]).length; }
+      else { qty=(state[stateKey(catIdx,itemIdx,tamanho)]||[]).length; }
+      if (qty > 0) { var u = qty===1?'unidade':'unidades'; linhas.push(item + ' - ' + qty + ' ' + u); }
     });
   });
-  if (linhas.length === 0) {
-    showToast('Nenhuma marmita ' + tamanho + 'g no estoque.');
-    return;
-  }
+  if (!linhas.length) { showToast('Nenhuma marmita ' + tamanho + 'g no estoque.'); return; }
   var texto = 'Segue abaixo os sabores que tenho no estoque:\n\n' + linhas.join('\n');
-  navigator.clipboard.writeText(texto).then(function() {
-    var btn = document.getElementById('btn-copiar-' + tamanho);
-    var original = btn.textContent;
-    btn.textContent = 'Copiado!';
-    setTimeout(function() { btn.textContent = original; }, 2000);
-  }).catch(function() {
-    showToast('Erro ao copiar. Tente manualmente.');
-  });
+  navigator.clipboard.writeText(texto).then(function(){
+    var btn = document.getElementById('btn-copiar-' + tamanho), orig = btn.textContent;
+    btn.textContent = 'Copiado!'; setTimeout(function(){ btn.textContent = orig; }, 2000);
+  }).catch(function(){ showToast('Erro ao copiar.'); });
 }
-
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'e' || e.key === 'E') {
-    var active = document.activeElement;
-    var tag = active ? active.tagName : '';
-    if (tag === 'INPUT' || tag === 'TEXTAREA') return;
-    var resumo = document.getElementById('resumo-overlay');
-    if (resumo.classList.contains('open')) fecharResumo();
-    else abrirResumo();
-  }
-  if (e.key === 'Escape') { fecharResumo(); fecharRanking(); closeModal(); }
-});
-
 function abrirRanking() {
   var itens = [];
-  CATEGORIAS.forEach(function(cat, catIdx) {
+  CATEGORIAS.forEach(function(cat, catIdx){
     if (cat.fitness) return;
-    cat.itens.forEach(function(item, itemIdx) {
-      var q350 = (state[stateKey(catIdx, itemIdx, '350')] || []).length;
-      var q500 = (state[stateKey(catIdx, itemIdx, '500')] || []).length;
+    cat.itens.forEach(function(item, itemIdx){
+      var q350 = (state[stateKey(catIdx,itemIdx,'350')]||[]).length, q500 = (state[stateKey(catIdx,itemIdx,'500')]||[]).length;
       var total = q350 + q500;
-      if (total > 0) {
-        itens.push({ nome: item, q350: q350, q500: q500, total: total });
-      }
+      if (total > 0) itens.push({ nome: item, q350: q350, q500: q500, total: total });
     });
   });
-
-  itens.sort(function(a, b) { return b.total - a.total; });
-
+  itens.sort(function(a,b){ return b.total - a.total; });
   var html = '';
-  if (itens.length === 0) {
-    html = '<p style="font-size:13px;color:#9b9b97;text-align:center;padding:24px 0;">Nenhuma marmita em estoque no momento.</p>';
-  } else {
-    itens.forEach(function(item, idx) {
-      var pct350 = item.total > 0 ? Math.round((item.q350 / item.total) * 100) : 0;
-      var pct500 = 100 - pct350;
+  if (!itens.length) { html = '<p style="font-size:13px;color:#9b9b97;text-align:center;padding:24px 0;">Nenhuma marmita em estoque.</p>'; }
+  else {
+    itens.forEach(function(item, idx){
+      var pct350 = item.total > 0 ? Math.round((item.q350/item.total)*100) : 0;
       html += '<div style="padding:10px 0;border-bottom:0.5px solid rgba(0,0,0,0.07);">';
-      // Row 1: rank + nome + total
-      html += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">';
-      html += '<span style="font-size:11px;font-weight:700;color:#9b9b97;min-width:20px;text-align:right;">' + (idx+1) + '</span>';
-      html += '<span style="font-size:13px;font-weight:500;color:#1a1a18;flex:1;">' + item.nome + '</span>';
-      html += '<span style="font-size:13px;font-weight:700;color:#1a1a18;">' + item.total + ' un</span>';
-      html += '</div>';
-      // Row 2: badges + bar
+      html += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;"><span style="font-size:11px;font-weight:700;color:#9b9b97;min-width:20px;text-align:right;">' + (idx+1) + '</span><span style="font-size:13px;font-weight:500;flex:1;">' + item.nome + '</span><span style="font-size:13px;font-weight:700;">' + item.total + ' un</span></div>';
       html += '<div style="display:flex;align-items:center;gap:8px;padding-left:30px;">';
-      if (item.q350 > 0) html += '<span style="font-size:11px;font-weight:600;background:#e8f0fb;color:#1a4fa0;padding:2px 8px;border-radius:8px;white-space:nowrap;">350g: ' + item.q350 + '</span>';
-      if (item.q500 > 0) html += '<span style="font-size:11px;font-weight:600;background:#eaf3de;color:#3b6d11;padding:2px 8px;border-radius:8px;white-space:nowrap;">500g: ' + item.q500 + '</span>';
-      // Progress bar
+      if (item.q350 > 0) html += '<span style="font-size:11px;font-weight:600;background:#4285F4;color:#fff;padding:2px 8px;border-radius:8px;white-space:nowrap;">350g: ' + item.q350 + '</span>';
+      if (item.q500 > 0) html += '<span style="font-size:11px;font-weight:600;background:#34A853;color:#fff;padding:2px 8px;border-radius:8px;white-space:nowrap;">500g: ' + item.q500 + '</span>';
       html += '<div style="flex:1;height:6px;background:#f1efe8;border-radius:3px;overflow:hidden;display:flex;">';
       if (item.q350 > 0) html += '<div style="width:' + pct350 + '%;background:#4285F4;"></div>';
-      if (item.q500 > 0) html += '<div style="width:' + pct500 + '%;background:#34A853;"></div>';
-      html += '</div>';
-      html += '</div>';
-      html += '</div>';
+      if (item.q500 > 0) html += '<div style="width:' + (100-pct350) + '%;background:#34A853;"></div>';
+      html += '</div></div></div>';
     });
   }
-
   document.getElementById('ranking-conteudo').innerHTML = html;
   document.getElementById('ranking-overlay').classList.add('open');
 }
+function fecharRanking() { document.getElementById('ranking-overlay').classList.remove('open'); }
+document.getElementById('ranking-overlay').addEventListener('click', function(e){ if (e.target===this) fecharRanking(); });
+function exportarBackup() {
+  if (!state || !Object.keys(state).length) { showToast('Estoque vazio, nada para exportar.'); return; }
+  var agora = new Date(), dataStr = agora.toLocaleDateString('pt-BR') + ' ' + String(agora.getHours()).padStart(2,'0') + ':' + String(agora.getMinutes()).padStart(2,'0');
+  var linhas = ['BACKUP DO ESTOQUE DE MARMITAS', 'Gerado em: ' + dataStr, ''];
+  CATEGORIAS.forEach(function(cat, catIdx){
+    var bloco = [], tem = false;
+    cat.itens.forEach(function(item, itemIdx){
+      if (cat.fitness) {
+        var d = state[stateKey(catIdx,itemIdx,'fit')] || [];
+        if (d.length) { tem = true; bloco.push('  ' + item); bloco.push('    Qtd: ' + d.length + ' | Validades: ' + d.slice().sort().map(formatDate).join(', ')); }
+      } else {
+        var d350 = state[stateKey(catIdx,itemIdx,'350')]||[], d500 = state[stateKey(catIdx,itemIdx,'500')]||[];
+        if (d350.length || d500.length) { tem = true; bloco.push('  ' + item); if (d350.length) bloco.push('    350g - Qtd: ' + d350.length + ' | Validades: ' + d350.slice().sort().map(formatDate).join(', ')); if (d500.length) bloco.push('    500g - Qtd: ' + d500.length + ' | Validades: ' + d500.slice().sort().map(formatDate).join(', ')); }
+      }
+    });
+    if (tem) { linhas.push(cat.nome.toUpperCase()); linhas = linhas.concat(bloco); linhas.push(''); }
+  });
+  linhas.push('--- DADOS BRUTOS (JSON) ---'); linhas.push(JSON.stringify(state, null, 2));
+  var blob = new Blob([linhas.join('\n')], { type: 'text/plain;charset=utf-8' });
+  var url = URL.createObjectURL(blob), a = document.createElement('a');
+  var nome = 'backup-estoque-' + agora.getFullYear() + '-' + String(agora.getMonth()+1).padStart(2,'0') + '-' + String(agora.getDate()).padStart(2,'0') + '.txt';
+  a.href = url; a.download = nome; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+  showToast('Backup exportado: ' + nome);
+}
+document.addEventListener('keydown', function(e){
+  if (e.key==='e'||e.key==='E') {
+    var tag = document.activeElement ? document.activeElement.tagName : '';
+    if (tag==='INPUT'||tag==='TEXTAREA') return;
+    var r = document.getElementById('resumo-overlay');
+    if (r.classList.contains('open')) fecharResumo(); else abrirResumo();
+  }
+  if (e.key==='Escape') { fecharResumo(); fecharRanking(); fecharHistorico(); closeModal(); }
+});
 
-function fecharRanking() {
-  document.getElementById('ranking-overlay').classList.remove('open');
+var historico = [];
+var undoStack = [];
+
+function registrarAcao(tipo, desc, key, datasAntes) {
+  var agora = new Date();
+  var hora = agora.toLocaleDateString('pt-BR') + ' ' + String(agora.getHours()).padStart(2,'0') + ':' + String(agora.getMinutes()).padStart(2,'0') + ':' + String(agora.getSeconds()).padStart(2,'0');
+  historico.unshift({ tipo: tipo, desc: desc, hora: hora });
+  if (historico.length > 50) historico.pop();
+  undoStack.push({ key: key, datas: datasAntes.slice(), desc: desc });
+  if (undoStack.length > 50) undoStack.shift();
+  try { localStorage.setItem('est_hist', JSON.stringify(historico)); } catch(e) {}
 }
 
-document.getElementById('ranking-overlay').addEventListener('click', function(e) {
-  if (e.target === this) fecharRanking();
-});
+function nomeDoKey(key) {
+  var parts = key.split('_');
+  var cat = CATEGORIAS[parseInt(parts[0].replace('c',''))];
+  var nome = cat ? cat.itens[parseInt(parts[1].replace('i',''))] : key;
+  var tam = parts[2] === '350' ? ' (350g)' : parts[2] === '500' ? ' (500g)' : '';
+  return nome + tam;
+}
 
-estoqueRef.on('value', function(snapshot) {
+function abrirHistorico() {
+  var html = '';
+  if (!historico.length) {
+    html = '<p style="font-size:13px;color:#9b9b97;text-align:center;padding:24px 0;">Nenhuma alteração registrada.</p>';
+  } else {
+    historico.forEach(function(h, idx) {
+      var cor = h.tipo === 'add' ? '#34A853' : h.tipo === 'remove' ? '#4285F4' : '#1a4fa0';
+      var ic = h.tipo === 'add' ? '+' : h.tipo === 'remove' ? '-' : 'D';
+      html += '<div style="display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:0.5px solid rgba(0,0,0,0.06);">';
+      html += '<span style="min-width:22px;height:22px;border-radius:50%;background:' + cor + ';color:#fff;font-size:12px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">' + ic + '</span>';
+      html += '<div style="flex:1;"><div style="font-size:12px;font-weight:500;color:#1a1a18;">' + h.desc + '</div>';
+      html += '<div style="font-size:10px;color:#9b9b97;margin-top:2px;">' + h.hora;
+      if (idx === 0) html += ' <span style="background:#eaf3de;color:#3b6d11;padding:1px 6px;border-radius:6px;font-size:9px;font-weight:600;margin-left:4px;">mais recente</span>';
+      html += '</div></div></div>';
+    });
+  }
+  document.getElementById('historico-conteudo').innerHTML = html;
+  document.getElementById('historico-overlay').classList.add('open');
+}
+
+function fecharHistorico() { document.getElementById('historico-overlay').classList.remove('open'); }
+document.getElementById('historico-overlay').addEventListener('click', function(e){ if (e.target===this) fecharHistorico(); });
+
+function desfazerUltima() {
+  if (!undoStack.length) { showToast('Nada para desfazer.'); return; }
+  var ultimo = undoStack.pop();
+  state[ultimo.key] = ultimo.datas;
+  saveState(function(){
+    historico.unshift({ tipo: 'undo', desc: 'Desfeito: ' + ultimo.desc, hora: new Date().toLocaleString('pt-BR') });
+    try { localStorage.setItem('est_hist', JSON.stringify(historico)); } catch(e) {}
+    showToast('Acao desfeita!');
+    if (document.getElementById('historico-overlay').classList.contains('open')) abrirHistorico();
+  });
+}
+
+estoqueRef.on('value', function(snapshot){
   state = snapshot.val() || {};
   document.getElementById('loading-overlay').style.display = 'none';
-  setStatus('online');
-  render();
-}, function() {
+  setStatus('online'); render();
+}, function(){
   document.getElementById('loading-overlay').style.display = 'none';
-  setStatus('offline');
-  showToast('Erro de conexao com o banco de dados.');
-  render();
+  setStatus('offline'); showToast('Erro de conexao.'); render();
 });
+
+// Init compras
+try { var _h = localStorage.getItem('est_hist'); if (_h) historico = JSON.parse(_h); } catch(e) {}
 </script>
 </body>
 </html>
