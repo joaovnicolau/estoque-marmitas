@@ -78,6 +78,11 @@
     .modal-btn.primary:hover{background:#333}
 
     /* ── TOAST & LOADER ── */
+    .analise-box { margin-top: 16px; padding: 14px; background: var(--bg); border-radius: var(--radius-sm); border: 0.5px solid var(--border); font-size: 13px; color: var(--text); line-height: 1.6; white-space: pre-wrap; }
+    .analise-box.loading { color: var(--text-muted); font-style: italic; }
+    .btn-analise { display: flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; cursor: pointer; border: 0.5px solid var(--border-strong); background: var(--text); color: #fff; font-family: inherit; transition: background 0.1s; }
+    .btn-analise:hover { background: #333; }
+    .btn-analise:disabled { opacity: 0.5; cursor: not-allowed; }
     .toast{position:fixed;bottom:20px;right:20px;background:var(--text);color:#fff;border-radius:var(--radius-sm);padding:9px 16px;font-size:13px;opacity:0;transform:translateY(8px);transition:opacity 0.25s,transform 0.25s;pointer-events:none;z-index:999;max-width:300px}
     .toast.show{opacity:1;transform:translateY(0)}
     .loading-overlay{position:fixed;inset:0;background:rgba(245,244,240,0.88);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;z-index:100;font-size:14px;color:var(--text-muted)}
@@ -129,7 +134,13 @@
       </div>
       <p style="font-size:12px;color:#6b6b67;margin-bottom:16px;">Marmitas ordenadas por quantidade total (350g + 500g), da maior para a menor.</p>
       <div id="ranking-conteudo" style="overflow-y:auto;flex:1;"></div>
-      <div style="margin-top:16px;text-align:right;"><button class="modal-btn" onclick="fecharRanking()">Fechar</button></div>
+      <div style="margin-top:16px;display:flex;flex-direction:column;gap:12px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <button class="btn-analise" id="btn-analise" onclick="analisarEstoque()">&#x2728; Analisar estoque com IA</button>
+          <button class="modal-btn" onclick="fecharRanking()">Fechar</button>
+        </div>
+        <div id="analise-box" style="display:none;" class="analise-box"></div>
+      </div>
     </div>
   </div>
 
@@ -549,7 +560,13 @@ function abrirRanking() {
   document.getElementById('ranking-conteudo').innerHTML = html;
   document.getElementById('ranking-overlay').classList.add('open');
 }
-function fecharRanking() { document.getElementById('ranking-overlay').classList.remove('open'); }
+function fecharRanking() {
+  document.getElementById('ranking-overlay').classList.remove('open');
+  var box = document.getElementById('analise-box');
+  if (box) { box.style.display = 'none'; box.textContent = ''; }
+  var btn = document.getElementById('btn-analise');
+  if (btn) { btn.disabled = false; btn.innerHTML = '&#x2728; Analisar estoque com IA'; }
+}
 document.getElementById('ranking-overlay').addEventListener('click', function(e){ if (e.target===this) fecharRanking(); });
 function exportarBackup() {
   if (!state || !Object.keys(state).length) { showToast('Estoque vazio, nada para exportar.'); return; }
@@ -642,6 +659,81 @@ function desfazerUltima() {
   });
 }
 
+function analisarEstoque() {
+  var btn = document.getElementById('btn-analise');
+  var box = document.getElementById('analise-box');
+  btn.disabled = true;
+  btn.textContent = 'Analisando...';
+  box.style.display = 'block';
+  box.className = 'analise-box loading';
+  box.textContent = 'Gerando analise do estoque...';
+
+  // Monta resumo do estoque para enviar ao Claude
+  var hoje = new Date();
+  var linhas = [];
+  var totalGeral = 0;
+  var vencendoBreve = [];
+  var zerados = [];
+
+  CATEGORIAS.forEach(function(cat, catIdx) {
+    if (cat.fitness) return;
+    cat.itens.forEach(function(item, itemIdx) {
+      var d350 = state[stateKey(catIdx, itemIdx, '350')] || [];
+      var d500 = state[stateKey(catIdx, itemIdx, '500')] || [];
+      var total = d350.length + d500.length;
+      totalGeral += total;
+
+      if (total === 0) {
+        zerados.push(item);
+      } else {
+        linhas.push(item + ': ' + (d350.length > 0 ? d350.length + 'un 350g' : '') + (d350.length > 0 && d500.length > 0 ? ', ' : '') + (d500.length > 0 ? d500.length + 'un 500g' : ''));
+        // Check validades proximas
+        var todasDatas = d350.concat(d500);
+        todasDatas.forEach(function(d) {
+          var diff = Math.round((new Date(d) - hoje) / 86400000);
+          if (diff <= 7 && diff >= 0) {
+            vencendoBreve.push(item + ' (vence em ' + diff + 'd)');
+          }
+        });
+      }
+    });
+  });
+
+  var estoqueTexto = linhas.join('\n');
+  var vencTexto = vencendoBreve.length > 0 ? 'VENCENDO EM ATE 7 DIAS:\n' + vencendoBreve.join('\n') + '\n\n' : '';
+  var zeradosTexto = zerados.length > 0 ? 'SABORES SEM ESTOQUE:\n' + zerados.slice(0,10).join('\n') + '\n\n' : '';
+  var prompt = 'Voce e um assistente de gestao de estoque de delivery de marmitas. ' +
+    'Analise o estoque e forneca insights praticos.\n\n' +
+    'ESTOQUE ATUAL (total: ' + totalGeral + ' marmitas):\n' + estoqueTexto + '\n\n' +
+    vencTexto + zeradosTexto +
+    'Forneca: 1) Resumo geral 2) Alertas de validade/estoque baixo 3) Distribuicao 350g vs 500g 4) Sugestoes de acao. ' +
+    'Seja direto e use linguagem simples. Maximo 200 palavras.';
+
+  fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1000,
+      messages: [{ role: 'user', content: prompt }]
+    })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    var texto = data.content && data.content[0] ? data.content[0].text : 'Nao foi possivel gerar a analise.';
+    box.className = 'analise-box';
+    box.textContent = texto;
+    btn.disabled = false;
+    btn.innerHTML = '&#x2728; Analisar novamente';
+  })
+  .catch(function(err) {
+    box.className = 'analise-box';
+    box.textContent = 'Erro ao conectar com a IA. Tente novamente.';
+    btn.disabled = false;
+    btn.innerHTML = '&#x2728; Tentar novamente';
+  });
+}
+
 estoqueRef.on('value', function(snapshot){
   // So atualiza estado se nao estiver no meio de um salvamento
   if (!syncing) {
@@ -653,6 +745,17 @@ estoqueRef.on('value', function(snapshot){
 }, function(){
   document.getElementById('loading-overlay').style.display = 'none';
   setStatus('offline'); showToast('Erro de conexao.'); render();
+});
+
+// Escuta historico em tempo real
+historicoRef.orderByChild('ts').limitToLast(50).on('value', function(snap) {
+  historico = [];
+  snap.forEach(function(child) { historico.push(child.val()); });
+  historico.reverse(); // mais recente primeiro
+  // Atualiza modal se estiver aberto
+  if (document.getElementById('historico-overlay').classList.contains('open')) {
+    document.getElementById('historico-conteudo').innerHTML = renderHistoricoHTML(historico);
+  }
 });
 
 // Init compras
