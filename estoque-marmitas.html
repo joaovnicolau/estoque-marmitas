@@ -88,14 +88,7 @@
 </head>
 <body>
 
-<!-- TAB BAR -->
-<div class="tab-bar">
-  <span class="tab-bar-title">Marmitas</span>
-  <button class="tab active" onclick="trocarAba('estoque', this)">Estoque</button>
-</div>
-
 <!-- ══════════ ABA ESTOQUE ══════════ -->
-<div id="aba-estoque" class="tab-content active">
 
   <div class="modal-overlay" id="modal-overlay">
     <div class="modal">
@@ -194,7 +187,6 @@
       <span id="last-update"></span>
     </div>
   </div>
-</div>
 
 <div id="toast" class="toast"></div>
 
@@ -216,6 +208,7 @@ var firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 var db = firebase.database();
 var estoqueRef = db.ref('estoque_v2');
+var historicoRef = db.ref('historico_v1');
 
 var CATEGORIAS = [
   { emoji: '\uD83C\uDF57', nome: 'Frango', itens: [
@@ -382,12 +375,52 @@ function render() {
   var h = document.getElementById('last-update-header'); if (h) h.textContent = 'Atualizado ' + upd;
   if (termoAtual) aplicarFiltro(termoAtual.toLowerCase().trim());
 }
+var ultimoTotalConhecido = 0;
+
+function contarTotal(s) {
+  var t = 0;
+  Object.keys(s || {}).forEach(function(k){ var v = s[k]; if (Array.isArray(v)) t += v.length; });
+  return t;
+}
+
 function saveState(cb) {
   syncing = true; setStatus('syncing'); render();
-  estoqueRef.set(state, function(err){
-    if (err) { showToast('Erro ao salvar.'); setStatus('offline'); }
-    else { setStatus('online'); if (cb) cb(); }
-    syncing = false; render();
+  // Antes de salvar, verifica se o Firebase tem dados mais recentes
+  estoqueRef.once('value', function(snapshot) {
+    var remoto = snapshot.val() || {};
+    var totalRemoto = contarTotal(remoto);
+    var totalLocal  = contarTotal(state);
+
+    // Se o remoto tem MAIS marmitas do que o local conhecia antes desta acao,
+    // significa que outro aparelho salvou enquanto este estava aberto
+    if (totalRemoto > ultimoTotalConhecido && totalRemoto > totalLocal) {
+      syncing = false;
+      setStatus('online');
+      // Mostra aviso e pergunta o que fazer
+      var msg = 'Atencao! Outro aparelho atualizou o estoque.\n\nRemoto: ' + totalRemoto + ' marmitas\nLocal: ' + totalLocal + ' marmitas\n\nDeseja usar os dados mais recentes do servidor (recomendado)?';
+      if (confirm(msg)) {
+        // Descarta alteracao local, carrega dados remotos
+        state = remoto;
+        ultimoTotalConhecido = totalRemoto;
+        render();
+        showToast('Dados atualizados do servidor!');
+      } else {
+        // Forcca salvamento local mesmo assim
+        estoqueRef.set(state, function(err){
+          if (err) { showToast('Erro ao salvar.'); setStatus('offline'); }
+          else { setStatus('online'); ultimoTotalConhecido = totalLocal; if (cb) cb(); }
+          render();
+        });
+      }
+      return;
+    }
+
+    // Sem conflito — salva normalmente
+    estoqueRef.set(state, function(err){
+      if (err) { showToast('Erro ao salvar.'); setStatus('offline'); }
+      else { setStatus('online'); ultimoTotalConhecido = totalLocal; if (cb) cb(); }
+      syncing = false; render();
+    });
   });
 }
 function _adicionar(key) {
@@ -600,16 +633,21 @@ function desfazerUltima() {
   if (!undoStack.length) { showToast('Nada para desfazer.'); return; }
   var ultimo = undoStack.pop();
   state[ultimo.key] = ultimo.datas;
+  var agora = new Date();
+  var hora = agora.toLocaleDateString('pt-BR') + ' ' + String(agora.getHours()).padStart(2,'0') + ':' + String(agora.getMinutes()).padStart(2,'00') + ':' + String(agora.getSeconds()).padStart(2,'00');
+  historicoRef.push({ tipo: 'undo', desc: 'Desfeito: ' + ultimo.desc, hora: hora, ts: agora.getTime() });
   saveState(function(){
-    historico.unshift({ tipo: 'undo', desc: 'Desfeito: ' + ultimo.desc, hora: new Date().toLocaleString('pt-BR') });
-    try { localStorage.setItem('est_hist', JSON.stringify(historico)); } catch(e) {}
     showToast('Acao desfeita!');
     if (document.getElementById('historico-overlay').classList.contains('open')) abrirHistorico();
   });
 }
 
 estoqueRef.on('value', function(snapshot){
-  state = snapshot.val() || {};
+  // So atualiza estado se nao estiver no meio de um salvamento
+  if (!syncing) {
+    state = snapshot.val() || {};
+    ultimoTotalConhecido = contarTotal(state);
+  }
   document.getElementById('loading-overlay').style.display = 'none';
   setStatus('online'); render();
 }, function(){
@@ -618,7 +656,6 @@ estoqueRef.on('value', function(snapshot){
 });
 
 // Init compras
-try { var _h = localStorage.getItem('est_hist'); if (_h) historico = JSON.parse(_h); } catch(e) {}
 </script>
 </body>
 </html>
