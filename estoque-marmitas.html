@@ -608,11 +608,11 @@ var undoStack = [];
 function registrarAcao(tipo, desc, key, datasAntes) {
   var agora = new Date();
   var hora = agora.toLocaleDateString('pt-BR') + ' ' + String(agora.getHours()).padStart(2,'0') + ':' + String(agora.getMinutes()).padStart(2,'0') + ':' + String(agora.getSeconds()).padStart(2,'0');
-  historico.unshift({ tipo: tipo, desc: desc, hora: hora });
-  if (historico.length > 50) historico.pop();
+  // Salva no Firebase (fonte unica da verdade)
+  historicoRef.push({ tipo: tipo, desc: desc, hora: hora, ts: agora.getTime() });
+  // Undo stack fica local (nao precisa persistir)
   undoStack.push({ key: key, datas: datasAntes.slice(), desc: desc });
   if (undoStack.length > 50) undoStack.shift();
-  try { localStorage.setItem('est_hist', JSON.stringify(historico)); } catch(e) {}
 }
 
 function nomeDoKey(key) {
