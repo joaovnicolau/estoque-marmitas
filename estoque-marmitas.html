@@ -135,11 +135,11 @@
       <p style="font-size:12px;color:#6b6b67;margin-bottom:16px;">Marmitas ordenadas por quantidade total (350g + 500g), da maior para a menor.</p>
       <div id="ranking-conteudo" style="overflow-y:auto;flex:1;"></div>
       <div style="margin-top:16px;display:flex;flex-direction:column;gap:12px;">
+        <div id="analise-box" class="analise-box" style="display:none;"></div>
         <div style="display:flex;justify-content:space-between;align-items:center;">
-          <button class="btn-analise" id="btn-analise" onclick="analisarEstoque()">&#x2728; Analisar estoque com IA</button>
+          <button class="btn-analise" id="btn-analise" onclick="analisarEstoque()">&#x2728; Analisar novamente</button>
           <button class="modal-btn" onclick="fecharRanking()">Fechar</button>
         </div>
-        <div id="analise-box" style="display:none;" class="analise-box"></div>
       </div>
     </div>
   </div>
@@ -436,10 +436,14 @@ function saveState(cb) {
 }
 function _adicionar(key) {
   if (syncing) return;
+  var snap = (state[key] || []).slice();
   if (!state[key]) state[key] = [];
-  state[key].push(todayPlus60());
+  var validade = todayPlus60();
+  state[key].push(validade);
   var label = key.indexOf('350') > -1 ? ' (350g)' : key.indexOf('500') > -1 ? ' (500g)' : '';
-  saveState(function(){ showToast('+1 adicionada' + label + ' - vence em ' + formatDate(todayPlus60())); });
+  var desc = '+1 adicionada' + label + ' - ' + nomeDoKey(key) + ' - vence ' + formatDate(validade);
+  registrarAcao('add', desc, key, snap);
+  saveState(function(){ showToast('+1 adicionada' + label + ' - vence em ' + formatDate(validade)); });
 }
 function _remover(key) {
   if (syncing) return;
@@ -559,13 +563,15 @@ function abrirRanking() {
   }
   document.getElementById('ranking-conteudo').innerHTML = html;
   document.getElementById('ranking-overlay').classList.add('open');
+  // Inicia analise automaticamente
+  setTimeout(analisarEstoque, 300);
 }
 function fecharRanking() {
   document.getElementById('ranking-overlay').classList.remove('open');
   var box = document.getElementById('analise-box');
   if (box) { box.style.display = 'none'; box.textContent = ''; }
   var btn = document.getElementById('btn-analise');
-  if (btn) { btn.disabled = false; btn.innerHTML = '&#x2728; Analisar estoque com IA'; }
+  if (btn) { btn.disabled = false; btn.innerHTML = '&#x2728; Analisar novamente'; }
 }
 document.getElementById('ranking-overlay').addEventListener('click', function(e){ if (e.target===this) fecharRanking(); });
 function exportarBackup() {
@@ -659,21 +665,10 @@ function desfazerUltima() {
   });
 }
 
-function analisarEstoque() {
-  var btn = document.getElementById('btn-analise');
-  var box = document.getElementById('analise-box');
-  btn.disabled = true;
-  btn.textContent = 'Analisando...';
-  box.style.display = 'block';
-  box.className = 'analise-box loading';
-  box.textContent = 'Gerando analise do estoque...';
-
-  // Monta resumo do estoque para enviar ao Claude
+function montarResumoEstoque() {
   var hoje = new Date();
-  var linhas = [];
-  var totalGeral = 0;
-  var vencendoBreve = [];
-  var zerados = [];
+  var linhas = [], totalGeral = 0, vencendoBreve = [], zerados = [];
+  var total350 = 0, total500 = 0;
 
   CATEGORIAS.forEach(function(cat, catIdx) {
     if (cat.fitness) return;
@@ -682,45 +677,59 @@ function analisarEstoque() {
       var d500 = state[stateKey(catIdx, itemIdx, '500')] || [];
       var total = d350.length + d500.length;
       totalGeral += total;
-
+      total350 += d350.length;
+      total500 += d500.length;
       if (total === 0) {
         zerados.push(item);
       } else {
-        linhas.push(item + ': ' + (d350.length > 0 ? d350.length + 'un 350g' : '') + (d350.length > 0 && d500.length > 0 ? ', ' : '') + (d500.length > 0 ? d500.length + 'un 500g' : ''));
-        // Check validades proximas
-        var todasDatas = d350.concat(d500);
-        todasDatas.forEach(function(d) {
+        var partes = [];
+        if (d350.length > 0) partes.push(d350.length + 'un 350g');
+        if (d500.length > 0) partes.push(d500.length + 'un 500g');
+        linhas.push('- ' + item + ': ' + partes.join(', '));
+        d350.concat(d500).forEach(function(d) {
           var diff = Math.round((new Date(d) - hoje) / 86400000);
-          if (diff <= 7 && diff >= 0) {
-            vencendoBreve.push(item + ' (vence em ' + diff + 'd)');
-          }
+          if (diff <= 7 && diff >= 0) vencendoBreve.push(item + ' (vence em ' + diff + 'd)');
         });
       }
     });
   });
+  return { linhas: linhas, totalGeral: totalGeral, total350: total350, total500: total500, vencendoBreve: vencendoBreve, zerados: zerados };
+}
 
-  var estoqueTexto = linhas.join('\n');
-  var vencTexto = vencendoBreve.length > 0 ? 'VENCENDO EM ATE 7 DIAS:\n' + vencendoBreve.join('\n') + '\n\n' : '';
-  var zeradosTexto = zerados.length > 0 ? 'SABORES SEM ESTOQUE:\n' + zerados.slice(0,10).join('\n') + '\n\n' : '';
+function analisarEstoque() {
+  var btn = document.getElementById('btn-analise');
+  var box = document.getElementById('analise-box');
+  if (!btn || !box) return;
+  btn.disabled = true;
+  btn.textContent = 'Analisando...';
+  box.style.display = 'block';
+  box.className = 'analise-box loading';
+  box.textContent = 'Gerando analise com IA...';
+
+  var r = montarResumoEstoque();
+
+  var vencTexto = r.vencendoBreve.length > 0 ? 'VENCENDO EM ATE 7 DIAS: ' + r.vencendoBreve.join(', ') + '. ' : 'Nenhuma marmita vencendo em 7 dias. ';
+  var zeradosTexto = r.zerados.length > 0 ? 'SEM ESTOQUE: ' + r.zerados.slice(0,8).join(', ') + '. ' : '';
   var prompt = 'Voce e um assistente de gestao de estoque de delivery de marmitas. ' +
-    'Analise o estoque e forneca insights praticos.\n\n' +
-    'ESTOQUE ATUAL (total: ' + totalGeral + ' marmitas):\n' + estoqueTexto + '\n\n' +
-    vencTexto + zeradosTexto +
-    'Forneca: 1) Resumo geral 2) Alertas de validade/estoque baixo 3) Distribuicao 350g vs 500g 4) Sugestoes de acao. ' +
-    'Seja direto e use linguagem simples. Maximo 200 palavras.';
+    'Analise o estoque e forneca insights praticos em portugues.' +
+    ' TOTAL: ' + r.totalGeral + ' marmitas (' + r.total350 + ' de 350g, ' + r.total500 + ' de 500g).' +
+    ' ESTOQUE: ' + r.linhas.join(' | ') +
+    ' ' + vencTexto + zeradosTexto +
+    ' Forneca em topicos curtos: 1) Situacao geral 2) Alertas urgentes 3) Sugestoes praticas.' +
+    ' Seja objetivo, maximo 150 palavras.';
 
-  fetch('https://api.anthropic.com/v1/messages', {
+  fetch('https://analise-estoque.joaovitor-nva.workers.dev/', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       model: 'claude-sonnet-4-20250514',
-      max_tokens: 1000,
+      max_tokens: 500,
       messages: [{ role: 'user', content: prompt }]
     })
   })
   .then(function(r) { return r.json(); })
   .then(function(data) {
-    var texto = data.content && data.content[0] ? data.content[0].text : 'Nao foi possivel gerar a analise.';
+    var texto = (data.content && data.content[0]) ? data.content[0].text : 'Nao foi possivel gerar a analise.';
     box.className = 'analise-box';
     box.textContent = texto;
     btn.disabled = false;
@@ -728,9 +737,10 @@ function analisarEstoque() {
   })
   .catch(function(err) {
     box.className = 'analise-box';
-    box.textContent = 'Erro ao conectar com a IA. Tente novamente.';
+    box.textContent = 'Erro ao conectar. Verifique sua conexao e tente novamente.';
     btn.disabled = false;
     btn.innerHTML = '&#x2728; Tentar novamente';
+    console.error('Analise error:', err);
   });
 }
 
