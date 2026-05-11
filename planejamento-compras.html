@@ -321,6 +321,8 @@ input[type="text"]:focus { border-color: var(--text); }
   <button class="btn-clear" onclick="clearAll()">Limpar tudo</button>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script>
 const DAYS = ['2ª','3ª','4ª','5ª','6ª','Sáb'];
 const UNITS = ['kg','g','L','ml','un','cx','pct','mç'];
@@ -436,11 +438,48 @@ const DATA = [
   ]},
 ];
 
+// ── FIREBASE ──
+const firebaseConfig = {
+  apiKey: "AIzaSyAOhA-3CYhTdNAdBiKOpf9f8OtW3CMO674",
+  authDomain: "estoque-marmitas.firebaseapp.com",
+  databaseURL: "https://estoque-marmitas-default-rtdb.firebaseio.com",
+  projectId: "estoque-marmitas",
+  storageBucket: "estoque-marmitas.firebasestorage.app",
+  messagingSenderId: "667056517335",
+  appId: "1:667056517335:web:dd15208ede9b61ddc44092"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const comprasRef = db.ref('planejamento_compras');
+
 const state = {};
 DATA.forEach(c => c.items.forEach(item => {
   const id = c.cat + '::' + item.name;
   state[id] = { selected: false, qty: '', unit: 'kg', days: [], obs: '' };
 }));
+
+let firebaseReady = false;
+
+// Carrega do Firebase e escuta mudanças em tempo real
+comprasRef.on('value', snap => {
+  const data = snap.val() || {};
+  Object.keys(state).forEach(id => {
+    if (data[id]) {
+      state[id] = { selected: false, qty: '', unit: 'kg', days: [], obs: '', ...data[id] };
+    } else {
+      state[id] = { selected: false, qty: '', unit: 'kg', days: [], obs: '' };
+    }
+  });
+  firebaseReady = true;
+  renderAll();
+  showToast('Sincronizado ✓');
+});
+
+function saveItem(id) {
+  if (!firebaseReady) return;
+  const safeKey = id.replace(/[.#$/[\]]/g, '_');
+  comprasRef.child(safeKey).set(state[id]);
+}
 
 function sid(s) { return s.replace(/[^a-z0-9]/gi,'_'); }
 
@@ -493,13 +532,13 @@ function toggleItem(id) {
   } else {
     cb.classList.remove('checked'); exp.style.display = 'none';
   }
-  updateChip(id); updateStats();
+  updateChip(id); updateStats(); saveItem(id);
 }
 
 function toggleDay(id, day, btn) {
   const idx = state[id].days.indexOf(day);
   idx===-1 ? (state[id].days.push(day), btn.classList.add('active')) : (state[id].days.splice(idx,1), btn.classList.remove('active'));
-  updateChip(id); updateStats();
+  updateChip(id); updateStats(); saveItem(id);
 }
 
 function showToast(msg) {
@@ -509,7 +548,8 @@ function showToast(msg) {
 
 function clearAll() {
   if (!confirm('Limpar todos os itens selecionados?')) return;
-  Object.keys(state).forEach(id=>{ state[id]={selected:false,qty:'',unit:'kg',days:[],obs:''}; });
+  Object.keys(state).forEach(id => { state[id]={selected:false,qty:'',unit:'kg',days:[],obs:''}; });
+  comprasRef.set(null);
   renderAll();
 }
 
@@ -657,9 +697,9 @@ function renderAll() {
       const tdQty = document.createElement('td'); tdQty.className = 'td-qty';
       tdQty.innerHTML = `<div class="qty-wrap">
         <input type="number" min="0" step="0.1" placeholder="0" value="${s.qty}"
-          oninput="state['${id}'].qty=this.value;updateChip('${id}')"
+          oninput="state['${id}'].qty=this.value;updateChip('${id}');saveItem('${id}')"
           onclick="event.stopPropagation()">
-        <select onchange="state['${id}'].unit=this.value;updateChip('${id}')" onclick="event.stopPropagation()">
+        <select onchange="state['${id}'].unit=this.value;updateChip('${id}');saveItem('${id}')" onclick="event.stopPropagation()">
           ${UNITS.map(u=>`<option${s.unit===u?' selected':''}>${u}</option>`).join('')}
         </select>
       </div>`;
@@ -686,7 +726,7 @@ function renderAll() {
       expTd.innerHTML = `<div class="exp-inner">
         <div class="exp-label">Observação</div>
         <input type="text" placeholder="ex: cortar em cubos, fatiar fino..." value="${s.obs}"
-          oninput="state['${id}'].obs=this.value" onclick="event.stopPropagation()">
+          oninput="state['${id}'].obs=this.value;saveItem('${id}')" onclick="event.stopPropagation()">
       </div>`;
       expTr.appendChild(expTd);
 
