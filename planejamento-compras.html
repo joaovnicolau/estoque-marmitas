@@ -286,10 +286,7 @@ input[type="text"]:focus { border-color: var(--text); }
   <div class="page-header">
     <div>
       <h1>Planejamento de Compras</h1>
-      <div style="display:flex;gap:6px;margin-top:8px;">
-        <a href="estoque-marmitas.html" style="display:inline-flex;align-items:center;height:26px;padding:0 12px;font-size:12px;font-weight:500;background:#fff;border:0.5px solid rgba(0,0,0,0.18);border-radius:6px;color:var(--text-muted);text-decoration:none;" onmouseover="this.style.background='#f1efe8'" onmouseout="this.style.background='#fff'">Estoque</a>
-        <span style="display:inline-flex;align-items:center;height:26px;padding:0 12px;font-size:12px;font-weight:600;background:var(--text);color:#fff;border-radius:6px;">Compras</span>
-      </div>
+      <div class="page-subtitle">delivery &middot; marmitas &amp; salgados</div>
     </div>
     <div class="header-right">
       <div class="header-actions">
@@ -302,11 +299,7 @@ input[type="text"]:focus { border-color: var(--text); }
     </div>
   </div>
 
-  <div class="stats-row">
-    <div class="stat-card"><div class="num" id="stat-sel">0</div><div class="label">Itens selecionados</div></div>
-    <div class="stat-card"><div class="num" id="stat-cats">0</div><div class="label">Categorias ativas</div></div>
-    <div class="stat-card"><div class="num" id="stat-days">0</div><div class="label">Dias com entregas</div></div>
-  </div>
+
 
   <div id="cats-container"></div>
 
@@ -321,13 +314,11 @@ input[type="text"]:focus { border-color: var(--text); }
   <button class="btn-clear" onclick="clearAll()">Limpar tudo</button>
 </div>
 
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script>
 const DAYS = ['2ª','3ª','4ª','5ª','6ª','Sáb'];
 const UNITS = ['kg','g','L','ml','un','cx','pct','mç'];
 const DATA = [
-  { cat: 'Proteínas', items: [
+  { cat: 'Proteínas', emoji: '🥩', items: [
     { name: 'Carne 2ª músculo traseiro em cubos', supplier: 'Blu Carnes' },
     { name: 'Paleta sem osso (p/ desfiar)', supplier: 'SOS Alim.' },
     { name: 'Carne moída de 1ª fresca "patinho"', supplier: 'Blu Carnes' },
@@ -341,7 +332,7 @@ const DATA = [
     { name: 'Linguiça calabresa', supplier: '' },
     { name: 'Salsicha (p/ salgados)', supplier: '' },
   ]},
-  { cat: 'Laticínios / Frios', items: [
+  { cat: 'Laticínios / Frios', emoji: '🧀', items: [
     { name: 'Queijo mussarela ralada', supplier: 'SOS Alim.' },
     { name: 'Presunto fatiado', supplier: '' },
     { name: 'Margarina com sal Doriana', supplier: '' },
@@ -351,7 +342,7 @@ const DATA = [
     { name: 'Leite integral', supplier: '' },
     { name: 'Ovo (cartela c/ 30 unidades)', supplier: '' },
   ]},
-  { cat: 'Temperos / Condimentos', items: [
+  { cat: 'Temperos / Condimentos', emoji: '🧄', items: [
     { name: 'Açafrão em pó', supplier: 'SOS Alim.' },
     { name: 'Noz moscada', supplier: '' },
     { name: 'Colorau', supplier: '' },
@@ -371,7 +362,7 @@ const DATA = [
     { name: 'Vinagre de álcool', supplier: '' },
     { name: 'Extrato de tomate', supplier: '' },
   ]},
-  { cat: 'Mercearia', items: [
+  { cat: 'Mercearia', emoji: '🛒', items: [
     { name: 'Arroz branco', supplier: 'SuperA' },
     { name: 'Feijão carioca', supplier: '' },
     { name: 'Feijão preto', supplier: '' },
@@ -400,7 +391,7 @@ const DATA = [
     { name: 'Chocolate em pó 50%', supplier: '' },
     { name: 'Café', supplier: '' },
   ]},
-  { cat: 'Horti-fruti', items: [
+  { cat: 'Horti-fruti', emoji: '🥦', items: [
     { name: 'Abobrinha verde', supplier: 'Atacado da Serra' },
     { name: 'Batata conserva / soutê', supplier: 'Atacado da Serra' },
     { name: 'Batata doce média', supplier: 'Atacado da Serra' },
@@ -422,7 +413,7 @@ const DATA = [
     { name: 'Tomate salada', supplier: 'Atacado da Serra' },
     { name: 'Cebolete', supplier: 'Atacado da Serra' },
   ]},
-  { cat: 'Higiene / Limpeza', items: [
+  { cat: 'Higiene / Limpeza', emoji: '🧹', items: [
     { name: 'Água sanitária', supplier: '' },
     { name: 'Álcool líquido 70%', supplier: '' },
     { name: 'Desengordurante Veja', supplier: '' },
@@ -438,48 +429,11 @@ const DATA = [
   ]},
 ];
 
-// ── FIREBASE ──
-const firebaseConfig = {
-  apiKey: "AIzaSyAOhA-3CYhTdNAdBiKOpf9f8OtW3CMO674",
-  authDomain: "estoque-marmitas.firebaseapp.com",
-  databaseURL: "https://estoque-marmitas-default-rtdb.firebaseio.com",
-  projectId: "estoque-marmitas",
-  storageBucket: "estoque-marmitas.firebasestorage.app",
-  messagingSenderId: "667056517335",
-  appId: "1:667056517335:web:dd15208ede9b61ddc44092"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-const comprasRef = db.ref('planejamento_compras');
-
 const state = {};
 DATA.forEach(c => c.items.forEach(item => {
   const id = c.cat + '::' + item.name;
   state[id] = { selected: false, qty: '', unit: 'kg', days: [], obs: '' };
 }));
-
-let firebaseReady = false;
-
-// Carrega do Firebase e escuta mudanças em tempo real
-comprasRef.on('value', snap => {
-  const data = snap.val() || {};
-  Object.keys(state).forEach(id => {
-    if (data[id]) {
-      state[id] = { selected: false, qty: '', unit: 'kg', days: [], obs: '', ...data[id] };
-    } else {
-      state[id] = { selected: false, qty: '', unit: 'kg', days: [], obs: '' };
-    }
-  });
-  firebaseReady = true;
-  renderAll();
-  showToast('Sincronizado ✓');
-});
-
-function saveItem(id) {
-  if (!firebaseReady) return;
-  const safeKey = id.replace(/[.#$/[\]]/g, '_');
-  comprasRef.child(safeKey).set(state[id]);
-}
 
 function sid(s) { return s.replace(/[^a-z0-9]/gi,'_'); }
 
@@ -532,13 +486,13 @@ function toggleItem(id) {
   } else {
     cb.classList.remove('checked'); exp.style.display = 'none';
   }
-  updateChip(id); updateStats(); saveItem(id);
+  updateChip(id); updateStats();
 }
 
 function toggleDay(id, day, btn) {
   const idx = state[id].days.indexOf(day);
   idx===-1 ? (state[id].days.push(day), btn.classList.add('active')) : (state[id].days.splice(idx,1), btn.classList.remove('active'));
-  updateChip(id); updateStats(); saveItem(id);
+  updateChip(id); updateStats();
 }
 
 function showToast(msg) {
@@ -548,8 +502,7 @@ function showToast(msg) {
 
 function clearAll() {
   if (!confirm('Limpar todos os itens selecionados?')) return;
-  Object.keys(state).forEach(id => { state[id]={selected:false,qty:'',unit:'kg',days:[],obs:''}; });
-  comprasRef.set(null);
+  Object.keys(state).forEach(id=>{ state[id]={selected:false,qty:'',unit:'kg',days:[],obs:''}; });
   renderAll();
 }
 
@@ -559,7 +512,7 @@ function buildText(catName, items) {
   items.forEach(i => {
     t += '• '+i.name;
     if (i.qty) t += ' — '+i.qty+' '+i.unit;
-    if (i.days.length) t += ' ('+i.days.join(', ')+')';
+
     if (i.obs) t += '\n  obs: '+i.obs;
     t += '\n';
   });
@@ -646,10 +599,10 @@ function renderAll() {
     const hdr = document.createElement('div');
     hdr.className = 'category-header';
     hdr.innerHTML = `
-      <span class="category-name">${cat.cat}</span>
+      <span class="category-name">${cat.emoji ? cat.emoji + ' ' : ''}${cat.cat}</span>
       <span class="cat-badge" id="badge-${sid(cat.cat)}"></span>
       <span class="category-count">${cat.items.length} itens</span>
-      <span class="chevron open" id="chev-${sid(cat.cat)}">&#9660;</span>`;
+      <span class="chevron" id="chev-${sid(cat.cat)}">&#9660;</span>`;
     hdr.onclick = () => {
       const tw = document.getElementById('tw-'+sid(cat.cat));
       const ch = document.getElementById('chev-'+sid(cat.cat));
@@ -660,6 +613,7 @@ function renderAll() {
 
     const tw = document.createElement('div');
     tw.className = 'table-wrap'; tw.id = 'tw-'+sid(cat.cat);
+    tw.style.display = 'none';
 
     const table = document.createElement('table');
     const thead = document.createElement('thead');
@@ -697,9 +651,9 @@ function renderAll() {
       const tdQty = document.createElement('td'); tdQty.className = 'td-qty';
       tdQty.innerHTML = `<div class="qty-wrap">
         <input type="number" min="0" step="0.1" placeholder="0" value="${s.qty}"
-          oninput="state['${id}'].qty=this.value;updateChip('${id}');saveItem('${id}')"
+          oninput="state['${id}'].qty=this.value;updateChip('${id}')"
           onclick="event.stopPropagation()">
-        <select onchange="state['${id}'].unit=this.value;updateChip('${id}');saveItem('${id}')" onclick="event.stopPropagation()">
+        <select onchange="state['${id}'].unit=this.value;updateChip('${id}')" onclick="event.stopPropagation()">
           ${UNITS.map(u=>`<option${s.unit===u?' selected':''}>${u}</option>`).join('')}
         </select>
       </div>`;
@@ -726,7 +680,7 @@ function renderAll() {
       expTd.innerHTML = `<div class="exp-inner">
         <div class="exp-label">Observação</div>
         <input type="text" placeholder="ex: cortar em cubos, fatiar fino..." value="${s.obs}"
-          oninput="state['${id}'].obs=this.value;saveItem('${id}')" onclick="event.stopPropagation()">
+          oninput="state['${id}'].obs=this.value" onclick="event.stopPropagation()">
       </div>`;
       expTr.appendChild(expTd);
 
