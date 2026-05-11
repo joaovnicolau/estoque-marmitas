@@ -21,7 +21,7 @@
     body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
     /* ── ESTOQUE ── */
-    .container { max-width: 980px; margin: 0 auto; padding: 24px 16px; }
+    .container { max-width: 980px; margin: 0 auto; }
     .page-header { margin-bottom: 1.5rem; display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
     .page-header h1 { font-size: 22px; font-weight: 600; margin-bottom: 4px; }
     .status-dot { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); white-space: nowrap; }
@@ -39,8 +39,8 @@
     .category-count { font-size: 11px; color: var(--text-muted); margin-left: auto; }
     .table-wrap { overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; }
-    col.c-sabor{width:30%} col.c-g{width:7%} col.c-qty{width:7%} col.c-minus{width:6%} col.c-plus{width:6%} col.c-cal{width:6%} col.c-val{width:38%}
-    col.c-sabor-fit{width:36%} col.c-qty-fit{width:8%} col.c-minus-fit{width:7%} col.c-plus-fit{width:7%} col.c-cal-fit{width:7%} col.c-val-fit{width:35%}
+    col.c-sabor{width:26%} col.c-g{width:10%} col.c-qty{width:9%} col.c-minus{width:7%} col.c-plus{width:7%} col.c-cal{width:7%} col.c-val{width:34%}
+    col.c-sabor-fit{width:32%} col.c-qty-fit{width:10%} col.c-minus-fit{width:8%} col.c-plus-fit{width:8%} col.c-cal-fit{width:8%} col.c-val-fit{width:34%}
     thead th { padding: 8px 10px; font-size: 10px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; background: #fafaf8; border-bottom: 0.5px solid var(--border); text-align: left; }
     thead th.center { text-align: center; }
     tbody tr.row-350 td { border-bottom: 0.5px dashed rgba(0,0,0,0.08); }
@@ -159,6 +159,35 @@
     </div>
   </div>
 
+  <div class="modal-overlay" id="pedido-overlay">
+    <div class="modal" style="width:560px;max-height:88vh;display:flex;flex-direction:column;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <h3 style="margin:0;">&#x1F6D2; Verificar Pedido</h3>
+        <button onclick="fecharPedido()" style="background:none;border:none;cursor:pointer;font-size:18px;color:#6b6b67;padding:2px 6px;">&#x2715;</button>
+      </div>
+
+
+      <div style="margin-bottom:12px;">
+        <label style="font-size:11px;font-weight:600;color:#6b6b67;text-transform:uppercase;letter-spacing:0.04em;display:block;margin-bottom:8px;">Verificar no estoque de:</label>
+        <div style="display:flex;gap:8px;">
+          <button id="btn-tam-350" onclick="selecionarTam('350')" style="flex:1;padding:8px;border-radius:8px;border:2px solid #4285F4;background:#4285F4;color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s;">350g</button>
+          <button id="btn-tam-500" onclick="selecionarTam('500')" style="flex:1;padding:8px;border-radius:8px;border:2px solid rgba(0,0,0,0.18);background:#fff;color:#6b6b67;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s;">500g</button>
+        </div>
+      </div>
+
+      <textarea id="pedido-input" placeholder="Cole o pedido aqui. Exemplo:&#10;2 Frango grelhado com arroz, feijao, batata doce e legumes&#10;2 Frango oriental com arroz chop suey e brocolis&#10;- Strogonoff de frango com arroz e batata palha&#10;- Panqueca recheada com legumes..." style="width:100%;height:130px;padding:10px;border:0.5px solid rgba(0,0,0,0.18);border-radius:8px;font-size:13px;font-family:inherit;background:#f5f4f0;color:#1a1a18;resize:none;outline:none;margin-bottom:12px;"></textarea>
+
+      <div style="display:flex;gap:8px;margin-bottom:14px;">
+        <button class="modal-btn primary" onclick="verificarPedido()" style="flex:1;">&#x1F50D; Verificar estoque</button>
+        <button class="modal-btn" onclick="document.getElementById('pedido-input').value='';document.getElementById('pedido-resultado').innerHTML='';">Limpar</button>
+      </div>
+      <div id="pedido-resultado" style="overflow-y:auto;flex:1;"></div>
+      <div style="margin-top:14px;text-align:right;">
+        <button class="modal-btn" onclick="fecharPedido()">Fechar</button>
+      </div>
+    </div>
+  </div>
+
   <div id="loading-overlay" class="loading-overlay">
     <div class="spinner"></div>
     <span>Conectando ao estoque...</span>
@@ -166,13 +195,7 @@
 
   <div class="container">
     <div class="page-header">
-      <div>
-        <h1>Estoque de Marmitas</h1>
-        <div style="display:flex;gap:6px;margin-top:8px;">
-          <span style="display:inline-flex;align-items:center;height:26px;padding:0 12px;font-size:12px;font-weight:600;background:var(--text);color:#fff;border-radius:6px;">Estoque</span>
-          <a href="planejamento-compras.html" style="display:inline-flex;align-items:center;height:26px;padding:0 12px;font-size:12px;font-weight:500;background:#fff;border:0.5px solid rgba(0,0,0,0.18);border-radius:6px;color:var(--text-muted);text-decoration:none;" onmouseover="this.style.background='#f1efe8'" onmouseout="this.style.background='#fff'">Compras</a>
-        </div>
-      </div>
+      <div><h1>Estoque de Marmitas</h1></div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;margin-top:6px;">
         <div style="display:flex;align-items:center;gap:8px;">
           <div class="status-dot"><div class="dot" id="status-dot"></div><span id="status-label">Conectando...</span></div>
@@ -180,6 +203,7 @@
           <button onclick="abrirRanking()" title="Ranking" style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;border:0.5px solid rgba(0,0,0,0.18);background:#fff;cursor:pointer;font-size:15px;" onmouseover="this.style.background='#f1efe8'" onmouseout="this.style.background='#fff'">&#x1F4CA;</button>
           <button onclick="exportarBackup()" title="Backup" style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;border:0.5px solid rgba(0,0,0,0.18);background:#fff;cursor:pointer;font-size:15px;" onmouseover="this.style.background='#f1efe8'" onmouseout="this.style.background='#fff'">&#x1F4BE;</button>
           <button onclick="abrirHistorico()" title="Hist&#xF3;rico" style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;border:0.5px solid rgba(0,0,0,0.18);background:#fff;cursor:pointer;font-size:15px;" onmouseover="this.style.background='#f1efe8'" onmouseout="this.style.background='#fff'">&#x1F4CB;</button>
+          <button onclick="abrirPedido()" title="Verificar pedido" style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;border:0.5px solid rgba(0,0,0,0.18);background:#fff;cursor:pointer;font-size:15px;" onmouseover="this.style.background='#f1efe8'" onmouseout="this.style.background='#fff'">&#x1F6D2;</button>
         </div>
         <span id="last-update-header" style="font-size:10px;color:#9b9b97;"></span>
       </div>
@@ -195,7 +219,7 @@
       <div class="legend-item">&#x1F4C5; Data manual</div>
       <div class="legend-item" style="margin-left:auto;position:relative;">
         <input id="busca-input" type="text" placeholder="Buscar marmita..." oninput="filtrarMarmitas(this.value)" style="padding:6px 32px 6px 12px;border:0.5px solid rgba(0,0,0,0.18);border-radius:8px;font-size:13px;font-family:inherit;background:#fff;color:#1a1a18;width:240px;outline:none;" onfocus="this.style.outline='2px solid #1a4fa0'" onblur="this.style.outline='none'" />
-        <button id="busca-clear" onclick="limparBusca()" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:14px;color:#9b9b97;display:none;line-height:1;padding:0;">&#x2715;</button>
+        <button id="busca-clear" onclick="limparBusca()" style="position:absolute;right:6px;top:50%;transform:translateY(-50%);background:#e8e6e0;border:none;cursor:pointer;font-size:12px;color:#6b6b67;display:none;line-height:1;padding:3px 6px;z-index:10;border-radius:10px;font-weight:600;">&#x2715;</button>
       </div>
     </div>
     <div id="categories-container"></div>
@@ -240,7 +264,8 @@ var CATEGORIAS = [
     'Frango grelhado com creme de milho, arroz, legumes e batata chips',
     'Strogonoff de frango com arroz e batata palha',
     'Frango oriental com arroz chop suey e br\u00F3colis',
-    'Frango \u00E0 milanesa com talharim ao molho ros\u00EA e batatas assadas'
+    'Frango \u00E0 milanesa com talharim ao molho ros\u00EA e batatas assadas',
+    'Frango assado com macarr\u00E3o penne ao molho branco e batatas r\u00FAsticas'
   ]},
   { emoji: '\uD83E\uDD69', nome: 'Carne bovina', itens: [
     'Carne mo\u00EDda com arroz, feij\u00E3o preto, pur\u00EA de batatas e legumes',
@@ -248,7 +273,7 @@ var CATEGORIAS = [
     'Carne de panela com mandioca, arroz, feij\u00E3o preto, legumes e farofa',
     'Carne de panela desfiada com arroz, batatas assadas e farofa',
     'Carne desfiada com arroz, farofa e batata assada (sem legumes)',
-    'Carne desfiada com macarr\u00E3o penne, molho de tomate e batatas assadas',
+    'Carne desfiada com macarro\u00E3o penne, molho de tomate e batatas assadas',
     'Strogonoff de carne com arroz e batata palha',
     'Alm\u00F4ndega com espaguete, molho de tomate e legumes',
     'Alm\u00F4ndega com arroz, feij\u00E3o carioca, pur\u00EA e legumes',
@@ -288,7 +313,26 @@ var syncing = false;
 var modalKey = null;
 var termoAtual = '';
 
-function stateKey(catIdx, itemIdx, tamanho) { return 'c' + catIdx + '_i' + itemIdx + '_' + tamanho; }
+function slugify(str) {
+  // Converte nome em chave segura para Firebase
+  return str.toLowerCase()
+    .replace(/[^a-z0-9]/g, '_')
+    .replace(/_+/g, '_')
+    .replace(/^_|_$/g, '')
+    .substring(0, 80);
+}
+
+function stateKey(catIdx, itemIdx, tamanho) {
+  // Nova chave baseada no nome (evita problema de indice)
+  var cat = CATEGORIAS[catIdx];
+  if (!cat || !cat.itens[itemIdx]) return 'c' + catIdx + '_i' + itemIdx + '_' + tamanho;
+  return 'n_' + slugify(cat.itens[itemIdx]) + '_' + tamanho;
+}
+
+function stateKeyLegacy(catIdx, itemIdx, tamanho) {
+  // Chave antiga por indice (usada so na migracao)
+  return 'c' + catIdx + '_i' + itemIdx + '_' + tamanho;
+}
 function todayPlus60() { var d = new Date(); d.setDate(d.getDate() + 60); return d.toISOString().slice(0,10); }
 function todayStr() { return new Date().toISOString().slice(0,10); }
 function formatDate(d) { var p = d.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
@@ -492,8 +536,10 @@ function aplicarFiltro(t) {
 }
 function limparBusca() {
   termoAtual = '';
-  var inp = document.getElementById('busca-input'); if (inp) inp.value = '';
-  var cb = document.getElementById('busca-clear'); if (cb) cb.style.display = 'none';
+  var inp = document.getElementById('busca-input');
+  if (inp) { inp.value = ''; inp.focus(); }
+  var cb = document.getElementById('busca-clear');
+  if (cb) cb.style.display = 'none';
   aplicarFiltro('');
 }
 function abrirResumo() {
@@ -611,7 +657,7 @@ document.addEventListener('keydown', function(e){
     var r = document.getElementById('resumo-overlay');
     if (r.classList.contains('open')) fecharResumo(); else abrirResumo();
   }
-  if (e.key==='Escape') { fecharResumo(); fecharRanking(); fecharHistorico(); closeModal(); }
+  if (e.key==='Escape') { fecharResumo(); fecharRanking(); fecharHistorico(); fecharPedido(); closeModal(); }
 });
 
 var historico = [];
@@ -750,11 +796,193 @@ function analisarEstoque() {
   });
 }
 
+var tamPedido = '350';
+
+function selecionarTam(t) {
+  tamPedido = t;
+  var b350 = document.getElementById('btn-tam-350');
+  var b500 = document.getElementById('btn-tam-500');
+  if (t === '350') {
+    b350.style.background = '#4285F4'; b350.style.color = '#fff'; b350.style.borderColor = '#4285F4';
+    b500.style.background = '#fff'; b500.style.color = '#6b6b67'; b500.style.borderColor = 'rgba(0,0,0,0.18)';
+  } else {
+    b500.style.background = '#34A853'; b500.style.color = '#fff'; b500.style.borderColor = '#34A853';
+    b350.style.background = '#fff'; b350.style.color = '#6b6b67'; b350.style.borderColor = 'rgba(0,0,0,0.18)';
+  }
+}
+
+function abrirPedido() {
+  document.getElementById('pedido-overlay').classList.add('open');
+  selecionarTam('350');
+  setTimeout(function(){ document.getElementById('pedido-input').focus(); }, 100);
+}
+function fecharPedido() {
+  document.getElementById('pedido-overlay').classList.remove('open');
+}
+document.getElementById('pedido-overlay').addEventListener('click', function(e){ if(e.target===this) fecharPedido(); });
+
+function parsearLinhaPedido(linha) {
+  var l = linha.trim();
+  if (!l) return null;
+  var qtd = null;
+  var nome = l;
+  // Formato: "2 Nome do prato" ou "- Nome do prato"
+  var matchNum = l.match(/^(\d+)\s+(.+)$/);
+  var matchTraco = l.match(/^[-]\s*(.+)$/);
+  if (matchNum) {
+    qtd = parseInt(matchNum[1]);
+    nome = matchNum[2];
+  } else if (matchTraco) {
+    qtd = null;
+    nome = matchTraco[1];
+  }
+  return { qtd: qtd, nome: nome.trim() };
+}
+
+function buscarNoEstoque(nomeBusca, tam) {
+  var busca = nomeBusca.toLowerCase();
+  // Remove prefixos numericos e tracos
+  busca = busca.replace(/^[\d\-\s]+/, '').trim();
+  var palavras = busca.split(' ').filter(function(p){ return p.length > 2; });
+  if (!palavras.length) return [];
+
+  var candidatos = [];
+  CATEGORIAS.forEach(function(cat, catIdx) {
+    if (cat.fitness) return;
+    cat.itens.forEach(function(item, itemIdx) {
+      var nomeItem = item.toLowerCase();
+      // Conta quantas palavras batem
+      var acertos = palavras.filter(function(p){ return nomeItem.indexOf(p) > -1; }).length;
+      var score = acertos / palavras.length;
+      // Aceita se pelo menos 50% das palavras batem
+      if (score >= 0.5) {
+        var qty = (state[stateKey(catIdx, itemIdx, tam)] || []).length;
+        candidatos.push({ nome: item, qty: qty, score: score });
+      }
+    });
+  });
+
+  // Retorna apenas o melhor resultado
+  if (!candidatos.length) return [];
+  candidatos.sort(function(a, b){ return b.score - a.score; });
+  return [candidatos[0]];
+}
+
+function verificarPedido() {
+  var input = document.getElementById('pedido-input').value.trim();
+  var resultado = document.getElementById('pedido-resultado');
+  if (!input) { resultado.innerHTML = '<p style="font-size:13px;color:#9b9b97;">Cole o pedido acima.</p>'; return; }
+
+  var linhas = input.split('\n').filter(function(l){ return l.trim(); });
+  var html = '';
+  var totalPedido = 0, totalOk = 0, totalFalta = 0;
+
+  linhas.forEach(function(linha) {
+    var parsed = parsearLinhaPedido(linha);
+    if (!parsed) return;
+
+    var encontrados = buscarNoEstoque(parsed.nome, tamPedido);
+    var qtdPedida = parsed.qtd;
+    var estoqueDisponivel = encontrados.length > 0 ? encontrados[0].qty : 0;
+    var nomeExibir = encontrados.length > 0 ? encontrados[0].nome : parsed.nome;
+
+    if (qtdPedida !== null) totalPedido += qtdPedida;
+
+    var temNoEstoque = estoqueDisponivel > 0;
+    var suficiente = qtdPedida === null ? temNoEstoque : estoqueDisponivel >= qtdPedida;
+
+    if (suficiente) totalOk++;
+    else totalFalta++;
+
+    var bgCor = suficiente ? '#f0faf3' : '#fdf0f0';
+    var bordaCor = suficiente ? '#34A853' : '#EA4335';
+    var tamCor = tamPedido === '350' ? '#4285F4' : '#34A853';
+
+    html += '<div style="padding:10px 12px;margin-bottom:6px;border-radius:8px;background:' + bgCor + ';border-left:3px solid ' + bordaCor + ';">';
+    html += '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">';
+    html += '<div style="flex:1;">';
+
+    // Nome + tamanho
+    html += '<div style="font-size:12px;font-weight:600;color:#1a1a18;margin-bottom:4px;">';
+    if (qtdPedida !== null) html += '<span style="background:#1a1a18;color:#fff;padding:1px 7px;border-radius:6px;font-size:11px;margin-right:6px;">' + qtdPedida + 'x</span>';
+    html += nomeExibir + '</div>';
+
+    // Status
+    if (encontrados.length === 0) {
+      html += '<div style="font-size:11px;color:#a32d2d;">&#x274C; Não encontrada no cardápio</div>';
+    } else if (!temNoEstoque) {
+      html += '<div style="font-size:11px;color:#a32d2d;">&#x274C; Sem estoque de ' + tamPedido + 'g</div>';
+    } else if (!suficiente) {
+      html += '<div style="font-size:11px;color:#854f0b;">&#x26A0;&#xFE0F; Estoque insuficiente: ' + estoqueDisponivel + 'un no estoque, pedido pede ' + qtdPedida + '</div>';
+    } else {
+      html += '<div style="font-size:11px;color:#3b6d11;">&#x2705; Disponível: ' + estoqueDisponivel + 'un no estoque</div>';
+    }
+    html += '</div>';
+
+    // Badge tamanho + qtd estoque
+    html += '<div style="text-align:right;flex-shrink:0;">';
+    html += '<span style="background:' + tamCor + ';color:#fff;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700;">' + tamPedido + 'g</span>';
+    if (temNoEstoque) html += '<div style="font-size:11px;color:#6b6b67;margin-top:3px;">' + estoqueDisponivel + ' em estoque</div>';
+    html += '</div>';
+    html += '</div></div>';
+  });
+
+  // Summary
+  var summaryHtml = '<div style="padding:10px 12px;background:#f5f4f0;border-radius:8px;margin-bottom:12px;display:flex;gap:16px;flex-wrap:wrap;">';
+  if (totalPedido > 0) summaryHtml += '<span style="font-size:12px;color:#1a1a18;font-weight:600;">Pedido: ' + totalPedido + ' marmitas</span>';
+  summaryHtml += '<span style="font-size:12px;color:#3b6d11;font-weight:600;">&#x2705; ' + totalOk + ' Ok</span>';
+  if (totalFalta > 0) summaryHtml += '<span style="font-size:12px;color:#a32d2d;font-weight:600;">&#x274C; ' + totalFalta + ' Sem estoque</span>';
+  summaryHtml += '</div>';
+
+  resultado.innerHTML = summaryHtml + html;
+}
+
+function migrarParaNomeChave(dadosAntigos) {
+  // Verifica se ja foi migrado (chaves novas comecam com 'n_')
+  var temChaveNova = Object.keys(dadosAntigos).some(function(k){ return k.indexOf('n_') === 0; });
+  var temChaveAntiga = Object.keys(dadosAntigos).some(function(k){ return k.indexOf('c') === 0 && k.indexOf('_i') > -1; });
+
+  if (!temChaveAntiga || temChaveNova) return null; // ja migrado ou nada para migrar
+
+  console.log('Migrando estoque para chaves por nome...');
+  var novoState = {};
+
+  CATEGORIAS.forEach(function(cat, catIdx) {
+    cat.itens.forEach(function(item, itemIdx) {
+      ['350', '500', 'fit'].forEach(function(tam) {
+        var keyAntiga = stateKeyLegacy(catIdx, itemIdx, tam);
+        var keyNova = stateKey(catIdx, itemIdx, tam);
+        if (dadosAntigos[keyAntiga] && dadosAntigos[keyAntiga].length > 0) {
+          novoState[keyNova] = dadosAntigos[keyAntiga];
+        }
+      });
+    });
+  });
+
+  return novoState;
+}
+
 estoqueRef.on('value', function(snapshot){
-  // So atualiza estado se nao estiver no meio de um salvamento
   if (!syncing) {
-    state = snapshot.val() || {};
-    ultimoTotalConhecido = contarTotal(state);
+    var dados = snapshot.val() || {};
+
+    // Verifica se precisa migrar para chaves por nome
+    var novoState = migrarParaNomeChave(dados);
+    if (novoState !== null) {
+      // Salva dados migrados no Firebase e continua
+      console.log('Salvando estoque migrado...');
+      estoqueRef.set(novoState, function(err) {
+        if (!err) {
+          state = novoState;
+          ultimoTotalConhecido = contarTotal(state);
+          showToast('Estoque atualizado para novo formato!');
+          render();
+        }
+      });
+    } else {
+      state = dados;
+      ultimoTotalConhecido = contarTotal(state);
+    }
   }
   document.getElementById('loading-overlay').style.display = 'none';
   setStatus('online'); render();

@@ -286,6 +286,18 @@ input[type="text"]:focus { border-color: var(--text); }
 }
 .btn-top.visible { display: flex; }
 .btn-top:hover { background: #333; }
+.btn-cart {
+  position: fixed; bottom: 106px; right: 16px;
+  width: 38px; height: 38px;
+  background: var(--text); border: none;
+  border-radius: 50%; cursor: pointer;
+  display: none; align-items: center; justify-content: center;
+  font-size: 17px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+  transition: background 0.1s; z-index: 98;
+}
+.btn-cart.visible { display: flex; }
+.btn-cart:hover { background: #333; }
 
 /* TOAST */
 .toast {
@@ -782,12 +794,96 @@ function renderAll() {
 
 renderAll();
 </script>
+<!-- MODAL CARRINHO -->
+<div class="modal-overlay" id="cart-overlay" onclick="if(event.target===this)document.getElementById('cart-overlay').classList.remove('open')">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Resumo da semana</h3>
+      <button class="modal-close" onclick="document.getElementById('cart-overlay').classList.remove('open')">&#x2715;</button>
+    </div>
+    <div class="modal-body" id="cart-body"></div>
+    <div class="modal-footer">
+      <button class="modal-btn" onclick="document.getElementById('cart-overlay').classList.remove('open')">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<button class="btn-cart" id="btn-cart" onclick="openCart()" title="Ver resumo">🛒</button>
 <button class="btn-top" id="btn-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Voltar ao topo">&#8679;</button>
 
 <script>
 window.addEventListener('scroll', () => {
-  document.getElementById('btn-top').classList.toggle('visible', window.scrollY > 300);
+  const vis = window.scrollY > 300;
+  document.getElementById('btn-top').classList.toggle('visible', vis);
+  document.getElementById('btn-cart').classList.toggle('visible', vis);
 });
+
+function openCart() {
+  const body = document.getElementById('cart-body');
+  const allItems = [];
+  DATA.forEach(c => {
+    c.items.forEach(item => {
+      const id = c.cat+'::'+item.name;
+      const s = state[id];
+      if (s.selected) allItems.push({...item, ...s, cat: c.cat, emoji: c.emoji});
+    });
+  });
+
+  if (!allItems.length) {
+    body.innerHTML = '<div class="modal-empty">Nenhum item selecionado ainda.</div>';
+    document.getElementById('cart-overlay').classList.add('open');
+    return;
+  }
+
+  const DAY_LABELS = {'2ª':'2ª feira','3ª':'3ª feira','4ª':'4ª feira','5ª':'5ª feira','6ª':'6ª feira','Sáb':'Sábado'};
+  const semDia = allItems.filter(i => !i.days || i.days.length === 0);
+
+  const diasHtml = DAYS.map(dia => {
+    const itensDia = allItems.filter(i => i.days && i.days.includes(dia));
+    if (!itensDia.length) return '';
+    return `
+      <div class="summ-day-block">
+        <div class="summ-day-title">${DAY_LABELS[dia]}</div>
+        ${itensDia.map(item => `
+          <div class="summ-item">
+            <div class="summ-item-left">
+              <span class="summ-cat-tag">${item.emoji || ''}</span>
+              <div>
+                <div class="summ-item-name">${item.name}</div>
+                ${item.obs ? `<div class="summ-item-obs">${item.obs}</div>` : ''}
+              </div>
+            </div>
+            <span class="summ-item-qty${item.qty ? '' : ' no-qty'}">${item.qty ? item.qty+' '+item.unit : 'sem qtd'}</span>
+          </div>`).join('')}
+      </div>`;
+  }).join('');
+
+  const semDiaHtml = semDia.length ? `
+    <div class="summ-day-block">
+      <div class="summ-day-title" style="color:var(--amber-text);background:var(--amber-bg);">Sem dia definido</div>
+      ${semDia.map(item => `
+        <div class="summ-item">
+          <div class="summ-item-left">
+            <span class="summ-cat-tag">${item.emoji || ''}</span>
+            <div>
+              <div class="summ-item-name">${item.name}</div>
+              ${item.obs ? `<div class="summ-item-obs">${item.obs}</div>` : ''}
+            </div>
+          </div>
+          <span class="summ-item-qty${item.qty ? '' : ' no-qty'}">${item.qty ? item.qty+' '+item.unit : 'sem qtd'}</span>
+        </div>`).join('')}
+    </div>` : '';
+
+  const activeDays = DAYS.filter(d => allItems.some(i => i.days && i.days.includes(d))).length;
+  body.innerHTML = `
+    <div class="summ-header-info">
+      <span>${allItems.length} ${allItems.length===1?'item':'itens'} selecionados</span>
+      <span>${activeDays} ${activeDays===1?'dia':'dias'} com entregas</span>
+    </div>
+    ${diasHtml}${semDiaHtml}`;
+
+  document.getElementById('cart-overlay').classList.add('open');
+}
 </script>
 </body>
 </html>
