@@ -102,8 +102,8 @@ td.td-name:hover .item-name { color: #3b6d11; }
   background: var(--green-bg); color: var(--green-text);
   border-radius: 20px; padding: 1px 8px;
 }
-td.td-qty { width: 170px; padding: 8px 10px; }
-td.td-days { width: 230px; padding: 8px 10px; }
+td.td-qty { width: 150px; padding: 8px 10px; vertical-align: top; padding-top: 12px; }
+.item-days-wrap { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 8px; }
 
 .qty-wrap { display: flex; align-items: center; gap: 5px; }
 input[type="number"] {
@@ -154,15 +154,15 @@ input[type="text"]:focus { border-color: var(--text); }
 /* MODAL */
 .modal-overlay {
   position: fixed; inset: 0; background: rgba(0,0,0,0.4);
-  display: flex; align-items: flex-end; justify-content: center;
+  display: flex; align-items: center; justify-content: center;
   z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.2s;
 }
 .modal-overlay.open { opacity: 1; pointer-events: all; }
 .modal {
-  background: var(--surface); border-radius: var(--radius) var(--radius) 0 0;
-  width: 100%; max-width: 680px; max-height: 82vh;
+  background: var(--surface); border-radius: var(--radius);
+  width: calc(100% - 32px); max-width: 680px; max-height: 88vh;
   display: flex; flex-direction: column;
-  transform: translateY(24px); transition: transform 0.25s;
+  transform: translateY(16px); transition: transform 0.25s;
 }
 .modal-overlay.open .modal { transform: translateY(0); }
 .modal-header {
@@ -183,6 +183,41 @@ input[type="text"]:focus { border-color: var(--text); }
   display: flex; gap: 8px; justify-content: space-between; align-items: center;
 }
 .modal-empty { text-align: center; padding: 36px 20px; color: var(--text-muted); font-size: 13px; line-height: 1.7; }
+
+/* SUMMARY NEW STYLES */
+.summ-header-info {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 12px; color: var(--text-muted);
+  padding-bottom: 12px; margin-bottom: 4px;
+  border-bottom: 0.5px solid var(--border);
+}
+.summ-copy-row {
+  display: flex; gap: 6px; flex-wrap: wrap;
+  padding: 10px 0 14px; margin-bottom: 4px;
+  border-bottom: 0.5px solid var(--border);
+}
+.summ-day-block { margin-bottom: 16px; }
+.summ-day-title {
+  font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--green-text); background: var(--green-bg);
+  border-radius: var(--radius-sm); padding: 4px 10px;
+  display: inline-block; margin-bottom: 6px;
+}
+.summ-item {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;
+  padding: 8px 10px; border-radius: var(--radius-sm);
+  background: var(--gray-bg); margin-bottom: 3px;
+}
+.summ-item-left { display: flex; align-items: flex-start; gap: 8px; flex: 1; min-width: 0; }
+.summ-cat-tag { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+.summ-item-name { font-size: 13px; font-weight: 500; color: var(--text); }
+.summ-item-obs { font-size: 11px; color: var(--text-light); font-style: italic; margin-top: 2px; }
+.summ-item-qty {
+  font-size: 12px; font-weight: 600; flex-shrink: 0;
+  background: var(--green-bg); color: var(--green-text);
+  border-radius: 20px; padding: 2px 10px; white-space: nowrap; margin-top: 1px;
+}
+.summ-item-qty.no-qty { background: var(--gray-bg); color: var(--text-light); font-weight: 400; border: 0.5px dashed var(--border-strong); }
 
 .modal-cat-block { margin-bottom: 20px; }
 .modal-cat-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
@@ -239,6 +274,18 @@ input[type="text"]:focus { border-color: var(--text); }
   background: transparent; color: var(--text-muted); cursor: pointer; transition: background 0.1s;
 }
 .btn-clear:hover { background: var(--gray-bg); color: var(--text); }
+.btn-top {
+  position: fixed; bottom: 60px; right: 16px;
+  width: 38px; height: 38px;
+  background: var(--surface); border: 0.5px solid var(--border-strong);
+  border-radius: 50%; cursor: pointer;
+  display: none; align-items: center; justify-content: center;
+  font-size: 16px; color: var(--text-muted);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+  transition: background 0.1s, opacity 0.2s; z-index: 98;
+}
+.btn-top.visible { display: flex; }
+.btn-top:hover { background: var(--gray-bg); color: var(--text); }
 
 /* TOAST */
 .toast {
@@ -256,7 +303,6 @@ input[type="text"]:focus { border-color: var(--text); }
 }
 
 @media (max-width: 640px) {
-  td.td-days { display: none; }
   td.td-qty { width: auto; }
   .stats-row { gap: 8px; }
   .stat-card .num { font-size: 20px; }
@@ -399,17 +445,18 @@ const DATA = [
     { name: 'Batata média boa', supplier: 'Atacado da Serra' },
     { name: 'Berinjela', supplier: 'Atacado da Serra' },
     { name: 'Beterraba', supplier: 'Atacado da Serra' },
-    { name: 'Brócolis', supplier: 'Atacado da Serra' },
+    { name: 'Brócolis', supplier: 'Atacado da Serra', unit: 'un' },
     { name: 'Cebola branca', supplier: 'Atacado da Serra' },
     { name: 'Cenoura', supplier: 'Atacado da Serra' },
-    { name: 'Couve folha', supplier: 'Atacado da Serra' },
+    { name: 'Couve folha', supplier: 'Atacado da Serra', unit: 'un' },
     { name: 'Limão taiti', supplier: 'Atacado da Serra' },
     { name: 'Mandioca congelada', supplier: 'Atacado da Serra' },
-    { name: 'Manjericão', supplier: 'Atacado da Serra' },
+    { name: 'Laranja', supplier: 'Atacado da Serra', unit: 'un' },
+    { name: 'Manjericão', supplier: 'Atacado da Serra', unit: 'un' },
     { name: 'Pimentão verde', supplier: 'Atacado da Serra' },
     { name: 'Repolho verde', supplier: 'Atacado da Serra' },
-    { name: 'Salsinha fresca', supplier: 'Atacado da Serra' },
-    { name: 'Tomate maduro p/ molho (cx 20kg)', supplier: 'Atacado da Serra' },
+    { name: 'Salsinha fresca', supplier: 'Atacado da Serra', unit: 'un' },
+    { name: 'Tomate maduro p/ molho (cx 20kg)', supplier: 'Atacado da Serra', unit: 'cx' },
     { name: 'Tomate salada', supplier: 'Atacado da Serra' },
     { name: 'Cebolete', supplier: 'Atacado da Serra' },
   ]},
@@ -432,7 +479,7 @@ const DATA = [
 const state = {};
 DATA.forEach(c => c.items.forEach(item => {
   const id = c.cat + '::' + item.name;
-  state[id] = { selected: false, qty: '', unit: 'kg', days: [], obs: '' };
+  state[id] = { selected: false, qty: '', unit: item.unit || 'kg', days: [], obs: '' };
 }));
 
 function sid(s) { return s.replace(/[^a-z0-9]/gi,'_'); }
@@ -449,7 +496,6 @@ function sid(s) { return s.replace(/[^a-z0-9]/gi,'_'); }
 function updateStats() {
   const vals = Object.entries(state);
   const totalSel = vals.filter(([,s])=>s.selected).length;
-  document.getElementById('stat-sel').textContent = totalSel;
   document.getElementById('header-count').textContent = totalSel;
   document.getElementById('bottom-count').textContent = totalSel;
 
@@ -502,7 +548,10 @@ function showToast(msg) {
 
 function clearAll() {
   if (!confirm('Limpar todos os itens selecionados?')) return;
-  Object.keys(state).forEach(id=>{ state[id]={selected:false,qty:'',unit:'kg',days:[],obs:''}; });
+  DATA.forEach(c => c.items.forEach(item => {
+    const id = c.cat+'::'+item.name;
+    state[id] = { selected: false, qty: '', unit: item.unit || 'kg', days: [], obs: '' };
+  }));
   renderAll();
 }
 
@@ -552,40 +601,76 @@ function copyAll() {
 
 function openSummary() {
   const body = document.getElementById('modal-body');
-  const sel = [];
+  const allItems = [];
   DATA.forEach(c => {
-    const items = c.items.filter(item=>state[c.cat+'::'+item.name].selected)
-      .map(item=>({...item,...state[c.cat+'::'+item.name]}));
-    if (items.length) sel.push({cat:c.cat, items});
+    c.items.forEach(item => {
+      const id = c.cat+'::'+item.name;
+      const s = state[id];
+      if (s.selected) allItems.push({...item, ...s, cat: c.cat, emoji: c.emoji});
+    });
   });
-  if (!sel.length) {
+
+  if (!allItems.length) {
     body.innerHTML = '<div class="modal-empty">Nenhum item selecionado ainda.<br>Selecione os produtos na lista para ver o resumo aqui.</div>';
-  } else {
-    body.innerHTML = sel.map(s=>`
-      <div class="modal-cat-block">
-        <div class="modal-cat-header">
-          <div class="modal-cat-title">${s.cat} <span class="modal-cat-sub">(${s.items.length} ${s.items.length===1?'item':'itens'})</span></div>
-          <button class="btn-copy" onclick="copyCat('${s.cat.replace(/'/g,"\\'")}',this)">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-            <span>Copiar lista</span>
-          </button>
-        </div>
-        ${s.items.map(item=>`
-          <div class="modal-item">
-            <div style="flex:1">
-              <div class="modal-item-name">${item.name}</div>
-              ${item.obs?`<div class="modal-item-obs">${item.obs}</div>`:''}
-            </div>
-            <div class="modal-item-right">
-              ${item.days.length?`<span class="modal-item-days">${item.days.join(' · ')}</span>`:''}
-              <span class="modal-item-qty" style="${!item.qty?'opacity:0.5':''}">${item.qty?item.qty+' '+item.unit:'sem qtd'}</span>
-            </div>
-          </div>`).join('')}
-      </div>`).join('');
+    document.getElementById('modal-overlay').classList.add('open');
+    return;
   }
+
+  const DAY_LABELS = {'2ª':'2ª feira','3ª':'3ª feira','4ª':'4ª feira','5ª':'5ª feira','6ª':'6ª feira','Sáb':'Sábado'};
+  const semDia = allItems.filter(i => !i.days || i.days.length === 0);
+
+  const diasHtml = DAYS.map(dia => {
+    const itensDia = allItems.filter(i => i.days && i.days.includes(dia));
+    if (!itensDia.length) return '';
+    return `
+      <div class="summ-day-block">
+        <div class="summ-day-title">${DAY_LABELS[dia]}</div>
+        ${itensDia.map(item => `
+          <div class="summ-item">
+            <div class="summ-item-left">
+              <span class="summ-cat-tag">${item.emoji || ''}</span>
+              <div>
+                <div class="summ-item-name">${item.name}</div>
+                ${item.obs ? `<div class="summ-item-obs">${item.obs}</div>` : ''}
+              </div>
+            </div>
+            <span class="summ-item-qty${item.qty ? '' : ' no-qty'}">${item.qty ? item.qty + ' ' + item.unit : 'sem qtd'}</span>
+          </div>`).join('')}
+      </div>`;
+  }).join('');
+
+  const semDiaHtml = semDia.length ? `
+    <div class="summ-day-block">
+      <div class="summ-day-title" style="color:var(--amber-text);background:var(--amber-bg);">Sem dia definido</div>
+      ${semDia.map(item => `
+        <div class="summ-item">
+          <div class="summ-item-left">
+            <span class="summ-cat-tag">${item.emoji || ''}</span>
+            <div>
+              <div class="summ-item-name">${item.name}</div>
+              ${item.obs ? `<div class="summ-item-obs">${item.obs}</div>` : ''}
+            </div>
+          </div>
+          <span class="summ-item-qty${item.qty ? '' : ' no-qty'}">${item.qty ? item.qty + ' ' + item.unit : 'sem qtd'}</span>
+        </div>`).join('')}
+    </div>` : '';
+
+  const activeDays = DAYS.filter(d => allItems.some(i => i.days && i.days.includes(d))).length;
+  body.innerHTML = `
+    <div class="summ-header-info">
+      <span>${allItems.length} ${allItems.length === 1 ? 'item' : 'itens'} selecionados</span>
+      <span>${activeDays} ${activeDays === 1 ? 'dia' : 'dias'} com entregas</span>
+    </div>
+    <div class="summ-copy-row">
+      ${DATA.filter(c => allItems.some(i => i.cat === c.cat)).map(c => `
+        <button class="btn-copy" onclick="copyCat('${c.cat.replace(/'/g,"\\'")}',this)">
+          ${c.emoji || ''} <span>${c.cat.split(' /')[0]}</span>
+        </button>`).join('')}
+    </div>
+    ${diasHtml}${semDiaHtml}`;
+
   document.getElementById('modal-overlay').classList.add('open');
 }
-
 function closeSummary() { document.getElementById('modal-overlay').classList.remove('open'); }
 function closeSummaryOnOverlay(e) { if (e.target===document.getElementById('modal-overlay')) closeSummary(); }
 
@@ -620,8 +705,7 @@ function renderAll() {
     thead.innerHTML = `<tr>
       <th style="width:40px"></th>
       <th>Produto</th>
-      <th style="width:175px">Quantidade</th>
-      <th style="width:235px">Dias de entrega</th>
+      <th style="width:150px">Quantidade</th>
     </tr>`;
     const tbody = document.createElement('tbody');
 
@@ -640,47 +724,45 @@ function renderAll() {
       cb.onclick = () => toggleItem(id);
       tdCb.appendChild(cb);
 
-      // name cell
+      // name cell — with days buttons below
       const tdName = document.createElement('td'); tdName.className = 'td-name';
+      const dw = document.createElement('div'); dw.className = 'item-days-wrap';
+      DAYS.forEach(d => {
+        const btn = document.createElement('button');
+        btn.className = 'day-btn'+(s.days.includes(d)?' active':'');
+        btn.textContent = d;
+        btn.dataset.day = d;
+        btn.onclick = e => { e.stopPropagation(); toggleDay(id, d, btn); };
+        dw.appendChild(btn);
+      });
       tdName.innerHTML = `<div class="item-name">${item.name}</div>
         ${item.supplier?`<div class="item-supplier">${item.supplier}</div>`:''}
         <span class="item-chip" id="chip-${sid(id)}"></span>`;
+      tdName.appendChild(dw);
       tdName.onclick = () => toggleItem(id);
 
       // qty cell
       const tdQty = document.createElement('td'); tdQty.className = 'td-qty';
       tdQty.innerHTML = `<div class="qty-wrap">
         <input type="number" min="0" step="0.1" placeholder="0" value="${s.qty}"
-          oninput="state['${id}'].qty=this.value;updateChip('${id}')"
+          oninput="state['${id}'].qty=this.value;updateChip('${id}');saveItem('${id}')"
           onclick="event.stopPropagation()">
-        <select onchange="state['${id}'].unit=this.value;updateChip('${id}')" onclick="event.stopPropagation()">
+        <select onchange="state['${id}'].unit=this.value;updateChip('${id}');saveItem('${id}')" onclick="event.stopPropagation()">
           ${UNITS.map(u=>`<option${s.unit===u?' selected':''}>${u}</option>`).join('')}
         </select>
       </div>`;
 
-      // days cell
-      const tdDays = document.createElement('td'); tdDays.className = 'td-days';
-      const dw = document.createElement('div'); dw.className = 'days-wrap';
-      DAYS.forEach(d => {
-        const btn = document.createElement('button');
-        btn.className = 'day-btn'+(s.days.includes(d)?' active':'');
-        btn.textContent = d;
-        btn.onclick = e => { e.stopPropagation(); toggleDay(id, d, btn); };
-        dw.appendChild(btn);
-      });
-      tdDays.appendChild(dw);
-
-      tr.appendChild(tdCb); tr.appendChild(tdName); tr.appendChild(tdQty); tr.appendChild(tdDays);
+      tr.appendChild(tdCb); tr.appendChild(tdName); tr.appendChild(tdQty);
 
       // expand row
       const expTr = document.createElement('tr');
       expTr.className = 'exp-row'; expTr.id = 'exp-'+sid(id);
       expTr.style.display = s.selected ? 'table-row' : 'none';
-      const expTd = document.createElement('td'); expTd.colSpan = 4;
+      const expTd = document.createElement('td'); expTd.colSpan = 3;
       expTd.innerHTML = `<div class="exp-inner">
         <div class="exp-label">Observação</div>
         <input type="text" placeholder="ex: cortar em cubos, fatiar fino..." value="${s.obs}"
-          oninput="state['${id}'].obs=this.value" onclick="event.stopPropagation()">
+          oninput="state['${id}'].obs=this.value;saveItem('${id}')" onclick="event.stopPropagation()">
       </div>`;
       expTr.appendChild(expTd);
 
@@ -696,6 +778,13 @@ function renderAll() {
 }
 
 renderAll();
+</script>
+<button class="btn-top" id="btn-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Voltar ao topo">&#8679;</button>
+
+<script>
+window.addEventListener('scroll', () => {
+  document.getElementById('btn-top').classList.toggle('visible', window.scrollY > 300);
+});
 </script>
 </body>
 </html>
