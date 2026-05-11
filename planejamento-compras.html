@@ -26,7 +26,7 @@
   --radius-sm: 6px;
 }
 body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
-.container { max-width: 980px; margin: 0 auto; padding: 24px 16px 100px; }
+.container { max-width: 980px; margin: 0 auto; padding: 24px 16px 40px; }
 
 /* HEADER */
 .page-header { margin-bottom: 1.5rem; display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
@@ -50,6 +50,10 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 }
 .btn-resumo:hover { background: #333; }
 .week-label { font-size: 10px; color: var(--text-light); }
+.status-dot { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gray-text); flex-shrink: 0; }
+.dot.online { background: #3b6d11; }
+.dot.syncing { background: #854f0b; }
 
 /* STATS */
 .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 1.25rem; }
@@ -91,7 +95,6 @@ tbody tr.main-row:last-of-type { border-bottom: none; }
 tbody tr.main-row:hover td { background: #fafaf8; }
 tbody td { padding: 0; vertical-align: middle; }
 
-td.td-cb { width: 40px; padding: 10px 0 10px 12px; }
 td.td-name { padding: 10px 12px; border-right: 0.5px solid var(--border); cursor: pointer; }
 td.td-name:hover .item-name { color: #3b6d11; }
 .item-name { font-size: 13px; font-weight: 500; color: var(--text); }
@@ -130,7 +133,7 @@ select {
 
 /* EXPAND ROW */
 tr.exp-row td { background: #fafaf8; border-bottom: 0.5px solid var(--border); }
-.exp-inner { padding: 8px 12px 10px 52px; border-top: 0.5px dashed var(--border); }
+.exp-inner { padding: 8px 12px 10px 14px; border-top: 0.5px dashed var(--border); }
 .exp-label { font-size: 10px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 5px; }
 input[type="text"] {
   width: 340px; height: 28px; padding: 0 10px;
@@ -260,20 +263,7 @@ input[type="text"]:focus { border-color: var(--text); }
 .modal-btn.primary:hover { background: #333; }
 .modal-btn.primary.copied { background: var(--green-vivid); border-color: var(--green-vivid); }
 
-/* BOTTOM BAR */
-.bottom-bar {
-  position: fixed; bottom: 0; left: 0; right: 0;
-  background: var(--surface); border-top: 0.5px solid var(--border);
-  padding: 10px 20px; display: flex; align-items: center; justify-content: space-between;
-  z-index: 99; font-size: 12px; color: var(--text-muted);
-}
-.bottom-bar strong { color: var(--text); }
-.btn-clear {
-  height: 30px; padding: 0 14px; font-size: 12px; font-family: 'DM Sans', sans-serif;
-  border: 0.5px solid var(--border-strong); border-radius: var(--radius-sm);
-  background: transparent; color: var(--text-muted); cursor: pointer; transition: background 0.1s;
-}
-.btn-clear:hover { background: var(--gray-bg); color: var(--text); }
+
 .btn-top {
   position: fixed; bottom: 60px; right: 16px;
   width: 38px; height: 38px;
@@ -351,6 +341,7 @@ input[type="text"]:focus { border-color: var(--text); }
     </div>
     <div class="header-right">
       <div class="header-actions">
+        <div class="status-dot"><div class="dot" id="status-dot"></div><span id="status-label">Conectando...</span></div>
         <button class="btn-resumo" onclick="openSummary()">
           Resumo &nbsp;<span id="header-count" style="background:rgba(255,255,255,0.18);border-radius:20px;padding:1px 7px;font-size:12px;font-weight:600;">0</span>
         </button>
@@ -370,11 +361,8 @@ input[type="text"]:focus { border-color: var(--text); }
   </div>
 </div>
 
-<div class="bottom-bar">
-  <span><strong id="bottom-count">0</strong> itens selecionados esta semana</span>
-  <button class="btn-clear" onclick="clearAll()">Limpar tudo</button>
-</div>
-
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script>
 const DAYS = ['2ª','3ª','4ª','5ª','6ª','Sáb'];
 const UNITS = ['kg','g','L','ml','un','cx','pct','mç'];
@@ -491,6 +479,19 @@ const DATA = [
   ]},
 ];
 
+const firebaseConfig = {
+  apiKey: "AIzaSyAOhA-3CYhTdNAdBiKOpf9f8OtW3CMO674",
+  authDomain: "estoque-marmitas.firebaseapp.com",
+  databaseURL: "https://estoque-marmitas-default-rtdb.firebaseio.com",
+  projectId: "estoque-marmitas",
+  storageBucket: "estoque-marmitas.firebasestorage.app",
+  messagingSenderId: "667056517335",
+  appId: "1:667056517335:web:dd15208ede9b61ddc44092"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const comprasRef = db.ref('planejamento_compras');
+
 const state = {};
 DATA.forEach(c => c.items.forEach(item => {
   const id = c.cat + '::' + item.name;
@@ -498,6 +499,25 @@ DATA.forEach(c => c.items.forEach(item => {
 }));
 
 function sid(s) { return s.replace(/[^a-z0-9]/gi,'_'); }
+
+function setStatus(status) {
+  const dot = document.getElementById('status-dot');
+  const lbl = document.getElementById('status-label');
+  if (!dot || !lbl) return;
+  if (status === 'online') { dot.className = 'dot online'; lbl.textContent = 'Sincronizado'; }
+  else if (status === 'syncing') { dot.className = 'dot syncing'; lbl.textContent = 'Salvando...'; }
+  else { dot.className = 'dot'; lbl.textContent = 'Conectando...'; }
+}
+
+let saveTimers = {};
+function saveItem(id) {
+  setStatus('syncing');
+  clearTimeout(saveTimers[id]);
+  saveTimers[id] = setTimeout(() => {
+    const safeKey = id.replace(/[.#$\/\[\]]/g, '_');
+    comprasRef.child(safeKey).set(state[id]).then(() => setStatus('online'));
+  }, 600);
+}
 
 (function initLabels() {
   const now = new Date(), day = now.getDay();
@@ -512,7 +532,6 @@ function updateStats() {
   const vals = Object.entries(state);
   const totalSel = vals.filter(([,s])=>s.selected).length;
   document.getElementById('header-count').textContent = totalSel;
-  document.getElementById('bottom-count').textContent = totalSel;
 
   const catsActive = DATA.filter(c => c.items.some(item=>state[c.cat+'::'+item.name].selected)).length;
   document.getElementById('stat-cats').textContent = catsActive;
@@ -547,13 +566,23 @@ function toggleItem(id) {
   } else {
     cb.classList.remove('checked'); exp.style.display = 'none';
   }
-  updateChip(id); updateStats();
+  updateChip(id); updateStats(); saveItem(id);
 }
 
 function toggleDay(id, day, btn) {
   const idx = state[id].days.indexOf(day);
-  idx===-1 ? (state[id].days.push(day), btn.classList.add('active')) : (state[id].days.splice(idx,1), btn.classList.remove('active'));
-  updateChip(id); updateStats();
+  if (idx === -1) {
+    state[id].days.push(day);
+    btn.classList.add('active');
+  } else {
+    state[id].days.splice(idx, 1);
+    btn.classList.remove('active');
+  }
+  // Item is selected if at least one day is chosen
+  state[id].selected = state[id].days.length > 0;
+  const exp = document.getElementById('exp-'+sid(id));
+  if (exp) exp.style.display = state[id].selected ? 'table-row' : 'none';
+  updateChip(id); updateStats(); saveItem(id);
 }
 
 function showToast(msg) {
@@ -567,6 +596,7 @@ function clearAll() {
     const id = c.cat+'::'+item.name;
     state[id] = { selected: false, qty: '', unit: item.unit || 'kg', days: [], obs: '' };
   }));
+  comprasRef.set(null).then(() => setStatus('online'));
   renderAll();
 }
 
@@ -718,7 +748,6 @@ function renderAll() {
     const table = document.createElement('table');
     const thead = document.createElement('thead');
     thead.innerHTML = `<tr>
-      <th style="width:40px"></th>
       <th>Produto</th>
       <th style="width:150px">Quantidade</th>
     </tr>`;
@@ -730,14 +759,6 @@ function renderAll() {
 
       const tr = document.createElement('tr');
       tr.className = 'main-row';
-
-      // checkbox cell
-      const tdCb = document.createElement('td'); tdCb.className = 'td-cb';
-      const cb = document.createElement('div');
-      cb.className = 'check-box'+(s.selected?' checked':''); cb.id = 'cb-'+sid(id);
-      cb.innerHTML = '<svg class="check-icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>';
-      cb.onclick = () => toggleItem(id);
-      tdCb.appendChild(cb);
 
       // name cell — with days buttons below
       const tdName = document.createElement('td'); tdName.className = 'td-name';
@@ -754,8 +775,6 @@ function renderAll() {
         ${item.supplier?`<div class="item-supplier">${item.supplier}</div>`:''}
         <span class="item-chip" id="chip-${sid(id)}"></span>`;
       tdName.appendChild(dw);
-      tdName.onclick = () => toggleItem(id);
-
       // qty cell
       const tdQty = document.createElement('td'); tdQty.className = 'td-qty';
       tdQty.innerHTML = `<div class="qty-wrap">
@@ -767,13 +786,13 @@ function renderAll() {
         </select>
       </div>`;
 
-      tr.appendChild(tdCb); tr.appendChild(tdName); tr.appendChild(tdQty);
+      tr.appendChild(tdName); tr.appendChild(tdQty);
 
       // expand row
       const expTr = document.createElement('tr');
       expTr.className = 'exp-row'; expTr.id = 'exp-'+sid(id);
       expTr.style.display = s.selected ? 'table-row' : 'none';
-      const expTd = document.createElement('td'); expTd.colSpan = 3;
+      const expTd = document.createElement('td'); expTd.colSpan = 2;
       expTd.innerHTML = `<div class="exp-inner">
         <div class="exp-label">Observação</div>
         <input type="text" placeholder="ex: cortar em cubos, fatiar fino..." value="${s.obs}"
@@ -792,7 +811,49 @@ function renderAll() {
   updateStats();
 }
 
-renderAll();
+// Carrega do Firebase e renderiza
+comprasRef.once('value', snap => {
+  const data = snap.val() || {};
+  DATA.forEach(c => c.items.forEach(item => {
+    const id = c.cat + '::' + item.name;
+    const safeKey = id.replace(/[.#$\/\[\]]/g, '_');
+    if (data[safeKey]) {
+      state[id] = { selected: false, qty: '', unit: item.unit || 'kg', days: [], obs: '', ...data[safeKey] };
+    }
+  }));
+  renderAll();
+  setStatus('online');
+
+  // Escuta mudanças de outros dispositivos em tempo real
+  comprasRef.on('child_changed', snap => {
+    const safeKey = snap.key;
+    const val = snap.val();
+    const id = Object.keys(state).find(k => k.replace(/[.#$\/\[\]]/g, '_') === safeKey);
+    if (!id || !val) return;
+    state[id] = { selected: false, qty: '', unit: 'kg', days: [], obs: '', ...val };
+    // Atualiza UI sem re-renderizar tudo
+    const cb = document.getElementById('cb-'+sid(id));
+    const exp = document.getElementById('exp-'+sid(id));
+    if (cb) {
+      cb.classList.toggle('checked', state[id].selected);
+      if (exp) exp.style.display = state[id].selected ? 'table-row' : 'none';
+    }
+    updateChip(id);
+    updateStats();
+    setStatus('online');
+  });
+
+  comprasRef.on('child_removed', snap => {
+    const safeKey = snap.key;
+    const id = Object.keys(state).find(k => k.replace(/[.#$\/\[\]]/g, '_') === safeKey);
+    if (!id) return;
+    state[id] = { selected: false, qty: '', unit: 'kg', days: [], obs: '' };
+    const cb = document.getElementById('cb-'+sid(id));
+    const exp = document.getElementById('exp-'+sid(id));
+    if (cb) { cb.classList.remove('checked'); if(exp) exp.style.display='none'; }
+    updateChip(id); updateStats();
+  });
+});
 </script>
 <!-- MODAL CARRINHO -->
 <div class="modal-overlay" id="cart-overlay" onclick="if(event.target===this)document.getElementById('cart-overlay').classList.remove('open')">
