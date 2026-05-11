@@ -34,9 +34,14 @@
     .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 1.25rem; align-items: center; }
     .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); }
     .category-block { margin-bottom: 1.25rem; background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); overflow: hidden; }
-    .category-header { display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: var(--bg); border-bottom: 0.5px solid var(--border); }
+    .category-header { display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: var(--bg); border-bottom: 0.5px solid var(--border); cursor: pointer; user-select: none; transition: background 0.1s; }
+    .category-header:hover { background: #eeecea; }
     .category-emoji { font-size: 16px; } .category-name { font-size: 13px; font-weight: 600; }
     .category-count { font-size: 11px; color: var(--text-muted); margin-left: auto; }
+    .category-chevron { font-size: 11px; color: var(--text-muted); margin-left: 6px; transition: transform 0.2s; display: inline-block; }
+    .category-chevron.open { transform: rotate(180deg); }
+    .category-body { display: none; }
+    .category-body.open { display: block; }
     .table-wrap { overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; }
     col.c-sabor{width:26%} col.c-g{width:10%} col.c-qty{width:9%} col.c-minus{width:7%} col.c-plus{width:7%} col.c-cal{width:7%} col.c-val{width:34%}
@@ -217,7 +222,11 @@
     <div class="stats-row">
       <div class="stat-card"><div class="num" id="stat-total">--</div><div class="label">Total em estoque</div></div>
       <div class="stat-card"><div class="num" id="stat-tipos">--</div><div class="label">Sabores c/ estoque</div></div>
-      <div class="stat-card"><div class="num" id="stat-venc">--</div><div class="label">Vencidas / proximas</div></div>
+      <div class="stat-card" id="card-venc" onclick="filtrarVencidas()" style="cursor:pointer;transition:background 0.15s;" onmouseover="this.style.background='#faeeda'" onmouseout="this.style.background=''">
+      <div class="num" id="stat-venc">--</div>
+      <div class="label">Vencidas / pr&#xF3;ximas</div>
+      <div style="font-size:10px;color:#854f0b;margin-top:4px;opacity:0.8;">clique para filtrar</div>
+    </div>
     </div>
     <div class="legend">
       <div class="legend-item">&#x1F7E0; Vence em ate 30 dias</div>
@@ -405,8 +414,18 @@ function buildBtns(key, dis) {
 function render() {
   var container = document.getElementById('categories-container');
   var total = 0, tipos = 0, venc = 0, today = todayStr(), html = '';
+
   CATEGORIAS.forEach(function(cat, catIdx) {
-    html += '<div class="category-block"><div class="category-header"><span class="category-emoji">' + cat.emoji + '</span><span class="category-name">' + cat.nome + '</span><span class="category-count">' + cat.itens.length + ' itens</span></div><div class="table-wrap">';
+    var catId = 'cat-' + catIdx;
+    html += '<div class="category-block" id="' + catId + '">';
+    html += '<div class="category-header" onclick="toggleCategoria(\'' + catId + '\')">';
+    html += '<span class="category-emoji">' + cat.emoji + '</span>';
+    html += '<span class="category-name">' + cat.nome + '</span>';
+    html += '<span class="category-count">' + cat.itens.length + ' itens</span>';
+    html += '<span class="category-chevron" id="chev-' + catId + '">&#9660;</span>';
+    html += '</div>';
+    html += '<div class="category-body" id="body-' + catId + '">';
+
     if (cat.fitness) {
       html += '<table><colgroup><col class="c-sabor-fit"><col class="c-qty-fit"><col class="c-minus-fit"><col class="c-plus-fit"><col class="c-cal-fit"><col class="c-val-fit"></colgroup>';
       html += '<thead><tr><th>Sabor</th><th class="center">Qtd</th><th class="center">-</th><th class="center">+</th><th class="center">\uD83D\uDCC5</th><th>Validade mais antiga</th></tr></thead><tbody>';
@@ -417,6 +436,7 @@ function render() {
         if (oldest && (new Date(oldest) - new Date(today)) / 86400000 <= 30) venc++;
         html += '<tr class="row-fit"><td class="td-sabor">' + item + '</td><td class="center">' + renderQty(datas) + '</td>' + buildBtns(key, syncing) + '<td>' + renderValidade(datas) + '</td></tr>';
       });
+      html += '</tbody></table>';
     } else {
       html += '<table><colgroup><col class="c-sabor"><col class="c-g"><col class="c-qty"><col class="c-minus"><col class="c-plus"><col class="c-cal"><col class="c-val"></colgroup>';
       html += '<thead><tr><th>Sabor</th><th class="center">Tam.</th><th class="center">Qtd</th><th class="center">-</th><th class="center">+</th><th class="center">\uD83D\uDCC5</th><th>Validade mais antiga</th></tr></thead><tbody>';
@@ -429,18 +449,25 @@ function render() {
         html += '<tr class="row-350"><td class="td-sabor" rowspan="2">' + item + '</td><td class="center"><span class="size-badge badge-350">350g</span></td><td class="center">' + renderQty(d350) + '</td>' + buildBtns(k350, syncing) + '<td>' + renderValidade(d350) + '</td></tr>';
         html += '<tr class="row-500"><td class="center"><span class="size-badge badge-500">500g</span></td><td class="center">' + renderQty(d500) + '</td>' + buildBtns(k500, syncing) + '<td>' + renderValidade(d500) + '</td></tr>';
       });
+      html += '</tbody></table>';
     }
-    html += '</tbody></table></div></div>';
+    html += '</div></div>';
   });
-  document.getElementById('categories-container').innerHTML = html;
+
+  container.innerHTML = html;
   document.getElementById('stat-total').textContent = total;
   document.getElementById('stat-tipos').textContent = tipos;
   document.getElementById('stat-venc').textContent = venc;
   var now = new Date();
-  var upd = now.toLocaleDateString('pt-BR') + ' \u00E0s ' + String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+  var upd = now.toLocaleDateString('pt-BR') + ' \u00E0s ' + String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'00');
   document.getElementById('last-update').textContent = 'Atualizado ' + upd;
   var h = document.getElementById('last-update-header'); if (h) h.textContent = 'Atualizado ' + upd;
-  if (termoAtual) aplicarFiltro(termoAtual.toLowerCase().trim());
+
+  if (filtroVencidasAtivo) {
+    setTimeout(function(){ filtrarVencidas(); filtrarVencidas(); }, 0);
+  } else if (termoAtual) {
+    aplicarFiltro(termoAtual.toLowerCase().trim());
+  }
 }
 var ultimoTotalConhecido = 0;
 
@@ -538,6 +565,18 @@ function aplicarFiltro(t) {
       } else { i++; }
     }
     bloco.style.display = (t === '' || algum) ? '' : 'none';
+    // Expande categoria se tem resultado na busca, recolhe se busca vazia
+    var body = bloco.querySelector('.category-body');
+    var chev = bloco.querySelector('.category-chevron');
+    if (body && chev) {
+      if (t !== '' && algum) {
+        body.classList.add('open');
+        chev.classList.add('open');
+      } else if (t === '') {
+        body.classList.remove('open');
+        chev.classList.remove('open');
+      }
+    }
   });
 }
 function limparBusca() {
@@ -966,6 +1005,95 @@ function migrarParaNomeChave(dadosAntigos) {
   });
 
   return novoState;
+}
+
+var filtroVencidasAtivo = false;
+
+function toggleCategoria(catId) {
+  var body = document.getElementById('body-' + catId);
+  var chev = document.getElementById('chev-' + catId);
+  if (!body) return;
+  var isOpen = body.classList.contains('open');
+  if (isOpen) {
+    body.classList.remove('open');
+    chev.classList.remove('open');
+  } else {
+    body.classList.add('open');
+    chev.classList.add('open');
+  }
+}
+
+function expandirCategoria(catId) {
+  var body = document.getElementById('body-' + catId);
+  var chev = document.getElementById('chev-' + catId);
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    if (chev) chev.classList.add('open');
+  }
+}
+
+function recolherTodasCategorias() {
+  document.querySelectorAll('.category-body').forEach(function(b){ b.classList.remove('open'); });
+  document.querySelectorAll('.category-chevron').forEach(function(c){ c.classList.remove('open'); });
+}
+
+function expandirTodasCategorias() {
+  document.querySelectorAll('.category-body').forEach(function(b){ b.classList.add('open'); });
+  document.querySelectorAll('.category-chevron').forEach(function(c){ c.classList.add('open'); });
+}
+
+function filtrarVencidas() {
+  filtroVencidasAtivo = !filtroVencidasAtivo;
+  var card = document.getElementById('card-venc');
+
+  if (filtroVencidasAtivo) {
+    card.style.background = '#faeeda';
+    card.style.border = '1.5px solid #854f0b';
+    document.querySelector('#card-venc .label').style.color = '#854f0b';
+
+    var blocos = document.querySelectorAll('.category-block');
+    blocos.forEach(function(bloco) {
+      var rows = bloco.querySelectorAll('tbody tr');
+      var algumVisivel = false;
+      var i = 0;
+      while (i < rows.length) {
+        var row = rows[i];
+        if (row.classList.contains('row-350') || row.classList.contains('row-fit')) {
+          var nextRow = row.classList.contains('row-350') ? rows[i+1] : null;
+          var temAlerta = rowTemAlerta(row) || (nextRow && rowTemAlerta(nextRow));
+          row.style.display = temAlerta ? '' : 'none';
+          if (nextRow) { nextRow.style.display = temAlerta ? '' : 'none'; i += 2; }
+          else { i++; }
+          if (temAlerta) algumVisivel = true;
+        } else { i++; }
+      }
+      bloco.style.display = algumVisivel ? '' : 'none';
+      // Expande categorias que tem alertas
+      if (algumVisivel) {
+        var bodyEl = bloco.querySelector('.category-body');
+        var chevEl = bloco.querySelector('.category-chevron');
+        if (bodyEl) bodyEl.classList.add('open');
+        if (chevEl) chevEl.classList.add('open');
+      }
+    });
+    showToast('Mostrando marmitas vencidas ou próximas de vencer');
+  } else {
+    card.style.background = '';
+    card.style.border = '';
+    document.querySelector('#card-venc .label').style.color = '';
+    // Recolhe tudo e restaura estado normal
+    recolherTodasCategorias();
+    // Mostra todos os blocos
+    document.querySelectorAll('.category-block').forEach(function(b){ b.style.display = ''; });
+    document.querySelectorAll('tbody tr').forEach(function(r){ r.style.display = ''; });
+    aplicarFiltro(termoAtual ? termoAtual.toLowerCase().trim() : '');
+    showToast('Filtro removido');
+  }
+}
+
+function rowTemAlerta(row) {
+  var valCell = row.querySelector('.val-soon, .val-exp');
+  return valCell !== null;
 }
 
 estoqueRef.on('value', function(snapshot){
