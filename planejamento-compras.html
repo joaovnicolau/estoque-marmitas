@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Planejamento de Compras</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #f5f4f0;
+  --surface: #ffffff;
+  --border: rgba(0,0,0,0.10);
+  --border-strong: rgba(0,0,0,0.18);
+  --text: #1a1a18;
+  --text-muted: #6b6b67;
+  --text-light: #9b9b97;
+  --green-bg: #eaf3de;
+  --green-text: #3b6d11;
+  --green-vivid: #34A853;
+  --amber-bg: #faeeda;
+  --amber-text: #854f0b;
+  --gray-bg: #f1efe8;
+  --gray-text: #5f5e5a;
+  --radius: 10px;
+  --radius-sm: 6px;
+}
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+.container { max-width: 980px; margin: 0 auto; padding: 24px 16px 100px; }
+
+/* HEADER */
+.page-header { margin-bottom: 1.5rem; display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+.page-header h1 { font-size: 22px; font-weight: 600; margin-bottom: 4px; }
+.page-subtitle { font-size: 12px; color: var(--text-muted); }
+.header-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; margin-top: 4px; }
+.header-actions { display: flex; align-items: center; gap: 8px; }
+.icon-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; border-radius: var(--radius-sm);
+  border: 0.5px solid var(--border-strong); background: var(--surface);
+  cursor: pointer; font-size: 15px; transition: background 0.1s; color: var(--text-muted);
+}
+.icon-btn:hover { background: var(--gray-bg); }
+.btn-resumo {
+  display: inline-flex; align-items: center; gap: 8px;
+  height: 30px; padding: 0 14px;
+  font-size: 13px; font-weight: 500; font-family: 'DM Sans', sans-serif;
+  background: var(--text); color: #fff; border: none;
+  border-radius: var(--radius-sm); cursor: pointer; transition: background 0.12s;
+}
+.btn-resumo:hover { background: #333; }
+.week-label { font-size: 10px; color: var(--text-light); }
+
+/* STATS */
+.stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 1.25rem; }
+.stat-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 14px 16px; }
+.stat-card .num { font-size: 26px; font-weight: 600; line-height: 1; margin-bottom: 4px; }
+.stat-card .label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
+
+/* CATEGORY */
+.category-block { margin-bottom: 1rem; background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.category-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; background: var(--bg);
+  border-bottom: 0.5px solid var(--border);
+  cursor: pointer; user-select: none; transition: background 0.1s;
+}
+.category-header:hover { background: #ece9e0; }
+.category-name { font-size: 13px; font-weight: 600; flex: 1; }
+.category-count { font-size: 11px; color: var(--text-muted); }
+.cat-badge {
+  font-size: 11px; font-weight: 500;
+  background: var(--green-bg); color: var(--green-text);
+  border-radius: 20px; padding: 2px 9px; display: none;
+}
+.cat-badge.visible { display: inline-block; }
+.chevron { font-size: 11px; color: var(--text-light); transition: transform 0.2s; display: inline-block; }
+.chevron.open { transform: rotate(180deg); }
+
+/* TABLE */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+thead th {
+  padding: 8px 10px; font-size: 10px; font-weight: 500;
+  color: var(--text-muted); text-transform: uppercase;
+  letter-spacing: 0.04em; background: #fafaf8;
+  border-bottom: 0.5px solid var(--border); text-align: left; white-space: nowrap;
+}
+tbody tr.main-row { border-bottom: 0.5px solid var(--border); }
+tbody tr.main-row:last-of-type { border-bottom: none; }
+tbody tr.main-row:hover td { background: #fafaf8; }
+tbody td { padding: 0; vertical-align: middle; }
+
+td.td-cb { width: 40px; padding: 10px 0 10px 12px; }
+td.td-name { padding: 10px 12px; border-right: 0.5px solid var(--border); cursor: pointer; }
+td.td-name:hover .item-name { color: #3b6d11; }
+.item-name { font-size: 13px; font-weight: 500; color: var(--text); }
+.item-supplier { font-size: 11px; color: var(--text-light); margin-top: 2px; }
+.item-chip {
+  display: none; margin-top: 4px;
+  font-size: 11px; font-weight: 500;
+  background: var(--green-bg); color: var(--green-text);
+  border-radius: 20px; padding: 1px 8px;
+}
+td.td-qty { width: 170px; padding: 8px 10px; }
+td.td-days { width: 230px; padding: 8px 10px; }
+
+.qty-wrap { display: flex; align-items: center; gap: 5px; }
+input[type="number"] {
+  width: 70px; height: 30px; padding: 0 8px;
+  font-size: 13px; font-family: 'DM Sans', sans-serif;
+  border: 0.5px solid var(--border-strong); border-radius: var(--radius-sm);
+  background: var(--surface); color: var(--text); outline: none; transition: border-color 0.15s;
+}
+input[type="number"]:focus { border-color: var(--text); }
+select {
+  height: 30px; padding: 0 6px; font-size: 12px; font-family: 'DM Sans', sans-serif;
+  border: 0.5px solid var(--border-strong); border-radius: var(--radius-sm);
+  background: var(--surface); color: var(--text); outline: none; cursor: pointer;
+}
+.days-wrap { display: flex; gap: 4px; flex-wrap: wrap; }
+.day-btn {
+  height: 26px; min-width: 34px; padding: 0 6px;
+  font-size: 11px; font-weight: 500; font-family: 'DM Sans', sans-serif;
+  border: 0.5px solid var(--border-strong); border-radius: var(--radius-sm);
+  background: white; color: var(--text); cursor: pointer; transition: all 0.1s;
+}
+.day-btn:hover { border-color: var(--text); }
+.day-btn.active { background: var(--text); border-color: var(--text); color: white; }
+
+/* EXPAND ROW */
+tr.exp-row td { background: #fafaf8; border-bottom: 0.5px solid var(--border); }
+.exp-inner { padding: 8px 12px 10px 52px; border-top: 0.5px dashed var(--border); }
+.exp-label { font-size: 10px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 5px; }
+input[type="text"] {
+  width: 340px; height: 28px; padding: 0 10px;
+  font-size: 12px; font-family: 'DM Sans', sans-serif;
+  border: 0.5px solid var(--border-strong); border-radius: var(--radius-sm);
+  background: var(--surface); color: var(--text); outline: none; transition: border-color 0.15s;
+}
+input[type="text"]:focus { border-color: var(--text); }
+
+/* CHECK BOX */
+.check-box {
+  width: 20px; height: 20px;
+  border: 1.5px solid var(--border-strong); border-radius: 5px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; background: white; transition: all 0.12s; flex-shrink: 0;
+}
+.check-box.checked { background: var(--text); border-color: var(--text); }
+.check-icon { display: none; width: 11px; height: 11px; stroke: white; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.check-box.checked .check-icon { display: block; }
+
+/* MODAL */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+  display: flex; align-items: flex-end; justify-content: center;
+  z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.2s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal {
+  background: var(--surface); border-radius: var(--radius) var(--radius) 0 0;
+  width: 100%; max-width: 680px; max-height: 82vh;
+  display: flex; flex-direction: column;
+  transform: translateY(24px); transition: transform 0.25s;
+}
+.modal-overlay.open .modal { transform: translateY(0); }
+.modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px 12px; border-bottom: 0.5px solid var(--border); flex-shrink: 0;
+}
+.modal-header h3 { font-size: 15px; font-weight: 600; }
+.modal-close {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; border-radius: var(--radius-sm);
+  border: 0.5px solid var(--border); background: transparent;
+  cursor: pointer; font-size: 15px; color: var(--text-muted); transition: background 0.1s;
+}
+.modal-close:hover { background: var(--gray-bg); }
+.modal-body { overflow-y: auto; padding: 16px 20px; flex: 1; }
+.modal-footer {
+  padding: 12px 20px; border-top: 0.5px solid var(--border); flex-shrink: 0;
+  display: flex; gap: 8px; justify-content: space-between; align-items: center;
+}
+.modal-empty { text-align: center; padding: 36px 20px; color: var(--text-muted); font-size: 13px; line-height: 1.7; }
+
+.modal-cat-block { margin-bottom: 20px; }
+.modal-cat-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.modal-cat-title { font-size: 13px; font-weight: 600; }
+.modal-cat-sub { font-size: 11px; color: var(--text-muted); font-weight: 400; margin-left: 5px; }
+
+.modal-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 7px 10px; border-radius: var(--radius-sm);
+  background: var(--gray-bg); margin-bottom: 3px;
+}
+.modal-item-name { font-size: 12px; color: var(--text); flex: 1; }
+.modal-item-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.modal-item-days { font-size: 11px; color: var(--text-muted); }
+.modal-item-qty {
+  font-size: 11px; font-weight: 600;
+  background: var(--green-bg); color: var(--green-text);
+  border-radius: 20px; padding: 2px 8px;
+}
+.modal-item-obs { font-size: 11px; color: var(--text-light); font-style: italic; margin-top: 3px; }
+
+.btn-copy {
+  display: inline-flex; align-items: center; gap: 5px;
+  height: 28px; padding: 0 12px;
+  font-size: 11px; font-weight: 500; font-family: 'DM Sans', sans-serif;
+  border: 0.5px solid var(--border-strong); border-radius: var(--radius-sm);
+  background: white; color: var(--text-muted); cursor: pointer; transition: all 0.12s;
+}
+.btn-copy:hover { border-color: var(--text); color: var(--text); }
+.btn-copy.copied { background: var(--green-bg); border-color: var(--green-text); color: var(--green-text); }
+
+.modal-btn {
+  height: 32px; padding: 0 16px;
+  font-size: 12px; font-weight: 500; font-family: 'DM Sans', sans-serif;
+  border: 0.5px solid var(--border-strong); border-radius: var(--radius-sm);
+  background: var(--bg); color: var(--text); cursor: pointer; transition: background 0.1s;
+}
+.modal-btn:hover { background: #e8e6e0; }
+.modal-btn.primary { background: var(--text); color: white; border-color: var(--text); }
+.modal-btn.primary:hover { background: #333; }
+.modal-btn.primary.copied { background: var(--green-vivid); border-color: var(--green-vivid); }
+
+/* BOTTOM BAR */
+.bottom-bar {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: var(--surface); border-top: 0.5px solid var(--border);
+  padding: 10px 20px; display: flex; align-items: center; justify-content: space-between;
+  z-index: 99; font-size: 12px; color: var(--text-muted);
+}
+.bottom-bar strong { color: var(--text); }
+.btn-clear {
+  height: 30px; padding: 0 14px; font-size: 12px; font-family: 'DM Sans', sans-serif;
+  border: 0.5px solid var(--border-strong); border-radius: var(--radius-sm);
+  background: transparent; color: var(--text-muted); cursor: pointer; transition: background 0.1s;
+}
+.btn-clear:hover { background: var(--gray-bg); color: var(--text); }
+
+/* TOAST */
+.toast {
+  position: fixed; bottom: 58px; right: 20px;
+  background: var(--text); color: white; border-radius: var(--radius-sm);
+  padding: 9px 16px; font-size: 12px;
+  opacity: 0; transform: translateY(8px);
+  transition: opacity 0.25s, transform 0.25s; pointer-events: none; z-index: 999;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+
+.footer-bar {
+  margin-top: 1rem; font-size: 11px; color: var(--text-light);
+  display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px; padding: 0 2px;
+}
+
+@media (max-width: 640px) {
+  td.td-days { display: none; }
+  td.td-qty { width: auto; }
+  .stats-row { gap: 8px; }
+  .stat-card .num { font-size: 20px; }
+}
+</style>
+</head>
+<body>
+
+<!-- MODAL RESUMO -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeSummaryOnOverlay(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Resumo da semana</h3>
+      <button class="modal-close" onclick="closeSummary()">&#x2715;</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-footer">
+      <button class="modal-btn primary" id="btn-copy-all" onclick="copyAll()">Copiar lista completa</button>
+      <button class="modal-btn" onclick="closeSummary()">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<div class="container">
+  <div class="page-header">
+    <div>
+      <h1>Planejamento de Compras</h1>
+      <div class="page-subtitle">delivery &middot; marmitas &amp; salgados</div>
+    </div>
+    <div class="header-right">
+      <div class="header-actions">
+        <button class="btn-resumo" onclick="openSummary()">
+          Resumo &nbsp;<span id="header-count" style="background:rgba(255,255,255,0.18);border-radius:20px;padding:1px 7px;font-size:12px;font-weight:600;">0</span>
+        </button>
+        <button class="icon-btn" onclick="clearAll()" title="Limpar tudo">&#x1F5D1;</button>
+      </div>
+      <span class="week-label" id="week-label"></span>
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card"><div class="num" id="stat-sel">0</div><div class="label">Itens selecionados</div></div>
+    <div class="stat-card"><div class="num" id="stat-cats">0</div><div class="label">Categorias ativas</div></div>
+    <div class="stat-card"><div class="num" id="stat-days">0</div><div class="label">Dias com entregas</div></div>
+  </div>
+
+  <div id="cats-container"></div>
+
+  <div class="footer-bar">
+    <span>Selecione os itens, informe quantidade e dias de entrega.</span>
+    <span id="footer-date"></span>
+  </div>
+</div>
+
+<div class="bottom-bar">
+  <span><strong id="bottom-count">0</strong> itens selecionados esta semana</span>
+  <button class="btn-clear" onclick="clearAll()">Limpar tudo</button>
+</div>
+
+<script>
+const DAYS = ['2ª','3ª','4ª','5ª','6ª','Sáb'];
+const UNITS = ['kg','g','L','ml','un','cx','pct','mç'];
+const DATA = [
+  { cat: 'Proteínas', items: [
+    { name: 'Carne 2ª músculo traseiro em cubos', supplier: 'Blu Carnes' },
+    { name: 'Paleta sem osso (p/ desfiar)', supplier: 'SOS Alim.' },
+    { name: 'Carne moída de 1ª fresca "patinho"', supplier: 'Blu Carnes' },
+    { name: 'Carne moída de 2ª congelada', supplier: 'Blu Carnes' },
+    { name: 'Carne 1ª para strogonoff (iscas)', supplier: 'Blu Carnes' },
+    { name: 'Filé de tilápia refrigerada', supplier: 'Coop Juriti' },
+    { name: 'Peito de frango sem pele e osso', supplier: 'SOS Alim.' },
+    { name: 'Filé de coxa e sobrecoxa de frango', supplier: 'SOS Alim.' },
+    { name: 'Pernil de porco refrigerado', supplier: '' },
+    { name: 'Linguiça toscana', supplier: '' },
+    { name: 'Linguiça calabresa', supplier: '' },
+    { name: 'Salsicha (p/ salgados)', supplier: '' },
+  ]},
+  { cat: 'Laticínios / Frios', items: [
+    { name: 'Queijo mussarela ralada', supplier: 'SOS Alim.' },
+    { name: 'Presunto fatiado', supplier: '' },
+    { name: 'Margarina com sal Doriana', supplier: '' },
+    { name: 'Massa fresca para lasanha Rotelli', supplier: 'Rotelli' },
+    { name: 'Creme de leite', supplier: '' },
+    { name: 'Leite condensado mistura láctea', supplier: '' },
+    { name: 'Leite integral', supplier: '' },
+    { name: 'Ovo (cartela c/ 30 unidades)', supplier: '' },
+  ]},
+  { cat: 'Temperos / Condimentos', items: [
+    { name: 'Açafrão em pó', supplier: 'SOS Alim.' },
+    { name: 'Noz moscada', supplier: '' },
+    { name: 'Colorau', supplier: '' },
+    { name: 'Cominho', supplier: '' },
+    { name: 'Curry', supplier: '' },
+    { name: 'Folha de louro seca', supplier: '' },
+    { name: 'Orégano', supplier: '' },
+    { name: 'Páprica doce', supplier: '' },
+    { name: 'Pimenta do reino', supplier: '' },
+    { name: 'Alho frito', supplier: '' },
+    { name: 'Alho moído pote', supplier: '' },
+    { name: 'Mostarda', supplier: '' },
+    { name: 'Katchup (p/ strogonoff)', supplier: '' },
+    { name: 'Molho de alho', supplier: '' },
+    { name: 'Molho inglês', supplier: '' },
+    { name: 'Shoyo', supplier: '' },
+    { name: 'Vinagre de álcool', supplier: '' },
+    { name: 'Extrato de tomate', supplier: '' },
+  ]},
+  { cat: 'Mercearia', items: [
+    { name: 'Arroz branco', supplier: 'SuperA' },
+    { name: 'Feijão carioca', supplier: '' },
+    { name: 'Feijão preto', supplier: '' },
+    { name: 'Farinha de trigo', supplier: '' },
+    { name: 'Farinha de rosca', supplier: '' },
+    { name: 'Farinha de mandioca grossa', supplier: '' },
+    { name: 'Farinha de milho', supplier: '' },
+    { name: 'Macarrão espaguetti', supplier: '' },
+    { name: 'Macarrão parafuso', supplier: '' },
+    { name: 'Macarrão penne', supplier: '' },
+    { name: 'Macarrão talharim caseiro', supplier: '' },
+    { name: 'Óleo de soja', supplier: '' },
+    { name: 'Amido de milho', supplier: '' },
+    { name: 'Açúcar refinado', supplier: '' },
+    { name: 'Sal', supplier: '' },
+    { name: 'Proteína de soja', supplier: '' },
+    { name: 'Grão de bico', supplier: '' },
+    { name: 'Lentilha', supplier: '' },
+    { name: 'Milho em conserva', supplier: '' },
+    { name: 'Ervilha congelada', supplier: '' },
+    { name: 'Azeitona sem caroço (p/ empadinha)', supplier: '' },
+    { name: 'Champignon (p/ strogonoff)', supplier: '' },
+    { name: 'Batata palha', supplier: 'Sr. Milton' },
+    { name: 'Batata chips', supplier: 'Sr. Milton' },
+    { name: 'Trigo p/ kibe', supplier: '' },
+    { name: 'Chocolate em pó 50%', supplier: '' },
+    { name: 'Café', supplier: '' },
+  ]},
+  { cat: 'Horti-fruti', items: [
+    { name: 'Abobrinha verde', supplier: 'Atacado da Serra' },
+    { name: 'Batata conserva / soutê', supplier: 'Atacado da Serra' },
+    { name: 'Batata doce média', supplier: 'Atacado da Serra' },
+    { name: 'Batata lavada graúda boa', supplier: 'Atacado da Serra' },
+    { name: 'Batata média boa', supplier: 'Atacado da Serra' },
+    { name: 'Berinjela', supplier: 'Atacado da Serra' },
+    { name: 'Beterraba', supplier: 'Atacado da Serra' },
+    { name: 'Brócolis', supplier: 'Atacado da Serra' },
+    { name: 'Cebola branca', supplier: 'Atacado da Serra' },
+    { name: 'Cenoura', supplier: 'Atacado da Serra' },
+    { name: 'Couve folha', supplier: 'Atacado da Serra' },
+    { name: 'Limão taiti', supplier: 'Atacado da Serra' },
+    { name: 'Mandioca congelada', supplier: 'Atacado da Serra' },
+    { name: 'Manjericão', supplier: 'Atacado da Serra' },
+    { name: 'Pimentão verde', supplier: 'Atacado da Serra' },
+    { name: 'Repolho verde', supplier: 'Atacado da Serra' },
+    { name: 'Salsinha fresca', supplier: 'Atacado da Serra' },
+    { name: 'Tomate maduro p/ molho (cx 20kg)', supplier: 'Atacado da Serra' },
+    { name: 'Tomate salada', supplier: 'Atacado da Serra' },
+    { name: 'Cebolete', supplier: 'Atacado da Serra' },
+  ]},
+  { cat: 'Higiene / Limpeza', items: [
+    { name: 'Água sanitária', supplier: '' },
+    { name: 'Álcool líquido 70%', supplier: '' },
+    { name: 'Desengordurante Veja', supplier: '' },
+    { name: 'Detergente neutro', supplier: '' },
+    { name: 'Esponja verde p/ panelas', supplier: '' },
+    { name: 'Esponja de aço grossa', supplier: '' },
+    { name: 'Esponja de louça', supplier: '' },
+    { name: 'Luva descartável', supplier: '' },
+    { name: 'Papel higiênico', supplier: '' },
+    { name: 'Touca descartável', supplier: '' },
+    { name: 'Sabão em pó', supplier: '' },
+    { name: 'Papel alumínio rolo', supplier: '' },
+  ]},
+];
+
+const state = {};
+DATA.forEach(c => c.items.forEach(item => {
+  const id = c.cat + '::' + item.name;
+  state[id] = { selected: false, qty: '', unit: 'kg', days: [], obs: '' };
+}));
+
+function sid(s) { return s.replace(/[^a-z0-9]/gi,'_'); }
+
+(function initLabels() {
+  const now = new Date(), day = now.getDay();
+  const mon = new Date(now); mon.setDate(now.getDate() - (day===0?6:day-1));
+  const sat = new Date(mon); sat.setDate(mon.getDate()+5);
+  const fmt = d => d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
+  document.getElementById('week-label').textContent = 'Semana ' + fmt(mon) + ' – ' + fmt(sat);
+  document.getElementById('footer-date').textContent = now.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'2-digit',year:'numeric'});
+})();
+
+function updateStats() {
+  const vals = Object.entries(state);
+  const totalSel = vals.filter(([,s])=>s.selected).length;
+  document.getElementById('stat-sel').textContent = totalSel;
+  document.getElementById('header-count').textContent = totalSel;
+  document.getElementById('bottom-count').textContent = totalSel;
+
+  const catsActive = DATA.filter(c => c.items.some(item=>state[c.cat+'::'+item.name].selected)).length;
+  document.getElementById('stat-cats').textContent = catsActive;
+
+  const allDays = new Set();
+  vals.forEach(([,s])=>{ if(s.selected) s.days.forEach(d=>allDays.add(d)); });
+  document.getElementById('stat-days').textContent = allDays.size;
+
+  DATA.forEach(c => {
+    const sel = c.items.filter(item=>state[c.cat+'::'+item.name].selected).length;
+    const el = document.getElementById('badge-'+sid(c.cat));
+    if (el) { el.textContent = sel+' sel.'; el.classList.toggle('visible', sel>0); }
+  });
+}
+
+function updateChip(id) {
+  const s = state[id], chip = document.getElementById('chip-'+sid(id));
+  if (!chip) return;
+  if (s.selected && (s.qty || s.days.length)) {
+    let t = s.qty ? s.qty+' '+s.unit : '';
+    if (s.days.length) t += (t?' · ':'')+s.days.join(', ');
+    chip.textContent = t; chip.style.display = 'inline-block';
+  } else chip.style.display = 'none';
+}
+
+function toggleItem(id) {
+  state[id].selected = !state[id].selected;
+  const cb = document.getElementById('cb-'+sid(id));
+  const exp = document.getElementById('exp-'+sid(id));
+  if (state[id].selected) {
+    cb.classList.add('checked'); exp.style.display = 'table-row';
+  } else {
+    cb.classList.remove('checked'); exp.style.display = 'none';
+  }
+  updateChip(id); updateStats();
+}
+
+function toggleDay(id, day, btn) {
+  const idx = state[id].days.indexOf(day);
+  idx===-1 ? (state[id].days.push(day), btn.classList.add('active')) : (state[id].days.splice(idx,1), btn.classList.remove('active'));
+  updateChip(id); updateStats();
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._t); t._t = setTimeout(()=>t.classList.remove('show'), 2400);
+}
+
+function clearAll() {
+  if (!confirm('Limpar todos os itens selecionados?')) return;
+  Object.keys(state).forEach(id=>{ state[id]={selected:false,qty:'',unit:'kg',days:[],obs:''}; });
+  renderAll();
+}
+
+function buildText(catName, items) {
+  const date = new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'2-digit',year:'numeric'});
+  let t = 'PEDIDO — '+catName.toUpperCase()+'\n'+date+'\n'+'-'.repeat(34)+'\n';
+  items.forEach(i => {
+    t += '• '+i.name;
+    if (i.qty) t += ' — '+i.qty+' '+i.unit;
+    if (i.days.length) t += ' ('+i.days.join(', ')+')';
+    if (i.obs) t += '\n  obs: '+i.obs;
+    t += '\n';
+  });
+  return t;
+}
+
+function copyCat(catName, btnEl) {
+  const cat = DATA.find(c=>c.cat===catName);
+  const sel = cat.items.filter(item=>state[cat.cat+'::'+item.name].selected)
+    .map(item=>({...item,...state[cat.cat+'::'+item.name]}));
+  if (!sel.length) { showToast('Nenhum item em '+catName); return; }
+  navigator.clipboard.writeText(buildText(catName, sel)).then(()=>{
+    btnEl.classList.add('copied'); btnEl.querySelector('span').textContent='Copiado!';
+    showToast('Lista de '+catName+' copiada!');
+    setTimeout(()=>{ btnEl.classList.remove('copied'); btnEl.querySelector('span').textContent='Copiar lista'; }, 2200);
+  });
+}
+
+function copyAll() {
+  const sel = [];
+  DATA.forEach(c => {
+    const items = c.items.filter(item=>state[c.cat+'::'+item.name].selected)
+      .map(item=>({...item,...state[c.cat+'::'+item.name]}));
+    if (items.length) sel.push({cat:c.cat, items});
+  });
+  if (!sel.length) { showToast('Nenhum item selecionado'); return; }
+  const date = new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'2-digit',year:'numeric'});
+  let t = 'PLANEJAMENTO DE COMPRAS\n'+date+'\n'+'='.repeat(36)+'\n\n';
+  sel.forEach(s => { t += buildText(s.cat, s.items)+'\n'; });
+  navigator.clipboard.writeText(t).then(()=>{
+    const btn = document.getElementById('btn-copy-all');
+    btn.classList.add('copied'); btn.textContent='Copiado!';
+    showToast('Lista completa copiada!');
+    setTimeout(()=>{ btn.classList.remove('copied'); btn.textContent='Copiar lista completa'; }, 2200);
+  });
+}
+
+function openSummary() {
+  const body = document.getElementById('modal-body');
+  const sel = [];
+  DATA.forEach(c => {
+    const items = c.items.filter(item=>state[c.cat+'::'+item.name].selected)
+      .map(item=>({...item,...state[c.cat+'::'+item.name]}));
+    if (items.length) sel.push({cat:c.cat, items});
+  });
+  if (!sel.length) {
+    body.innerHTML = '<div class="modal-empty">Nenhum item selecionado ainda.<br>Selecione os produtos na lista para ver o resumo aqui.</div>';
+  } else {
+    body.innerHTML = sel.map(s=>`
+      <div class="modal-cat-block">
+        <div class="modal-cat-header">
+          <div class="modal-cat-title">${s.cat} <span class="modal-cat-sub">(${s.items.length} ${s.items.length===1?'item':'itens'})</span></div>
+          <button class="btn-copy" onclick="copyCat('${s.cat.replace(/'/g,"\\'")}',this)">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            <span>Copiar lista</span>
+          </button>
+        </div>
+        ${s.items.map(item=>`
+          <div class="modal-item">
+            <div style="flex:1">
+              <div class="modal-item-name">${item.name}</div>
+              ${item.obs?`<div class="modal-item-obs">${item.obs}</div>`:''}
+            </div>
+            <div class="modal-item-right">
+              ${item.days.length?`<span class="modal-item-days">${item.days.join(' · ')}</span>`:''}
+              <span class="modal-item-qty" style="${!item.qty?'opacity:0.5':''}">${item.qty?item.qty+' '+item.unit:'sem qtd'}</span>
+            </div>
+          </div>`).join('')}
+      </div>`).join('');
+  }
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function closeSummary() { document.getElementById('modal-overlay').classList.remove('open'); }
+function closeSummaryOnOverlay(e) { if (e.target===document.getElementById('modal-overlay')) closeSummary(); }
+
+function renderAll() {
+  const container = document.getElementById('cats-container');
+  container.innerHTML = '';
+  DATA.forEach(cat => {
+    const block = document.createElement('div');
+    block.className = 'category-block';
+
+    const hdr = document.createElement('div');
+    hdr.className = 'category-header';
+    hdr.innerHTML = `
+      <span class="category-name">${cat.cat}</span>
+      <span class="cat-badge" id="badge-${sid(cat.cat)}"></span>
+      <span class="category-count">${cat.items.length} itens</span>
+      <span class="chevron open" id="chev-${sid(cat.cat)}">&#9660;</span>`;
+    hdr.onclick = () => {
+      const tw = document.getElementById('tw-'+sid(cat.cat));
+      const ch = document.getElementById('chev-'+sid(cat.cat));
+      const isOpen = ch.classList.contains('open');
+      ch.classList.toggle('open', !isOpen);
+      tw.style.display = isOpen ? 'none' : 'block';
+    };
+
+    const tw = document.createElement('div');
+    tw.className = 'table-wrap'; tw.id = 'tw-'+sid(cat.cat);
+
+    const table = document.createElement('table');
+    const thead = document.createElement('thead');
+    thead.innerHTML = `<tr>
+      <th style="width:40px"></th>
+      <th>Produto</th>
+      <th style="width:175px">Quantidade</th>
+      <th style="width:235px">Dias de entrega</th>
+    </tr>`;
+    const tbody = document.createElement('tbody');
+
+    cat.items.forEach(item => {
+      const id = cat.cat+'::'+item.name;
+      const s = state[id];
+
+      const tr = document.createElement('tr');
+      tr.className = 'main-row';
+
+      // checkbox cell
+      const tdCb = document.createElement('td'); tdCb.className = 'td-cb';
+      const cb = document.createElement('div');
+      cb.className = 'check-box'+(s.selected?' checked':''); cb.id = 'cb-'+sid(id);
+      cb.innerHTML = '<svg class="check-icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>';
+      cb.onclick = () => toggleItem(id);
+      tdCb.appendChild(cb);
+
+      // name cell
+      const tdName = document.createElement('td'); tdName.className = 'td-name';
+      tdName.innerHTML = `<div class="item-name">${item.name}</div>
+        ${item.supplier?`<div class="item-supplier">${item.supplier}</div>`:''}
+        <span class="item-chip" id="chip-${sid(id)}"></span>`;
+      tdName.onclick = () => toggleItem(id);
+
+      // qty cell
+      const tdQty = document.createElement('td'); tdQty.className = 'td-qty';
+      tdQty.innerHTML = `<div class="qty-wrap">
+        <input type="number" min="0" step="0.1" placeholder="0" value="${s.qty}"
+          oninput="state['${id}'].qty=this.value;updateChip('${id}')"
+          onclick="event.stopPropagation()">
+        <select onchange="state['${id}'].unit=this.value;updateChip('${id}')" onclick="event.stopPropagation()">
+          ${UNITS.map(u=>`<option${s.unit===u?' selected':''}>${u}</option>`).join('')}
+        </select>
+      </div>`;
+
+      // days cell
+      const tdDays = document.createElement('td'); tdDays.className = 'td-days';
+      const dw = document.createElement('div'); dw.className = 'days-wrap';
+      DAYS.forEach(d => {
+        const btn = document.createElement('button');
+        btn.className = 'day-btn'+(s.days.includes(d)?' active':'');
+        btn.textContent = d;
+        btn.onclick = e => { e.stopPropagation(); toggleDay(id, d, btn); };
+        dw.appendChild(btn);
+      });
+      tdDays.appendChild(dw);
+
+      tr.appendChild(tdCb); tr.appendChild(tdName); tr.appendChild(tdQty); tr.appendChild(tdDays);
+
+      // expand row
+      const expTr = document.createElement('tr');
+      expTr.className = 'exp-row'; expTr.id = 'exp-'+sid(id);
+      expTr.style.display = s.selected ? 'table-row' : 'none';
+      const expTd = document.createElement('td'); expTd.colSpan = 4;
+      expTd.innerHTML = `<div class="exp-inner">
+        <div class="exp-label">Observação</div>
+        <input type="text" placeholder="ex: cortar em cubos, fatiar fino..." value="${s.obs}"
+          oninput="state['${id}'].obs=this.value" onclick="event.stopPropagation()">
+      </div>`;
+      expTr.appendChild(expTd);
+
+      tbody.appendChild(tr); tbody.appendChild(expTr);
+    });
+
+    table.appendChild(thead); table.appendChild(tbody);
+    tw.appendChild(table);
+    block.appendChild(hdr); block.appendChild(tw);
+    container.appendChild(block);
+  });
+  updateStats();
+}
+
+renderAll();
+</script>
+</body>
+</html>
