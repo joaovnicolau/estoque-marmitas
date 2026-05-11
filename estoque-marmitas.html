@@ -422,6 +422,12 @@ function buildBtns(key, dis) {
          '<td class="center"><button class="btn btn-cal" onclick="_abrirModal(\'' + key + '\')"' + d + ' title="Data manual">\uD83D\uDCC5</button></td>';
 }
 function render() {
+  // Salva quais categorias estao abertas antes de re-renderizar
+  var abertas = {};
+  document.querySelectorAll('.category-body.open').forEach(function(el) {
+    abertas[el.id] = true;
+  });
+
   var container = document.getElementById('categories-container');
   var total = 0, tipos = 0, venc = 0, today = todayStr(), html = '';
 
@@ -465,6 +471,15 @@ function render() {
   });
 
   container.innerHTML = html;
+
+  // Restaura categorias que estavam abertas
+  Object.keys(abertas).forEach(function(id) {
+    var body = document.getElementById(id);
+    var catId = id.replace('body-', '');
+    var chev = document.getElementById('chev-' + catId);
+    if (body) body.classList.add('open');
+    if (chev) chev.classList.add('open');
+  });
   document.getElementById('stat-total').textContent = total;
   document.getElementById('stat-tipos').textContent = tipos;
   document.getElementById('stat-venc').textContent = venc;
