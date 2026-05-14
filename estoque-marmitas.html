@@ -1418,18 +1418,26 @@ estoqueRef.on('value', function(snapshot){
   setStatus('offline'); showToast('Erro de conexao.'); render();
 });
 
+
 // Escuta historico em tempo real
 historicoRef.orderByChild('ts').limitToLast(50).on('value', function(snap) {
   historico = [];
   snap.forEach(function(child) { historico.push(child.val()); });
-  historico.reverse(); // mais recente primeiro
-  // Atualiza modal se estiver aberto
+  historico.reverse();
   if (document.getElementById('historico-overlay').classList.contains('open')) {
     document.getElementById('historico-conteudo').innerHTML = renderHistoricoHTML(historico);
   }
 });
 
-// Init compras
+// Escuta cardapio em tempo real
+cardapioRef.on('value', function(snapCardapio) {
+  var savedCardapio = snapCardapio.val();
+  if (savedCardapio && Array.isArray(savedCardapio) && savedCardapio.length > 0) {
+    categoriasCustom = savedCardapio;
+    render();
+  }
+});
+
 </script>
 </body>
 </html>
