@@ -542,7 +542,8 @@ function render() {
   var container = document.getElementById('categories-container');
   var total = 0, tipos = 0, venc = 0, today = todayStr(), html = '';
 
-  CATEGORIAS.forEach(function(cat, catIdx) {
+  var cats = getCategorias();
+  cats.forEach(function(cat, catIdx) {
     var catId = 'cat-' + catIdx;
     html += '<div class="category-block" id="' + catId + '">';
     html += '<div class="category-header" onclick="toggleCategoria(\'' + catId + '\')">';
@@ -725,7 +726,7 @@ function limparBusca() {
 }
 function abrirResumo() {
   var html = '', temAlgo = false;
-  CATEGORIAS.forEach(function(cat, catIdx){
+  getCategorias().forEach(function(cat, catIdx){
     var bloco = '';
     cat.itens.forEach(function(item, itemIdx){
       if (cat.fitness) {
@@ -752,7 +753,7 @@ function fecharResumo() { document.getElementById('resumo-overlay').classList.re
 document.getElementById('resumo-overlay').addEventListener('click', function(e){ if (e.target===this) fecharResumo(); });
 function copiarEstoque(tamanho) {
   var linhas = [];
-  CATEGORIAS.forEach(function(cat, catIdx){
+  getCategorias().forEach(function(cat, catIdx){
     cat.itens.forEach(function(item, itemIdx){
       var qty = 0;
       if (cat.fitness) { if (tamanho==='fit') qty=(state[stateKey(catIdx,itemIdx,'fit')]||[]).length; }
@@ -769,7 +770,7 @@ function copiarEstoque(tamanho) {
 }
 function abrirRanking() {
   var itens = [];
-  CATEGORIAS.forEach(function(cat, catIdx){
+  getCategorias().forEach(function(cat, catIdx){
     if (cat.fitness) return;
     cat.itens.forEach(function(item, itemIdx){
       var q350 = (state[stateKey(catIdx,itemIdx,'350')]||[]).length, q500 = (state[stateKey(catIdx,itemIdx,'500')]||[]).length;
@@ -811,7 +812,7 @@ function exportarBackup() {
   if (!state || !Object.keys(state).length) { showToast('Estoque vazio, nada para exportar.'); return; }
   var agora = new Date(), dataStr = agora.toLocaleDateString('pt-BR') + ' ' + String(agora.getHours()).padStart(2,'0') + ':' + String(agora.getMinutes()).padStart(2,'0');
   var linhas = ['BACKUP DO ESTOQUE DE MARMITAS', 'Gerado em: ' + dataStr, ''];
-  CATEGORIAS.forEach(function(cat, catIdx){
+  getCategorias().forEach(function(cat, catIdx){
     var bloco = [], tem = false;
     cat.itens.forEach(function(item, itemIdx){
       if (cat.fitness) {
@@ -903,7 +904,7 @@ function montarResumoEstoque() {
   var linhas = [], totalGeral = 0, vencendoBreve = [], zerados = [];
   var total350 = 0, total500 = 0;
 
-  CATEGORIAS.forEach(function(cat, catIdx) {
+  getCategorias().forEach(function(cat, catIdx) {
     if (cat.fitness) return;
     cat.itens.forEach(function(item, itemIdx) {
       var d350 = state[stateKey(catIdx, itemIdx, '350')] || [];
@@ -1034,7 +1035,7 @@ function buscarNoEstoque(nomeBusca, tam) {
   if (!palavras.length) return [];
 
   var candidatos = [];
-  CATEGORIAS.forEach(function(cat, catIdx) {
+  getCategorias().forEach(function(cat, catIdx) {
     if (cat.fitness) return;
     cat.itens.forEach(function(item, itemIdx) {
       var nomeItem = item.toLowerCase();
@@ -1146,7 +1147,7 @@ function migrarParaNomeChave(dadosAntigos) {
   console.log('Migrando estoque para chaves por nome...');
   var novoState = {};
 
-  CATEGORIAS.forEach(function(cat, catIdx) {
+  getCategorias().forEach(function(cat, catIdx) {
     cat.itens.forEach(function(item, itemIdx) {
       ['350', '500', 'fit'].forEach(function(tam) {
         var keyAntiga = stateKeyLegacy(catIdx, itemIdx, tam);
