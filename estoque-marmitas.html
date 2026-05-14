@@ -1256,7 +1256,12 @@ function rowTemAlerta(row) {
 var categoriasCustom = null;
 
 function getCategorias() {
-  return categoriasCustom || CATEGORIAS;
+  var cats = categoriasCustom || CATEGORIAS;
+  return cats.filter(function(cat) { return cat && cat.nome; }).map(function(cat) {
+    if (!cat.itens) cat.itens = [];
+    if (!cat.emoji) cat.emoji = '\uD83C\uDF7D';
+    return cat;
+  });
 }
 
 function salvarCardapioFirebase() {
@@ -1285,6 +1290,8 @@ function renderGerenciar() {
   var cats = getCategorias();
   var html = '';
   cats.forEach(function(cat, catIdx) {
+    if (!cat || !cat.nome) return;
+    if (!cat.itens) cat.itens = [];
     if (cat.fitness) return; // nao permite editar fitness
     html += '<div style="margin-bottom:16px;border:0.5px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;">';
     // Category header
@@ -1313,9 +1320,13 @@ function renderGerenciar() {
 
 function getCategoriasEditaveis() {
   if (!categoriasCustom) {
-    // Deep copy
     categoriasCustom = JSON.parse(JSON.stringify(CATEGORIAS));
   }
+  categoriasCustom.forEach(function(cat) {
+    if (!cat.itens) cat.itens = [];
+    if (!cat.emoji) cat.emoji = '\uD83C\uDF7D';
+    if (!cat.nome) cat.nome = 'Sem nome';
+  });
   return categoriasCustom;
 }
 
