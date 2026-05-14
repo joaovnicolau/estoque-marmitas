@@ -526,11 +526,20 @@ function confirmarManual() {
   saveState(function(){ showToast('+' + qty + ' adicionada(s) - vence em ' + formatDate(dateVal)); });
 }
 document.getElementById('modal-overlay').addEventListener('click', function(e){ if (e.target === this) closeModal(); });
-function buildBtns(key, dis) {
+function buildBtns(key, dis, nomeItem) {
   var d = dis ? ' disabled' : '';
-  return '<td class="center"><button class="btn btn-minus" onclick="_remover(\'' + key + '\')"' + d + '>-</button></td>' +
-         '<td class="center"><button class="btn btn-plus" onclick="_adicionar(\'' + key + '\')"' + d + '>+</button></td>' +
-         '<td class="center"><button class="btn btn-cal" onclick="_abrirModal(\'' + key + '\')"' + d + ' title="Data manual">\uD83D\uDCC5</button></td>';
+  var dataAttr = nomeItem ? ' data-nome="' + (nomeItem || '').replace(/"/g, '&quot;') + '"' : '';
+  return '<td class="center"><button class="btn btn-minus"' + dataAttr + ' onclick="_removerBtn(this,\'' + key + '\')"' + d + '>-</button></td>' +
+         '<td class="center"><button class="btn btn-plus"' + dataAttr + ' onclick="_adicionarBtn(this,\'' + key + '\')"' + d + '>+</button></td>' +
+         '<td class="center"><button class="btn btn-cal" onclick="_abrirModal(\'' + key + '\')"' + d + ' title="Data manual">&#x1F4C5;</button></td>';
+}
+
+function _adicionarBtn(el, key) {
+  _adicionar(key, el ? el.getAttribute('data-nome') : null);
+}
+
+function _removerBtn(el, key) {
+  _remover(key, el ? el.getAttribute('data-nome') : null);
 }
 function render() {
   // Salva quais categorias estao abertas antes de re-renderizar
@@ -562,7 +571,7 @@ function render() {
         total += datas.length; if (datas.length > 0) tipos++;
         var oldest = getOldest(datas);
         if (oldest && (new Date(oldest) - new Date(today)) / 86400000 <= 30) venc++;
-        html += '<tr class="row-fit"><td class="td-sabor">' + item + '</td><td class="center">' + renderQty(datas) + '</td>' + buildBtns(key, syncing) + '<td>' + renderValidade(datas) + '</td></tr>';
+        html += '<tr class="row-fit"><td class="td-sabor">' + item + '</td><td class="center">' + renderQty(datas) + '</td>' + buildBtns(key, syncing, item) + '<td>' + renderValidade(datas) + '</td></tr>';
       });
       html += '</tbody></table>';
     } else {
@@ -574,8 +583,8 @@ function render() {
         total += d350.length + d500.length;
         if (d350.length > 0 || d500.length > 0) tipos++;
         [d350, d500].forEach(function(d){ var o = getOldest(d); if (o && (new Date(o)-new Date(today))/86400000 <= 30) venc++; });
-        html += '<tr class="row-350"><td class="td-sabor" rowspan="2">' + item + '</td><td class="center"><span class="size-badge badge-350">350g</span></td><td class="center">' + renderQty(d350) + '</td>' + buildBtns(k350, syncing) + '<td>' + renderValidade(d350) + '</td></tr>';
-        html += '<tr class="row-500"><td class="center"><span class="size-badge badge-500">500g</span></td><td class="center">' + renderQty(d500) + '</td>' + buildBtns(k500, syncing) + '<td>' + renderValidade(d500) + '</td></tr>';
+        html += '<tr class="row-350"><td class="td-sabor" rowspan="2">' + item + '</td><td class="center"><span class="size-badge badge-350">350g</span></td><td class="center">' + renderQty(d350) + '</td>' + buildBtns(k350, syncing, item) + '<td>' + renderValidade(d350) + '</td></tr>';
+        html += '<tr class="row-500"><td class="center"><span class="size-badge badge-500">500g</span></td><td class="center">' + renderQty(d500) + '</td>' + buildBtns(k500, syncing, item) + '<td>' + renderValidade(d500) + '</td></tr>';
       });
       html += '</tbody></table>';
     }
@@ -654,25 +663,27 @@ function saveState(cb) {
     });
   });
 }
-function _adicionar(key) {
+function _adicionar(key, nomeItem) {
   if (syncing) return;
   var snap = (state[key] || []).slice();
   if (!state[key]) state[key] = [];
   var validade = todayPlus60();
   state[key].push(validade);
   var label = key.indexOf('350') > -1 ? ' (350g)' : key.indexOf('500') > -1 ? ' (500g)' : '';
-  var desc = '+1 adicionada' + label + ' - ' + nomeDoKey(key) + ' - vence ' + formatDate(validade);
+  var nome = nomeItem || nomeDoKey(key);
+  var desc = '+1 adicionada' + label + ' - ' + nome + ' - vence ' + formatDate(validade);
   registrarAcao('add', desc, key, snap);
   saveState(function(){ showToast('+1 adicionada' + label + ' - vence em ' + formatDate(validade)); });
 }
-function _remover(key) {
+function _remover(key, nomeItem) {
   if (syncing) return;
   if (!state[key] || !state[key].length) { showToast('Estoque vazio!'); return; }
   var snap = state[key].slice();
   var oldest = state[key].reduce(function(a,b){return a<b?a:b;});
   state[key].splice(state[key].indexOf(oldest), 1);
   var label = key.indexOf('350') > -1 ? ' (350g)' : key.indexOf('500') > -1 ? ' (500g)' : '';
-  var desc = '-1 removida' + label + ' - ' + nomeDoKey(key) + ' - validade era ' + formatDate(oldest);
+  var nome = nomeItem || nomeDoKey(key);
+  var desc = '-1 removida' + label + ' - ' + nome + ' - validade era ' + formatDate(oldest);
   registrarAcao('remove', desc, key, snap);
   saveState(function(){ showToast('Removida' + label + ' - validade era ' + formatDate(oldest)); });
 }
@@ -1257,9 +1268,9 @@ var categoriasCustom = null;
 
 function getCategorias() {
   var cats = categoriasCustom || CATEGORIAS;
-  return cats.filter(function(cat) { return cat && cat.nome; }).map(function(cat) {
+  return cats.filter(function(cat){ return cat && cat.nome; }).map(function(cat){
     if (!cat.itens) cat.itens = [];
-    if (!cat.emoji) cat.emoji = '\uD83C\uDF7D';
+    if (!cat.emoji) cat.emoji = String.fromCodePoint(0x1F37D);
     return cat;
   });
 }
@@ -1320,13 +1331,9 @@ function renderGerenciar() {
 
 function getCategoriasEditaveis() {
   if (!categoriasCustom) {
+    // Deep copy
     categoriasCustom = JSON.parse(JSON.stringify(CATEGORIAS));
   }
-  categoriasCustom.forEach(function(cat) {
-    if (!cat.itens) cat.itens = [];
-    if (!cat.emoji) cat.emoji = '\uD83C\uDF7D';
-    if (!cat.nome) cat.nome = 'Sem nome';
-  });
   return categoriasCustom;
 }
 
