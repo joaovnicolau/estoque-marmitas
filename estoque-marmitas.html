@@ -1042,7 +1042,20 @@ function buscarNoEstoque(nomeBusca, tam) {
   var busca = nomeBusca.toLowerCase();
   // Remove prefixos numericos e tracos
   busca = busca.replace(/^[\d\-\s]+/, '').trim();
-  var palavras = busca.split(' ').filter(function(p){ return p.length > 2; });
+
+  // Palavras ignoradas (acompanhamentos genéricos que nao identificam o prato)
+  var ignorar = ['com', 'arroz', 'feijao', 'feijão', 'couve', 'farofa', 'batata', 'legumes',
+    'molho', 'tomate', 'creme', 'purê', 'pure', 'assado', 'assadas', 'grelhado', 'grelhada',
+    'frito', 'frita', 'soltinho', 'preto', 'carioca', 'branco', 'chips', 'palha',
+    'rustica', 'rústica', 'rustico', 'rústico', 'vinagrete', 'ovo', 'queijo', 'mussarela',
+    'suina', 'suína', 'suíno', 'suino', 'fresca', 'congelada', 'temperada', 'especial'];
+
+  var palavrasTodas = busca.split(' ').filter(function(p){ return p.length > 2; });
+  // Palavras principais: nao estao na lista de ignoradas
+  var palavrasChave = palavrasTodas.filter(function(p){ return ignorar.indexOf(p) === -1; });
+  // Se nao sobrou palavra chave, usa todas
+  var palavras = palavrasChave.length > 0 ? palavrasChave : palavrasTodas;
+
   if (!palavras.length) return [];
 
   var candidatos = [];
@@ -1050,18 +1063,22 @@ function buscarNoEstoque(nomeBusca, tam) {
     if (cat.fitness) return;
     cat.itens.forEach(function(item, itemIdx) {
       var nomeItem = item.toLowerCase();
-      // Conta quantas palavras batem
-      var acertos = palavras.filter(function(p){ return nomeItem.indexOf(p) > -1; }).length;
-      var score = acertos / palavras.length;
-      // Aceita se pelo menos 50% das palavras batem
-      if (score >= 0.5) {
+      // Score baseado em palavras-chave
+      var acertosChave = palavras.filter(function(p){ return nomeItem.indexOf(p) > -1; }).length;
+      var scoreChave = acertosChave / palavras.length;
+
+      // Tambem verifica palavras totais para desempate
+      var acertosTodos = palavrasTodas.filter(function(p){ return nomeItem.indexOf(p) > -1; }).length;
+      var scoreTodos = acertosTodos / palavrasTodas.length;
+
+      // Exige 70% das palavras-chave para aceitar (mais rigoroso)
+      if (scoreChave >= 0.6) {
         var qty = (state[stateKey(catIdx, itemIdx, tam)] || []).length;
-        candidatos.push({ nome: item, qty: qty, score: score });
+        candidatos.push({ nome: item, qty: qty, score: scoreChave + scoreTodos * 0.1 });
       }
     });
   });
 
-  // Retorna apenas o melhor resultado
   if (!candidatos.length) return [];
   candidatos.sort(function(a, b){ return b.score - a.score; });
   return [candidatos[0]];
