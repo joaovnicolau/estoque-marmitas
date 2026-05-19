@@ -318,7 +318,47 @@ input[type="text"]:focus { border-color: var(--text); }
 }
 .toast.show { opacity: 1; transform: translateY(0); }
 
-.footer-bar {
+.form-group { margin-bottom: 14px; }
+.form-label { display: block; font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 5px; }
+.form-input {
+  width: 100%; height: 36px; padding: 0 10px;
+  font-size: 13px; font-family: 'DM Sans', sans-serif;
+  border: 0.5px solid var(--border-strong); border-radius: var(--radius-sm);
+  background: var(--surface); color: var(--text); outline: none; transition: border-color 0.15s;
+}
+.form-input:focus { border-color: var(--text); }
+.form-select {
+  width: 100%; height: 36px; padding: 0 10px;
+  font-size: 13px; font-family: 'DM Sans', sans-serif;
+  border: 0.5px solid var(--border-strong); border-radius: var(--radius-sm);
+  background: var(--surface); color: var(--text); outline: none; cursor: pointer;
+}
+.form-error { font-size: 11px; color: #a32d2d; margin-top: 4px; display: none; }
+.form-error.visible { display: block; }
+.custom-item-tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 11px; background: var(--amber-bg); color: var(--amber-text);
+  border-radius: 20px; padding: 2px 8px; margin-top: 2px;
+}
+.search-wrap {
+  position: relative; margin-bottom: 1.25rem;
+}
+.search-input {
+  width: 100%; height: 36px; padding: 0 36px 0 12px;
+  font-size: 13px; font-family: 'DM Sans', sans-serif;
+  border: 0.5px solid var(--border-strong); border-radius: var(--radius-sm);
+  background: var(--surface); color: var(--text); outline: none;
+  transition: border-color 0.15s;
+}
+.search-input:focus { border-color: var(--text); }
+.search-clear {
+  position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+  width: 20px; height: 20px; display: none; align-items: center; justify-content: center;
+  background: var(--border-strong); color: white; border: none;
+  border-radius: 50%; cursor: pointer; font-size: 11px; line-height: 1;
+}
+.search-clear.visible { display: flex; }
+.search-clear:hover { background: var(--text); }
   margin-top: 1rem; font-size: 11px; color: var(--text-light);
   display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px; padding: 0 2px;
 }
@@ -364,6 +404,7 @@ input[type="text"]:focus { border-color: var(--text); }
         <button class="btn-resumo" onclick="openSummary()">
           Resumo &nbsp;<span id="header-count" style="background:rgba(255,255,255,0.18);border-radius:20px;padding:1px 7px;font-size:12px;font-weight:600;">0</span>
         </button>
+        <button class="icon-btn" onclick="openCadastro()" title="Cadastrar item">&#xff0b;</button>
         <button class="icon-btn" onclick="clearAll()" title="Limpar tudo">&#x1F5D1;</button>
       </div>
       <span class="week-label" id="week-label"></span>
@@ -371,6 +412,11 @@ input[type="text"]:focus { border-color: var(--text); }
   </div>
 
 
+
+  <div class="search-wrap">
+    <input class="search-input" id="search-input" type="text" placeholder="Buscar produto...">
+    <button class="search-clear" id="search-clear" onclick="clearSearch()" title="Limpar busca">&#x2715;</button>
+  </div>
 
   <div id="cats-container"></div>
 
@@ -865,6 +911,7 @@ function renderAll() {
 
       const tr = document.createElement('tr');
       tr.className = 'main-row';
+      tr.id = 'tr-'+sid(id);
 
       // name cell — with days buttons below
       const tdName = document.createElement('td'); tdName.className = 'td-name';
@@ -884,6 +931,7 @@ function renderAll() {
       });
       tdName.innerHTML = `<div class="item-name">${item.name}</div>
         ${item.supplier?`<div class="item-supplier">${item.supplier}</div>`:''}
+        ${item.custom?`<span class="custom-item-tag">personalizado</span>`:''}
         <span class="item-chip" id="chip-${sid(id)}"></span>`;
       tdName.appendChild(dw);
       tr.appendChild(tdName);
@@ -915,10 +963,106 @@ function renderAll() {
   updateStats();
 }
 
+// ── CUSTOM ITEMS ──
+const customItemsRef = db.ref('custom_items');
+let customItems = [];
+let customLoaded = false, comprasLoaded = false;
+
+function maybeRender() {
+  if (customLoaded && comprasLoaded) { renderAll(); setStatus('online'); }
+}
+
+customItemsRef.once('value', snap => {
+  customItems = snap.val() ? Object.values(snap.val()) : [];
+  customItems.forEach(item => addCustomItemToData(item));
+  customLoaded = true;
+  maybeRender();
+});
+
+function addCustomItemToData(item) {
+  const cat = DATA.find(c => c.cat === item.cat);
+  if (!cat) return;
+  const exists = cat.items.some(i => i.name === item.name);
+  if (!exists) {
+    cat.items.push({ name: item.name, supplier: item.supplier || '', unit: item.unit || 'kg', custom: true });
+    const id = item.cat + '::'+ item.name;
+    if (!state[id]) state[id] = { selected: false, daysQty: {}, obs: '', defaultUnit: item.unit || 'kg' };
+  }
+}
+
+function openCadastro() {
+  document.getElementById('cad-nome').value = '';
+  document.getElementById('cad-fornecedor').value = '';
+  document.getElementById('cad-cat').value = '';
+  document.getElementById('cad-unit').value = 'kg';
+  document.getElementById('cad-nome-err').classList.remove('visible');
+  document.getElementById('cad-cat-err').classList.remove('visible');
+  document.getElementById('cadastro-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('cad-nome').focus(), 100);
+}
+
+function closeCadastro() {
+  document.getElementById('cadastro-overlay').classList.remove('open');
+}
+
+function salvarItem() {
+  const nome = document.getElementById('cad-nome').value.trim();
+  const cat = document.getElementById('cad-cat').value;
+  const fornecedor = document.getElementById('cad-fornecedor').value.trim();
+  const unit = document.getElementById('cad-unit').value;
+  let valid = true;
+  if (!nome) { document.getElementById('cad-nome-err').classList.add('visible'); valid = false; }
+  else document.getElementById('cad-nome-err').classList.remove('visible');
+  if (!cat) { document.getElementById('cad-cat-err').classList.add('visible'); valid = false; }
+  else document.getElementById('cad-cat-err').classList.remove('visible');
+  if (!valid) return;
+  const item = { name: nome, supplier: fornecedor, cat, unit, custom: true };
+  const safeKey = (cat + '::'+ nome).replace(/[.#$\/\[\]]/g, '_');
+  customItemsRef.child(safeKey).set(item).then(() => {
+    addCustomItemToData(item);
+    renderAll();
+    closeCadastro();
+    showToast('Item "' + nome + '" cadastrado!');
+    setStatus('online');
+  });
+}
+
+// ── SEARCH ──
+document.getElementById('search-input').addEventListener('input', function() {
+  const q = this.value.trim().toLowerCase();
+  document.getElementById('search-clear').classList.toggle('visible', q.length > 0);
+  DATA.forEach(cat => {
+    const tw = document.getElementById('tw-'+sid(cat.cat));
+    const chev = document.getElementById('chev-'+sid(cat.cat));
+    const block = tw && tw.parentElement;
+    if (!tw) return;
+    let anyVisible = false;
+    cat.items.forEach(item => {
+      const id = cat.cat+'::'+item.name;
+      const row = document.getElementById('tr-'+sid(id));
+      const expRow = document.getElementById('exp-'+sid(id));
+      if (!row) return;
+      const match = !q || item.name.toLowerCase().includes(q) || (item.supplier||'').toLowerCase().includes(q);
+      row.style.display = match ? '' : 'none';
+      if (expRow) expRow.style.display = (match && state[id].selected) ? 'table-row' : 'none';
+      if (match) anyVisible = true;
+    });
+    if (block) block.style.display = anyVisible ? '' : 'none';
+    if (q && anyVisible) { tw.style.display = 'block'; if (chev) chev.classList.add('open'); }
+    else if (!q) { tw.style.display = 'none'; if (chev) chev.classList.remove('open'); }
+  });
+});
+
+function clearSearch() {
+  const inp = document.getElementById('search-input');
+  inp.value = ''; inp.dispatchEvent(new Event('input')); inp.focus();
+}
+
 // Carrega do Firebase e renderiza
 // Fallback: renderiza mesmo se Firebase demorar
 const fallbackTimer = setTimeout(() => {
   if (!document.querySelector('.category-block')) {
+    customLoaded = true; comprasLoaded = true;
     renderAll();
     setStatus('offline');
   }
@@ -938,8 +1082,8 @@ comprasRef.once('value', snap => {
       state[id].selected = saved.selected || Object.keys(state[id].daysQty).length > 0;
     }
   }));
-  renderAll();
-  setStatus('online');
+  comprasLoaded = true;
+  maybeRender();
 
   // Escuta mudanças de outros dispositivos em tempo real
   comprasRef.on('child_changed', snap => {
@@ -1010,3 +1154,55 @@ function openCart() {
   document.getElementById('cart-overlay').classList.add('open');
 }
 </script>
+
+<!-- MODAL CADASTRO -->
+<div class="modal-overlay" id="cadastro-overlay" onclick="if(event.target===this)closeCadastro()">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-header">
+      <h3>Cadastrar item</h3>
+      <button class="modal-close" onclick="closeCadastro()">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Nome do produto *</label>
+        <input class="form-input" id="cad-nome" type="text" placeholder="ex: Aipim fresco">
+        <div class="form-error" id="cad-nome-err">Preencha o nome do produto</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Fornecedor</label>
+        <input class="form-input" id="cad-fornecedor" type="text" placeholder="ex: Atacado da Serra">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Categoria *</label>
+        <select class="form-select" id="cad-cat">
+          <option value="">Selecione...</option>
+          <option value="Proteínas">Proteínas</option>
+<option value="Laticínios / Frios">Laticínios / Frios</option>
+<option value="Temperos / Condimentos">Temperos / Condimentos</option>
+<option value="Mercearia">Mercearia</option>
+<option value="Horti-fruti">Horti-fruti</option>
+<option value="Higiene / Limpeza">Higiene / Limpeza</option>
+        </select>
+        <div class="form-error" id="cad-cat-err">Selecione uma categoria</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Unidade padrão</label>
+        <select class="form-select" id="cad-unit">
+          <option value="kg">kg</option>
+<option value="g">g</option>
+<option value="L">L</option>
+<option value="ml">ml</option>
+<option value="un">un</option>
+<option value="cx">cx</option>
+<option value="pct">pct</option>
+<option value="mç">mç</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="modal-btn primary" onclick="salvarItem()">Salvar item</button>
+      <button class="modal-btn" onclick="closeCadastro()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
