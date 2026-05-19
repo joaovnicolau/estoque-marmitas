@@ -335,11 +335,34 @@ input[type="text"]:focus { border-color: var(--text); }
 }
 .form-error { font-size: 11px; color: #a32d2d; margin-top: 4px; display: none; }
 .form-error.visible { display: block; }
-.custom-item-tag {
-  display: inline-flex; align-items: center; gap: 4px;
-  font-size: 11px; background: var(--amber-bg); color: var(--amber-text);
-  border-radius: 20px; padding: 2px 8px; margin-top: 2px;
+.custom-list-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 9px 10px; border-radius: var(--radius-sm);
+  background: var(--gray-bg); margin-bottom: 4px;
 }
+.custom-list-item-info { flex: 1; min-width: 0; }
+.custom-list-item-name { font-size: 13px; font-weight: 500; color: var(--text); }
+.custom-list-item-meta { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+.btn-delete {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; flex-shrink: 0;
+  border: 0.5px solid var(--border-strong); border-radius: var(--radius-sm);
+  background: white; color: var(--text-muted); cursor: pointer;
+  font-size: 13px; transition: all 0.12s; margin-left: 8px;
+}
+.btn-delete:hover { background: #fcebeb; border-color: #a32d2d; color: #a32d2d; }
+.cad-empty { text-align: center; padding: 28px 0; color: var(--text-muted); font-size: 13px; }
+.list-cat-block { margin-bottom: 14px; }
+.list-cat-label { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; padding: 4px 0; margin-bottom: 4px; }
+.list-item-actions { display: flex; gap: 4px; flex-shrink: 0; }
+.btn-edit {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; border: 0.5px solid var(--border-strong);
+  border-radius: var(--radius-sm); background: white; cursor: pointer; font-size: 13px;
+  transition: all 0.12s;
+}
+.btn-edit:hover { background: var(--gray-bg); }
+.edit-inline { padding: 10px 12px; background: var(--gray-bg); border-radius: var(--radius-sm); margin-bottom: 4px; }
 .search-wrap {
   position: relative; margin-bottom: 1.25rem;
 }
@@ -931,7 +954,6 @@ function renderAll() {
       });
       tdName.innerHTML = `<div class="item-name">${item.name}</div>
         ${item.supplier?`<div class="item-supplier">${item.supplier}</div>`:''}
-        ${item.custom?`<span class="custom-item-tag">personalizado</span>`:''}
         <span class="item-chip" id="chip-${sid(id)}"></span>`;
       tdName.appendChild(dw);
       tr.appendChild(tdName);
@@ -990,6 +1012,152 @@ function addCustomItemToData(item) {
   }
 }
 
+function switchTab(tab) {
+  const isNovo = tab === 'novo';
+  document.getElementById('cad-tab-novo').style.display = isNovo ? '' : 'none';
+  document.getElementById('cad-tab-lista').style.display = isNovo ? 'none' : '';
+  document.getElementById('cad-footer').style.display = isNovo ? '' : 'none';
+  const btnNovo = document.getElementById('tab-novo');
+  const btnLista = document.getElementById('tab-lista');
+  btnNovo.style.background = isNovo ? 'var(--text)' : 'white';
+  btnNovo.style.color = isNovo ? 'white' : 'var(--text-muted)';
+  btnLista.style.background = isNovo ? 'white' : 'var(--text)';
+  btnLista.style.color = isNovo ? 'var(--text-muted)' : 'white';
+  if (!isNovo) renderAllItemsList();
+}
+
+function renderAllItemsList() {
+  const container = document.getElementById('cad-lista-items');
+  const searchEl = document.getElementById('list-search');
+  const q = searchEl ? searchEl.value.toLowerCase() : '';
+
+  const allItems = [];
+  DATA.forEach(cat => cat.items.forEach(item => {
+    allItems.push({name: item.name, supplier: item.supplier||'', unit: item.unit||'kg', cat: cat.cat, emoji: cat.emoji, custom: !!item.custom});
+  }));
+  const filtered = q ? allItems.filter(i =>
+    i.name.toLowerCase().includes(q) || i.supplier.toLowerCase().includes(q) || i.cat.toLowerCase().includes(q)
+  ) : allItems;
+
+  let html = '<div class="search-wrap" style="margin-bottom:12px"><input class="search-input" id="list-search" type="text" placeholder="Filtrar produtos..."' +
+    ' value="" oninput="renderAllItemsList()"><button class="search-clear" id="list-clear-btn" onclick="clearListSearch()">&#x2715;</button></div>';
+
+  if (!filtered.length) {
+    container.innerHTML = html + '<div class="cad-empty">Nenhum item encontrado.</div>';
+    if (q) { const el = container.querySelector('#list-search'); if(el) { el.value = q; el.querySelector && true; container.querySelector('#list-clear-btn').classList.add('visible'); } }
+    return;
+  }
+
+  const byCat = {};
+  DATA.forEach(cat => { byCat[cat.cat] = []; });
+  filtered.forEach(i => { if (byCat[i.cat]) byCat[i.cat].push(i); });
+
+  DATA.filter(cd => byCat[cd.cat] && byCat[cd.cat].length).forEach(cd => {
+    html += '<div class="list-cat-block"><div class="list-cat-label">' + (cd.emoji||'') + ' ' + cd.cat + '</div>';
+    byCat[cd.cat].forEach(item => {
+      const key = cd.cat + '::' + item.name;
+      const sk = sid(key);
+      html += '<div class="custom-list-item" id="row-' + sk + '">';
+      html += '<div class="custom-list-item-info" id="eview-' + sk + '">';
+      html += '<div class="custom-list-item-name">' + item.name + '</div>';
+      html += '<div class="custom-list-item-meta">' + (item.supplier ? item.supplier + ' · ' : '') + item.unit + '</div>';
+      html += '</div>';
+      html += '<div class="list-item-actions" id="eact-' + sk + '">';
+      html += '<button class="btn-edit" data-key="' + sk + '" onclick="openEditItem(this.dataset.key)">✏️</button>';
+      html += '<button class="btn-delete" data-key="' + sk + '" data-nome="' + item.name.replace(/"/g,'&quot;') + '" data-custom="' + (item.custom ? '1' : '0') + '" onclick="deletarItemFromList(this.dataset.key,this.dataset.nome,+this.dataset.custom)">&#x1F5D1;</button>';
+      html += '</div></div>';
+      html += '<div class="edit-inline" id="eform-' + sk + '" style="display:none">';
+      html += '<input class="form-input" id="enome-' + sk + '" type="text" value="' + item.name.replace(/"/g,'&quot;') + '" placeholder="Nome" style="margin-bottom:6px">';
+      html += '<input class="form-input" id="eforn-' + sk + '" type="text" value="' + item.supplier.replace(/"/g,'&quot;') + '" placeholder="Fornecedor" style="margin-bottom:6px">';
+      html += '<div style="display:flex;gap:6px;margin-bottom:8px"><select class="form-select" id="ecat-' + sk + '" style="flex:1">';
+      DATA.forEach(co => { html += '<option value="' + co.cat + '"' + (co.cat === cd.cat ? ' selected' : '') + '>' + co.cat + '</option>'; });
+      html += '</select><select class="form-select" id="eunit-' + sk + '" style="width:80px">';
+      ['kg','g','L','ml','un','cx','pct','mç'].forEach(u => { html += '<option' + (item.unit===u?' selected':'') + '>' + u + '</option>'; });
+      html += '</select></div>';
+      html += '<div style="display:flex;gap:6px">';
+      html += '<button class="modal-btn primary" data-key="' + sk + '" data-custom="' + (item.custom ? '1' : '0') + '" style="height:28px;font-size:12px;padding:0 14px" onclick="salvarEdicao(this.dataset.key,+this.dataset.custom)">Salvar</button>';
+      html += '<button class="modal-btn" data-key="' + sk + '" style="height:28px;font-size:12px;padding:0 12px" onclick="cancelarEdicao(this.dataset.key)">Cancelar</button>';
+      html += '</div></div>';
+    });
+    html += '</div>';
+  });
+
+  container.innerHTML = html;
+  if (q) {
+    const inp = container.querySelector('#list-search');
+    if (inp) { inp.value = q; }
+    const clr = container.querySelector('#list-clear-btn');
+    if (clr) clr.classList.add('visible');
+  }
+}
+
+function keyFromSid(sk) {
+  // Find the item in DATA whose sid(cat::name) === sk
+  for (const cat of DATA) {
+    for (const item of cat.items) {
+      const key = cat.cat + '::' + item.name;
+      if (sid(key) === sk) return key;
+    }
+  }
+  return null;
+}
+
+function openEditItem(sk) {
+  const key = keyFromSid(sk) || sk;
+  const sk2 = sid(key);
+  const view = document.getElementById('eview-'+sk2); if (view) view.style.display = 'none';
+  const act = document.getElementById('eact-'+sk2); if (act) act.style.display = 'none';
+  const form = document.getElementById('eform-'+sk2); if (form) form.style.display = '';
+}
+
+function cancelarEdicao(sk) {
+  const view = document.getElementById('eview-'+sk); if (view) view.style.display = '';
+  const act = document.getElementById('eact-'+sk); if (act) act.style.display = '';
+  const form = document.getElementById('eform-'+sk); if (form) form.style.display = 'none';
+}
+
+function salvarEdicao(sk, wasCustom) {
+  const oldKey = keyFromSid(sk) || sk;
+  const newNome = document.getElementById('enome-'+sk).value.trim();
+  const newForn = document.getElementById('eforn-'+sk).value.trim();
+  const newCat  = document.getElementById('ecat-'+sk).value;
+  const newUnit = document.getElementById('eunit-'+sk).value;
+  if (!newNome) { showToast('Preencha o nome'); return; }
+  const [oldCat, oldNome] = oldKey.split('::');
+  const newKey = newCat+'::'+newNome;
+  const oldSafeKey = oldKey.replace(/[.#$\/\[\]]/g, '_');
+  const newSafeKey = newKey.replace(/[.#$\/\[\]]/g, '_');
+  // Update DATA
+  const oldCatData = DATA.find(c => c.cat === oldCat);
+  if (oldCatData) oldCatData.items = oldCatData.items.filter(i => i.name !== oldNome);
+  const newCatData = DATA.find(c => c.cat === newCat);
+  if (newCatData) newCatData.items.push({ name: newNome, supplier: newForn, unit: newUnit, custom: true });
+  // Update state
+  const oldState = state[oldKey] || { selected: false, daysQty: {}, obs: '', defaultUnit: newUnit };
+  delete state[oldKey];
+  state[newKey] = { ...oldState, defaultUnit: newUnit };
+  // Update customItems
+  customItems = customItems.filter(i => !(i.cat === oldCat && i.name === oldNome));
+  customItems.push({ name: newNome, supplier: newForn, cat: newCat, unit: newUnit, custom: true });
+  // Firebase
+  if (wasCustom) customItemsRef.child(oldSafeKey).remove();
+  customItemsRef.child(newSafeKey).set({ name: newNome, supplier: newForn, cat: newCat, unit: newUnit, custom: true }).then(() => setStatus('online'));
+  renderAll(); renderAllItemsList(); showToast('Item atualizado!');
+}
+
+function deletarItemFromList(sk, nome, isCustom) {
+  isCustom = !!isCustom;
+  if (!confirm('Deletar "' + nome + '"?')) return;
+  const key = keyFromSid(sk) || sk;
+  const safeKey = key.replace(/[.#$\/\[\]]/g, '_');
+  DATA.forEach(cat => { cat.items = cat.items.filter(i => (cat.cat+'::'+i.name) !== key); });
+  delete state[key];
+  if (isCustom) {
+    customItems = customItems.filter(i => (i.cat+'::'+i.name) !== key);
+    customItemsRef.child(safeKey).remove().then(() => setStatus('online'));
+  }
+  renderAllItemsList(); renderAll(); showToast('"'+nome+'" removido.');
+}
 function openCadastro() {
   document.getElementById('cad-nome').value = '';
   document.getElementById('cad-fornecedor').value = '';
@@ -997,6 +1165,7 @@ function openCadastro() {
   document.getElementById('cad-unit').value = 'kg';
   document.getElementById('cad-nome-err').classList.remove('visible');
   document.getElementById('cad-cat-err').classList.remove('visible');
+  switchTab('novo');
   document.getElementById('cadastro-overlay').classList.add('open');
   setTimeout(() => document.getElementById('cad-nome').focus(), 100);
 }
@@ -1018,13 +1187,11 @@ function salvarItem() {
   if (!valid) return;
   const item = { name: nome, supplier: fornecedor, cat, unit, custom: true };
   const safeKey = (cat + '::'+ nome).replace(/[.#$\/\[\]]/g, '_');
-  customItemsRef.child(safeKey).set(item).then(() => {
-    addCustomItemToData(item);
-    renderAll();
-    closeCadastro();
-    showToast('Item "' + nome + '" cadastrado!');
-    setStatus('online');
-  });
+  addCustomItemToData(item);
+  closeCadastro();
+  showToast('Item "' + nome + '" cadastrado!');
+  renderAll();
+  customItemsRef.child(safeKey).set(item).then(() => setStatus('online'));
 }
 
 // ── SEARCH ──
@@ -1052,6 +1219,11 @@ document.getElementById('search-input').addEventListener('input', function() {
     else if (!q) { tw.style.display = 'none'; if (chev) chev.classList.remove('open'); }
   });
 });
+
+function clearListSearch() {
+  const inp = document.getElementById('list-search');
+  if (inp) { inp.value = ''; renderAllItemsList(); inp.focus(); }
+}
 
 function clearSearch() {
   const inp = document.getElementById('search-input');
@@ -1159,47 +1331,63 @@ function openCart() {
 <div class="modal-overlay" id="cadastro-overlay" onclick="if(event.target===this)closeCadastro()">
   <div class="modal" style="max-width:480px">
     <div class="modal-header">
-      <h3>Cadastrar item</h3>
+      <h3 id="cad-modal-title">Cadastrar item</h3>
       <button class="modal-close" onclick="closeCadastro()">&#x2715;</button>
     </div>
     <div class="modal-body">
-      <div class="form-group">
-        <label class="form-label">Nome do produto *</label>
-        <input class="form-input" id="cad-nome" type="text" placeholder="ex: Aipim fresco">
-        <div class="form-error" id="cad-nome-err">Preencha o nome do produto</div>
+
+      <!-- TAB BUTTONS -->
+      <div style="display:flex;gap:6px;margin-bottom:16px;">
+        <button id="tab-novo" onclick="switchTab('novo')" style="flex:1;height:30px;font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;border-radius:var(--radius-sm);border:0.5px solid var(--border-strong);background:var(--text);color:white;cursor:pointer;">Novo item</button>
+        <button id="tab-lista" onclick="switchTab('lista')" style="flex:1;height:30px;font-size:12px;font-weight:500;font-family:'DM Sans',sans-serif;border-radius:var(--radius-sm);border:0.5px solid var(--border-strong);background:white;color:var(--text-muted);cursor:pointer;">Itens cadastrados</button>
       </div>
-      <div class="form-group">
-        <label class="form-label">Fornecedor</label>
-        <input class="form-input" id="cad-fornecedor" type="text" placeholder="ex: Atacado da Serra">
+
+      <!-- NOVO ITEM FORM -->
+      <div id="cad-tab-novo">
+        <div class="form-group">
+          <label class="form-label">Nome do produto *</label>
+          <input class="form-input" id="cad-nome" type="text" placeholder="ex: Aipim fresco">
+          <div class="form-error" id="cad-nome-err">Preencha o nome do produto</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Fornecedor</label>
+          <input class="form-input" id="cad-fornecedor" type="text" placeholder="ex: Atacado da Serra">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Categoria *</label>
+          <select class="form-select" id="cad-cat">
+            <option value="">Selecione...</option>
+            <option value="Proteínas">Proteínas</option>
+            <option value="Laticínios / Frios">Laticínios / Frios</option>
+            <option value="Temperos / Condimentos">Temperos / Condimentos</option>
+            <option value="Mercearia">Mercearia</option>
+            <option value="Horti-fruti">Horti-fruti</option>
+            <option value="Higiene / Limpeza">Higiene / Limpeza</option>
+          </select>
+          <div class="form-error" id="cad-cat-err">Selecione uma categoria</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Unidade padrão</label>
+          <select class="form-select" id="cad-unit">
+            <option value="kg">kg</option>
+            <option value="g">g</option>
+            <option value="L">L</option>
+            <option value="ml">ml</option>
+            <option value="un">un</option>
+            <option value="cx">cx</option>
+            <option value="pct">pct</option>
+            <option value="mç">mç</option>
+          </select>
+        </div>
       </div>
-      <div class="form-group">
-        <label class="form-label">Categoria *</label>
-        <select class="form-select" id="cad-cat">
-          <option value="">Selecione...</option>
-          <option value="Proteínas">Proteínas</option>
-<option value="Laticínios / Frios">Laticínios / Frios</option>
-<option value="Temperos / Condimentos">Temperos / Condimentos</option>
-<option value="Mercearia">Mercearia</option>
-<option value="Horti-fruti">Horti-fruti</option>
-<option value="Higiene / Limpeza">Higiene / Limpeza</option>
-        </select>
-        <div class="form-error" id="cad-cat-err">Selecione uma categoria</div>
+
+      <!-- LISTA DE ITENS CADASTRADOS -->
+      <div id="cad-tab-lista" style="display:none;">
+        <div id="cad-lista-items"></div>
       </div>
-      <div class="form-group">
-        <label class="form-label">Unidade padrão</label>
-        <select class="form-select" id="cad-unit">
-          <option value="kg">kg</option>
-<option value="g">g</option>
-<option value="L">L</option>
-<option value="ml">ml</option>
-<option value="un">un</option>
-<option value="cx">cx</option>
-<option value="pct">pct</option>
-<option value="mç">mç</option>
-        </select>
-      </div>
+
     </div>
-    <div class="modal-footer">
+    <div class="modal-footer" id="cad-footer">
       <button class="modal-btn primary" onclick="salvarItem()">Salvar item</button>
       <button class="modal-btn" onclick="closeCadastro()">Cancelar</button>
     </div>
