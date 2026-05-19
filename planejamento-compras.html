@@ -611,23 +611,43 @@ function toggleDay(id, day, btn) {
 
 function dayKey(day) { return day.replace('ª','a').replace('á','a').replace('º','o'); }
 
+function makeDayQtyWrap(id, day, dq) {
+  const dk = dayKey(day);
+  const wrap = document.createElement('span');
+  wrap.id = 'dqw-'+sid(id)+'-'+dk;
+  wrap.className = 'day-qty-wrap';
+  const inp = document.createElement('input');
+  inp.type = 'number'; inp.className = 'day-qty-input';
+  inp.min = '0'; inp.step = '0.1'; inp.placeholder = '0';
+  inp.value = dq.qty || '';
+  inp.addEventListener('click', e => e.stopPropagation());
+  inp.addEventListener('input', () => {
+    state[id].daysQty[day].qty = inp.value;
+    updateChip(id); saveItem(id);
+  });
+  const sel = document.createElement('select');
+  sel.className = 'day-qty-unit';
+  sel.addEventListener('click', e => e.stopPropagation());
+  sel.addEventListener('change', () => {
+    state[id].daysQty[day].unit = sel.value;
+    updateChip(id); saveItem(id);
+  });
+  ['kg','g','L','ml','un','cx','pct','mç'].forEach(u => {
+    const opt = document.createElement('option');
+    opt.value = u; opt.textContent = u;
+    if (dq.unit === u) opt.selected = true;
+    sel.appendChild(opt);
+  });
+  wrap.appendChild(inp); wrap.appendChild(sel);
+  return wrap;
+}
+
 function insertDayQtyInput(id, day, btn) {
   const dk = dayKey(day);
   const wrapId = 'dqw-'+sid(id)+'-'+dk;
   if (document.getElementById(wrapId)) return;
-  const s = state[id];
-  const dq = s.daysQty[day] || { qty: '', unit: s.defaultUnit };
-  const wrap = document.createElement('span');
-  wrap.id = wrapId;
-  wrap.className = 'day-qty-wrap';
-  wrap.innerHTML = `<input type="number" class="day-qty-input" min="0" step="0.1" placeholder="0" value="${dq.qty}"
-    oninput="state['${id}'].daysQty['${day}'].qty=this.value;updateChip('${id}');saveItem('${id}')"
-    onclick="event.stopPropagation()">
-  <select class="day-qty-unit" onclick="event.stopPropagation()"
-    onchange="state['${id}'].daysQty['${day}'].unit=this.value;updateChip('${id}');saveItem('${id}')">
-    ${['kg','g','L','ml','un','cx','pct','mç'].map(u=>`<option${dq.unit===u?' selected':''}>${u}</option>`).join('')}
-  </select>`;
-  btn.insertAdjacentElement('afterend', wrap);
+  const dq = state[id].daysQty[day] || { qty: '', unit: state[id].defaultUnit };
+  btn.insertAdjacentElement('afterend', makeDayQtyWrap(id, day, dq));
 }
 
 function showToast(msg) {
@@ -715,17 +735,12 @@ function getItemsByDay() {
 function buildDayCatText(day, catName, items) {
   const date = new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'2-digit',year:'numeric'});
   const dayFull = {'2ª':'Segunda','3ª':'Terça','4ª':'Quarta','5ª':'Quinta','6ª':'Sexta','Sáb':'Sábado'}[day] || day;
-  let t = 'PEDIDO — '+catName.toUpperCase()+' ('+dayFull+')
-'+date+'
-'+'-'.repeat(34)+'
-';
+  let t = 'PEDIDO — '+catName.toUpperCase()+' ('+dayFull+')\n'+date+'\n'+'-'.repeat(34)+'\n';
   items.forEach(i => {
     t += '• '+i.name;
     if (i.qty) t += ' — '+i.qty+' '+i.unit;
-    if (i.obs) t += '
-  obs: '+i.obs;
-    t += '
-';
+    if (i.obs) t += '\n  obs: '+i.obs;
+    t += '\n';
   });
   return t;
 }
@@ -860,23 +875,11 @@ function renderAll() {
         btn.className = 'day-btn'+(active?' active':'');
         btn.textContent = d;
         btn.dataset.day = d;
+        btn.dataset.itemId = id;
         btn.onclick = e => { e.stopPropagation(); toggleDay(id, d, btn); };
         dw.appendChild(btn);
         if (active) {
-          // restore qty input
-          const dk = dayKey(d);
-          const dq = s.daysQty[d];
-          const wrap = document.createElement('span');
-          wrap.id = 'dqw-'+sid(id)+'-'+dk;
-          wrap.className = 'day-qty-wrap';
-          wrap.innerHTML = `<input type="number" class="day-qty-input" min="0" step="0.1" placeholder="0" value="${dq.qty}"
-            oninput="state['${id}'].daysQty['${d}'].qty=this.value;updateChip('${id}');saveItem('${id}')"
-            onclick="event.stopPropagation()">
-          <select class="day-qty-unit" onclick="event.stopPropagation()"
-            onchange="state['${id}'].daysQty['${d}'].unit=this.value;updateChip('${id}');saveItem('${id}')">
-            ${['kg','g','L','ml','un','cx','pct','mç'].map(u=>`<option${dq.unit===u?' selected':''}>${u}</option>`).join('')}
-          </select>`;
-          dw.appendChild(wrap);
+          dw.appendChild(makeDayQtyWrap(id, d, s.daysQty[d]));
         }
       });
       tdName.innerHTML = `<div class="item-name">${item.name}</div>
@@ -890,11 +893,15 @@ function renderAll() {
       expTr.className = 'exp-row'; expTr.id = 'exp-'+sid(id);
       expTr.style.display = s.selected ? 'table-row' : 'none';
       const expTd = document.createElement('td'); expTd.colSpan = 1;
-      expTd.innerHTML = `<div class="exp-inner">
-        <div class="exp-label">Observação</div>
-        <input type="text" placeholder="ex: cortar em cubos, fatiar fino..." value="${s.obs}"
-          oninput="state['${id}'].obs=this.value;saveItem('${id}')" onclick="event.stopPropagation()">
-      </div>`;
+      const expInner = document.createElement('div'); expInner.className = 'exp-inner';
+      const expLabel = document.createElement('div'); expLabel.className = 'exp-label'; expLabel.textContent = 'Observação';
+      const obsInp = document.createElement('input'); obsInp.type = 'text';
+      obsInp.placeholder = 'ex: cortar em cubos, fatiar fino...';
+      obsInp.value = s.obs || '';
+      obsInp.addEventListener('click', e => e.stopPropagation());
+      obsInp.addEventListener('input', () => { state[id].obs = obsInp.value; saveItem(id); });
+      expInner.appendChild(expLabel); expInner.appendChild(obsInp);
+      expTd.appendChild(expInner);
       expTr.appendChild(expTd);
 
       tbody.appendChild(tr); tbody.appendChild(expTr);
@@ -1002,3 +1009,4 @@ function openCart() {
   renderSummaryBody(body, false);
   document.getElementById('cart-overlay').classList.add('open');
 }
+</script>
