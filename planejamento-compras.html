@@ -106,7 +106,26 @@ td.td-name:hover .item-name { color: #3b6d11; }
   border-radius: 20px; padding: 1px 8px;
 }
 td.td-qty { width: 150px; padding: 8px 10px; vertical-align: top; padding-top: 12px; }
-.item-days-wrap { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 8px; }
+.item-days-wrap { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 8px; align-items: center; }
+.day-qty-wrap { display: inline-flex; align-items: center; gap: 3px; margin-right: 6px; }
+.day-qty-input {
+  width: 52px; height: 26px; padding: 0 5px;
+  font-size: 12px; font-family: 'DM Sans', sans-serif;
+  border: 0.5px solid var(--border-strong); border-radius: var(--radius-sm);
+  background: var(--surface); color: var(--text); outline: none;
+}
+.day-qty-input:focus { border-color: var(--text); }
+.day-qty-unit {
+  height: 26px; padding: 0 4px; font-size: 11px; font-family: 'DM Sans', sans-serif;
+  border: 0.5px solid var(--border-strong); border-radius: var(--radius-sm);
+  background: var(--surface); color: var(--text); outline: none; cursor: pointer;
+}
+.summ-cat-group { margin-bottom: 8px; }
+.summ-cat-group-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 4px; padding: 0 2px;
+}
+.summ-cat-group-name { font-size: 12px; font-weight: 600; color: var(--text-muted); }
 
 .qty-wrap { display: flex; align-items: center; gap: 5px; }
 input[type="number"] {
@@ -495,7 +514,7 @@ const comprasRef = db.ref('planejamento_compras');
 const state = {};
 DATA.forEach(c => c.items.forEach(item => {
   const id = c.cat + '::' + item.name;
-  state[id] = { selected: false, qty: '', unit: item.unit || 'kg', days: [], obs: '' };
+  state[id] = { selected: false, daysQty: {}, obs: '', defaultUnit: item.unit || 'kg' };
 }));
 
 function sid(s) { return s.replace(/[^a-z0-9]/gi,'_'); }
@@ -506,6 +525,7 @@ function setStatus(status) {
   if (!dot || !lbl) return;
   if (status === 'online') { dot.className = 'dot online'; lbl.textContent = 'Sincronizado'; }
   else if (status === 'syncing') { dot.className = 'dot syncing'; lbl.textContent = 'Salvando...'; }
+  else if (status === 'offline') { dot.className = 'dot'; lbl.textContent = 'Sem conexão'; }
   else { dot.className = 'dot'; lbl.textContent = 'Conectando...'; }
 }
 
@@ -537,7 +557,7 @@ function updateStats() {
   document.getElementById('stat-cats').textContent = catsActive;
 
   const allDays = new Set();
-  vals.forEach(([,s])=>{ if(s.selected) s.days.forEach(d=>allDays.add(d)); });
+  vals.forEach(([,s])=>{ if(s.selected) Object.keys(s.daysQty).forEach(d=>allDays.add(d)); });
   document.getElementById('stat-days').textContent = allDays.size;
 
   DATA.forEach(c => {
@@ -550,10 +570,10 @@ function updateStats() {
 function updateChip(id) {
   const s = state[id], chip = document.getElementById('chip-'+sid(id));
   if (!chip) return;
-  if (s.selected && (s.qty || s.days.length)) {
-    let t = s.qty ? s.qty+' '+s.unit : '';
-    if (s.days.length) t += (t?' · ':'')+s.days.join(', ');
-    chip.textContent = t; chip.style.display = 'inline-block';
+  const days = Object.keys(s.daysQty);
+  if (days.length) {
+    chip.textContent = days.map(d => { const dq = s.daysQty[d]; return d + (dq.qty ? ' '+dq.qty+dq.unit : ''); }).join(' · ');
+    chip.style.display = 'inline-block';
   } else chip.style.display = 'none';
 }
 
@@ -570,19 +590,44 @@ function toggleItem(id) {
 }
 
 function toggleDay(id, day, btn) {
-  const idx = state[id].days.indexOf(day);
-  if (idx === -1) {
-    state[id].days.push(day);
-    btn.classList.add('active');
-  } else {
-    state[id].days.splice(idx, 1);
+  const s = state[id];
+  if (s.daysQty[day]) {
+    delete s.daysQty[day];
     btn.classList.remove('active');
+    // Remove qty input next to button
+    const qwrap = document.getElementById('dqw-'+sid(id)+'-'+day.replace('ª','a').replace('á','a'));
+    if (qwrap) qwrap.remove();
+  } else {
+    s.daysQty[day] = { qty: '', unit: s.defaultUnit };
+    btn.classList.add('active');
+    // Insert qty input next to button
+    insertDayQtyInput(id, day, btn);
   }
-  // Item is selected if at least one day is chosen
-  state[id].selected = state[id].days.length > 0;
+  s.selected = Object.keys(s.daysQty).length > 0;
   const exp = document.getElementById('exp-'+sid(id));
-  if (exp) exp.style.display = state[id].selected ? 'table-row' : 'none';
+  if (exp) exp.style.display = s.selected ? 'table-row' : 'none';
   updateChip(id); updateStats(); saveItem(id);
+}
+
+function dayKey(day) { return day.replace('ª','a').replace('á','a').replace('º','o'); }
+
+function insertDayQtyInput(id, day, btn) {
+  const dk = dayKey(day);
+  const wrapId = 'dqw-'+sid(id)+'-'+dk;
+  if (document.getElementById(wrapId)) return;
+  const s = state[id];
+  const dq = s.daysQty[day] || { qty: '', unit: s.defaultUnit };
+  const wrap = document.createElement('span');
+  wrap.id = wrapId;
+  wrap.className = 'day-qty-wrap';
+  wrap.innerHTML = `<input type="number" class="day-qty-input" min="0" step="0.1" placeholder="0" value="${dq.qty}"
+    oninput="state['${id}'].daysQty['${day}'].qty=this.value;updateChip('${id}');saveItem('${id}')"
+    onclick="event.stopPropagation()">
+  <select class="day-qty-unit" onclick="event.stopPropagation()"
+    onchange="state['${id}'].daysQty['${day}'].unit=this.value;updateChip('${id}');saveItem('${id}')">
+    ${['kg','g','L','ml','un','cx','pct','mç'].map(u=>`<option${dq.unit===u?' selected':''}>${u}</option>`).join('')}
+  </select>`;
+  btn.insertAdjacentElement('afterend', wrap);
 }
 
 function showToast(msg) {
@@ -594,7 +639,7 @@ function clearAll() {
   if (!confirm('Limpar todos os itens selecionados?')) return;
   DATA.forEach(c => c.items.forEach(item => {
     const id = c.cat+'::'+item.name;
-    state[id] = { selected: false, qty: '', unit: item.unit || 'kg', days: [], obs: '' };
+    state[id] = { selected: false, daysQty: {}, obs: '', defaultUnit: item.unit || 'kg' };
   }));
   comprasRef.set(null).then(() => setStatus('online'));
   renderAll();
@@ -644,76 +689,125 @@ function copyAll() {
   });
 }
 
-function openSummary() {
-  const body = document.getElementById('modal-body');
-  const allItems = [];
-  DATA.forEach(c => {
-    c.items.forEach(item => {
-      const id = c.cat+'::'+item.name;
+function getItemsByDay() {
+  // Returns { '2ª': [{cat, emoji, name, supplier, qty, unit, obs}], ... }
+  const byDay = {};
+  DAYS.forEach(d => byDay[d] = []);
+  const noDay = [];
+  DATA.forEach(cat => {
+    cat.items.forEach(item => {
+      const id = cat.cat+'::'+item.name;
       const s = state[id];
-      if (s.selected) allItems.push({...item, ...s, cat: c.cat, emoji: c.emoji});
+      if (!s.selected) return;
+      const days = Object.keys(s.daysQty);
+      if (days.length === 0) {
+        noDay.push({cat: cat.cat, emoji: cat.emoji, name: item.name, supplier: item.supplier, qty: '', unit: s.defaultUnit, obs: s.obs});
+      } else {
+        days.forEach(d => {
+          if (byDay[d]) byDay[d].push({cat: cat.cat, emoji: cat.emoji, name: item.name, supplier: item.supplier, qty: s.daysQty[d].qty, unit: s.daysQty[d].unit, obs: s.obs});
+        });
+      }
     });
   });
+  return {byDay, noDay};
+}
 
+function buildDayCatText(day, catName, items) {
+  const date = new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'2-digit',year:'numeric'});
+  const dayFull = {'2ª':'Segunda','3ª':'Terça','4ª':'Quarta','5ª':'Quinta','6ª':'Sexta','Sáb':'Sábado'}[day] || day;
+  let t = 'PEDIDO — '+catName.toUpperCase()+' ('+dayFull+')
+'+date+'
+'+'-'.repeat(34)+'
+';
+  items.forEach(i => {
+    t += '• '+i.name;
+    if (i.qty) t += ' — '+i.qty+' '+i.unit;
+    if (i.obs) t += '
+  obs: '+i.obs;
+    t += '
+';
+  });
+  return t;
+}
+
+function copyDayCat(day, catName, btnEl) {
+  const {byDay} = getItemsByDay();
+  const items = (byDay[day]||[]).filter(i => i.cat === catName);
+  if (!items.length) { showToast('Nenhum item'); return; }
+  navigator.clipboard.writeText(buildDayCatText(day, catName, items)).then(() => {
+    btnEl.classList.add('copied'); btnEl.querySelector('span').textContent = 'Copiado!';
+    showToast('Copiado!');
+    setTimeout(() => { btnEl.classList.remove('copied'); btnEl.querySelector('span').textContent = 'Copiar'; }, 2000);
+  });
+}
+
+function renderSummaryBody(body, showCopyBtns) {
+  const {byDay, noDay} = getItemsByDay();
+  const allItems = Object.values(byDay).flat().concat(noDay);
   if (!allItems.length) {
-    body.innerHTML = '<div class="modal-empty">Nenhum item selecionado ainda.<br>Selecione os produtos na lista para ver o resumo aqui.</div>';
-    document.getElementById('modal-overlay').classList.add('open');
+    body.innerHTML = '<div class="modal-empty">Nenhum item selecionado ainda.<br>Selecione os dias na lista para ver o resumo aqui.</div>';
     return;
   }
-
   const DAY_LABELS = {'2ª':'2ª feira','3ª':'3ª feira','4ª':'4ª feira','5ª':'5ª feira','6ª':'6ª feira','Sáb':'Sábado'};
-  const semDia = allItems.filter(i => !i.days || i.days.length === 0);
+  const activeDays = DAYS.filter(d => byDay[d] && byDay[d].length > 0);
 
-  const diasHtml = DAYS.map(dia => {
-    const itensDia = allItems.filter(i => i.days && i.days.includes(dia));
-    if (!itensDia.length) return '';
-    return `
-      <div class="summ-day-block">
-        <div class="summ-day-title">${DAY_LABELS[dia]}</div>
-        ${itensDia.map(item => `
-          <div class="summ-item">
-            <div class="summ-item-left">
-              <span class="summ-cat-tag">${item.emoji || ''}</span>
-              <div>
-                <div class="summ-item-name">${item.name}</div>
-                ${item.obs ? `<div class="summ-item-obs">${item.obs}</div>` : ''}
+  const diasHtml = activeDays.map(dia => {
+    const itensDia = byDay[dia];
+    // Group by category
+    const cats = [...new Set(itensDia.map(i => i.cat))];
+    return `<div class="summ-day-block">
+      <div class="summ-day-title">${DAY_LABELS[dia]}</div>
+      ${cats.map(catName => {
+        const catItems = itensDia.filter(i => i.cat === catName);
+        const catEmoji = catItems[0].emoji || '';
+        return `<div class="summ-cat-group">
+          <div class="summ-cat-group-header">
+            <span class="summ-cat-group-name">${catEmoji} ${catName}</span>
+            ${showCopyBtns ? `<button class="btn-copy" onclick="copyDayCat('${dia}','${catName.replace(/'/g,"\'")}',this)">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+              <span>Copiar</span>
+            </button>` : ''}
+          </div>
+          ${catItems.map(item => `
+            <div class="summ-item">
+              <div class="summ-item-left">
+                <div>
+                  <div class="summ-item-name">${item.name}</div>
+                  ${item.obs ? `<div class="summ-item-obs">${item.obs}</div>` : ''}
+                </div>
               </div>
-            </div>
-            <span class="summ-item-qty${item.qty ? '' : ' no-qty'}">${item.qty ? item.qty + ' ' + item.unit : 'sem qtd'}</span>
-          </div>`).join('')}
-      </div>`;
+              <span class="summ-item-qty${item.qty ? '' : ' no-qty'}">${item.qty ? item.qty+' '+item.unit : 'sem qtd'}</span>
+            </div>`).join('')}
+        </div>`;
+      }).join('')}
+    </div>`;
   }).join('');
 
-  const semDiaHtml = semDia.length ? `
+  const semDiaHtml = noDay.length ? `
     <div class="summ-day-block">
       <div class="summ-day-title" style="color:var(--amber-text);background:var(--amber-bg);">Sem dia definido</div>
-      ${semDia.map(item => `
+      ${noDay.map(item => `
         <div class="summ-item">
-          <div class="summ-item-left">
-            <span class="summ-cat-tag">${item.emoji || ''}</span>
-            <div>
-              <div class="summ-item-name">${item.name}</div>
-              ${item.obs ? `<div class="summ-item-obs">${item.obs}</div>` : ''}
-            </div>
-          </div>
-          <span class="summ-item-qty${item.qty ? '' : ' no-qty'}">${item.qty ? item.qty + ' ' + item.unit : 'sem qtd'}</span>
+          <div class="summ-item-left"><div>
+            <div class="summ-item-name">${item.emoji || ''} ${item.name}</div>
+            ${item.obs ? `<div class="summ-item-obs">${item.obs}</div>` : ''}
+          </div></div>
+          <span class="summ-item-qty no-qty">sem qtd</span>
         </div>`).join('')}
     </div>` : '';
 
-  const activeDays = DAYS.filter(d => allItems.some(i => i.days && i.days.includes(d))).length;
+  const totalItems = [...new Set(allItems.map(i=>i.cat+'::'+i.name))].length;
   body.innerHTML = `
     <div class="summ-header-info">
-      <span>${allItems.length} ${allItems.length === 1 ? 'item' : 'itens'} selecionados</span>
-      <span>${activeDays} ${activeDays === 1 ? 'dia' : 'dias'} com entregas</span>
-    </div>
-    <div class="summ-copy-row">
-      ${DATA.filter(c => allItems.some(i => i.cat === c.cat)).map(c => `
-        <button class="btn-copy" onclick="copyCat('${c.cat.replace(/'/g,"\\'")}',this)">
-          ${c.emoji || ''} <span>${c.cat.split(' /')[0]}</span>
-        </button>`).join('')}
+      <span>${totalItems} ${totalItems===1?'item':'itens'} selecionados</span>
+      <span>${activeDays.length} ${activeDays.length===1?'dia':'dias'} com entregas</span>
     </div>
     ${diasHtml}${semDiaHtml}`;
+}
 
+function openSummary() {
+  const body = document.getElementById('modal-body');
+  renderSummaryBody(body, true);
   document.getElementById('modal-overlay').classList.add('open');
 }
 function closeSummary() { document.getElementById('modal-overlay').classList.remove('open'); }
@@ -747,10 +841,7 @@ function renderAll() {
 
     const table = document.createElement('table');
     const thead = document.createElement('thead');
-    thead.innerHTML = `<tr>
-      <th>Produto</th>
-      <th style="width:150px">Quantidade</th>
-    </tr>`;
+    thead.innerHTML = `<tr><th>Produto</th></tr>`;
     const tbody = document.createElement('tbody');
 
     cat.items.forEach(item => {
@@ -765,34 +856,40 @@ function renderAll() {
       const dw = document.createElement('div'); dw.className = 'item-days-wrap';
       DAYS.forEach(d => {
         const btn = document.createElement('button');
-        btn.className = 'day-btn'+(s.days.includes(d)?' active':'');
+        const active = !!s.daysQty[d];
+        btn.className = 'day-btn'+(active?' active':'');
         btn.textContent = d;
         btn.dataset.day = d;
         btn.onclick = e => { e.stopPropagation(); toggleDay(id, d, btn); };
         dw.appendChild(btn);
+        if (active) {
+          // restore qty input
+          const dk = dayKey(d);
+          const dq = s.daysQty[d];
+          const wrap = document.createElement('span');
+          wrap.id = 'dqw-'+sid(id)+'-'+dk;
+          wrap.className = 'day-qty-wrap';
+          wrap.innerHTML = `<input type="number" class="day-qty-input" min="0" step="0.1" placeholder="0" value="${dq.qty}"
+            oninput="state['${id}'].daysQty['${d}'].qty=this.value;updateChip('${id}');saveItem('${id}')"
+            onclick="event.stopPropagation()">
+          <select class="day-qty-unit" onclick="event.stopPropagation()"
+            onchange="state['${id}'].daysQty['${d}'].unit=this.value;updateChip('${id}');saveItem('${id}')">
+            ${['kg','g','L','ml','un','cx','pct','mç'].map(u=>`<option${dq.unit===u?' selected':''}>${u}</option>`).join('')}
+          </select>`;
+          dw.appendChild(wrap);
+        }
       });
       tdName.innerHTML = `<div class="item-name">${item.name}</div>
         ${item.supplier?`<div class="item-supplier">${item.supplier}</div>`:''}
         <span class="item-chip" id="chip-${sid(id)}"></span>`;
       tdName.appendChild(dw);
-      // qty cell
-      const tdQty = document.createElement('td'); tdQty.className = 'td-qty';
-      tdQty.innerHTML = `<div class="qty-wrap">
-        <input type="number" min="0" step="0.1" placeholder="0" value="${s.qty}"
-          oninput="state['${id}'].qty=this.value;updateChip('${id}');saveItem('${id}')"
-          onclick="event.stopPropagation()">
-        <select onchange="state['${id}'].unit=this.value;updateChip('${id}');saveItem('${id}')" onclick="event.stopPropagation()">
-          ${UNITS.map(u=>`<option${s.unit===u?' selected':''}>${u}</option>`).join('')}
-        </select>
-      </div>`;
-
-      tr.appendChild(tdName); tr.appendChild(tdQty);
+      tr.appendChild(tdName);
 
       // expand row
       const expTr = document.createElement('tr');
       expTr.className = 'exp-row'; expTr.id = 'exp-'+sid(id);
       expTr.style.display = s.selected ? 'table-row' : 'none';
-      const expTd = document.createElement('td'); expTd.colSpan = 2;
+      const expTd = document.createElement('td'); expTd.colSpan = 1;
       expTd.innerHTML = `<div class="exp-inner">
         <div class="exp-label">Observação</div>
         <input type="text" placeholder="ex: cortar em cubos, fatiar fino..." value="${s.obs}"
@@ -812,13 +909,26 @@ function renderAll() {
 }
 
 // Carrega do Firebase e renderiza
+// Fallback: renderiza mesmo se Firebase demorar
+const fallbackTimer = setTimeout(() => {
+  if (!document.querySelector('.category-block')) {
+    renderAll();
+    setStatus('offline');
+  }
+}, 3000);
+
 comprasRef.once('value', snap => {
+  clearTimeout(fallbackTimer);
   const data = snap.val() || {};
   DATA.forEach(c => c.items.forEach(item => {
     const id = c.cat + '::' + item.name;
     const safeKey = id.replace(/[.#$\/\[\]]/g, '_');
     if (data[safeKey]) {
-      state[id] = { selected: false, qty: '', unit: item.unit || 'kg', days: [], obs: '', ...data[safeKey] };
+      const saved = data[safeKey];
+      state[id] = { selected: false, daysQty: {}, obs: '', defaultUnit: item.unit || 'kg' };
+      if (saved.daysQty) state[id].daysQty = saved.daysQty;
+      if (saved.obs) state[id].obs = saved.obs;
+      state[id].selected = saved.selected || Object.keys(state[id].daysQty).length > 0;
     }
   }));
   renderAll();
@@ -830,7 +940,11 @@ comprasRef.once('value', snap => {
     const val = snap.val();
     const id = Object.keys(state).find(k => k.replace(/[.#$\/\[\]]/g, '_') === safeKey);
     if (!id || !val) return;
-    state[id] = { selected: false, qty: '', unit: 'kg', days: [], obs: '', ...val };
+    const defUnit = DATA.flatMap(c=>c.items).find(i=> c.cat+'::'+i.name === id)?.unit || 'kg';
+    state[id] = { selected: false, daysQty: {}, obs: '', defaultUnit: defUnit };
+    if (val.daysQty) state[id].daysQty = val.daysQty;
+    if (val.obs) state[id].obs = val.obs;
+    state[id].selected = val.selected || Object.keys(state[id].daysQty).length > 0;
     // Atualiza UI sem re-renderizar tudo
     const cb = document.getElementById('cb-'+sid(id));
     const exp = document.getElementById('exp-'+sid(id));
@@ -847,12 +961,16 @@ comprasRef.once('value', snap => {
     const safeKey = snap.key;
     const id = Object.keys(state).find(k => k.replace(/[.#$\/\[\]]/g, '_') === safeKey);
     if (!id) return;
-    state[id] = { selected: false, qty: '', unit: 'kg', days: [], obs: '' };
+    state[id] = { selected: false, daysQty: {}, obs: '', defaultUnit: 'kg' };
     const cb = document.getElementById('cb-'+sid(id));
     const exp = document.getElementById('exp-'+sid(id));
     if (cb) { cb.classList.remove('checked'); if(exp) exp.style.display='none'; }
     updateChip(id); updateStats();
   });
+}, err => {
+  clearTimeout(fallbackTimer);
+  renderAll();
+  setStatus('offline');
 });
 </script>
 <!-- MODAL CARRINHO -->
@@ -881,70 +999,6 @@ window.addEventListener('scroll', () => {
 
 function openCart() {
   const body = document.getElementById('cart-body');
-  const allItems = [];
-  DATA.forEach(c => {
-    c.items.forEach(item => {
-      const id = c.cat+'::'+item.name;
-      const s = state[id];
-      if (s.selected) allItems.push({...item, ...s, cat: c.cat, emoji: c.emoji});
-    });
-  });
-
-  if (!allItems.length) {
-    body.innerHTML = '<div class="modal-empty">Nenhum item selecionado ainda.</div>';
-    document.getElementById('cart-overlay').classList.add('open');
-    return;
-  }
-
-  const DAY_LABELS = {'2ª':'2ª feira','3ª':'3ª feira','4ª':'4ª feira','5ª':'5ª feira','6ª':'6ª feira','Sáb':'Sábado'};
-  const semDia = allItems.filter(i => !i.days || i.days.length === 0);
-
-  const diasHtml = DAYS.map(dia => {
-    const itensDia = allItems.filter(i => i.days && i.days.includes(dia));
-    if (!itensDia.length) return '';
-    return `
-      <div class="summ-day-block">
-        <div class="summ-day-title">${DAY_LABELS[dia]}</div>
-        ${itensDia.map(item => `
-          <div class="summ-item">
-            <div class="summ-item-left">
-              <span class="summ-cat-tag">${item.emoji || ''}</span>
-              <div>
-                <div class="summ-item-name">${item.name}</div>
-                ${item.obs ? `<div class="summ-item-obs">${item.obs}</div>` : ''}
-              </div>
-            </div>
-            <span class="summ-item-qty${item.qty ? '' : ' no-qty'}">${item.qty ? item.qty+' '+item.unit : 'sem qtd'}</span>
-          </div>`).join('')}
-      </div>`;
-  }).join('');
-
-  const semDiaHtml = semDia.length ? `
-    <div class="summ-day-block">
-      <div class="summ-day-title" style="color:var(--amber-text);background:var(--amber-bg);">Sem dia definido</div>
-      ${semDia.map(item => `
-        <div class="summ-item">
-          <div class="summ-item-left">
-            <span class="summ-cat-tag">${item.emoji || ''}</span>
-            <div>
-              <div class="summ-item-name">${item.name}</div>
-              ${item.obs ? `<div class="summ-item-obs">${item.obs}</div>` : ''}
-            </div>
-          </div>
-          <span class="summ-item-qty${item.qty ? '' : ' no-qty'}">${item.qty ? item.qty+' '+item.unit : 'sem qtd'}</span>
-        </div>`).join('')}
-    </div>` : '';
-
-  const activeDays = DAYS.filter(d => allItems.some(i => i.days && i.days.includes(d))).length;
-  body.innerHTML = `
-    <div class="summ-header-info">
-      <span>${allItems.length} ${allItems.length===1?'item':'itens'} selecionados</span>
-      <span>${activeDays} ${activeDays===1?'dia':'dias'} com entregas</span>
-    </div>
-    ${diasHtml}${semDiaHtml}`;
-
+  renderSummaryBody(body, false);
   document.getElementById('cart-overlay').classList.add('open');
 }
-</script>
-</body>
-</html>
